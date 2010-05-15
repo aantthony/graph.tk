@@ -1,0 +1,11 @@
+graph.tk is the website which this code is used on.
+
+This is a web application that graphs multiple functions, calculates expressions, and graphically solves differential equations.
+
+Requirements:
+ * JQuery - included in main.js
+ * MathQuill - for awesome math rendering - included in main.js
+
+They are included in there because the whole thing needs to be able to run as an Offline Web application.
+
+At the moment this requires a browser that supports the html5 canvas tag.
