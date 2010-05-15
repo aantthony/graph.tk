@@ -466,7 +466,7 @@ return $(obj).mathquill("latex").replace(/}{/g,")/(").replace(/\\([a-zA-Z\.\,]+)
 
 //sets the value of a mathquill textbox. This is only a temporary solution.
 function setstr(obj,val) {
-$(obj).mathquill("latex",val.replace(/\\left\(/g,"){").replace(/\\right\)/g,"}"))
+$(obj).mathquill("latex",val)
 
 }
 
@@ -501,13 +501,13 @@ function newfunc(funcval) {
     newone.appendChild(inputbox);
     
     if (funcval !== null && funcval !== undefined) {
-        inputbox.appendChild(document.createTextNode(funcval.replace(/\\left\(/g,"){").replace(/\\right\)/g,"}")));
+        inputbox.appendChild(document.createTextNode(funcval));
         //setstr(inputbox,funcval);
     } else {
         
         
         //applies setstr string replacements
-        inputbox.appendChild(document.createTextNode(randfunc().replace(/\\left\(/g,"){").replace(/\\right\)/g,"}")));
+        inputbox.appendChild(document.createTextNode(randfunc()));
         //setstr(inputbox,randfunc());
     }
     $(inputbox).mathquill("editable");
