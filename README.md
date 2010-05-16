@@ -2,7 +2,7 @@
 This is a web application that graphs multiple functions, calculates expressions, and graphically solves differential equations.
 
 ### Try it out
-graph.tk is the website which this code is used on. The version there is pretty old though.
+[graph.tk](http://graph.tk/) is the website which this code is used on. The version there is pretty old though.
 
 ### Requirements:
 * JQuery
@@ -16,4 +16,5 @@ graph.tk is the website which this code is used on. The version there is pretty 
 * allow things like &int;x dx
 
 ### Big Ideas
-* 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted. It can be done! I made [this](http://url3.tk/3d/).
+* 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted. It can be done! I made [this](http://url3.tk/3d/)
+* CAS - Not likely to happen, but it would be cool
