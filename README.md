@@ -12,7 +12,7 @@ graph.tk is the website which this code is used on. The version there is pretty 
 ## Little Ideas
 * Automatically select all on function creation
 * allow things like dy/dx x
-* allow things like  ºx dx
+* allow things like  \int &int; x dx
 
 ## Big Ideas
 * 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted.
