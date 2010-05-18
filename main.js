@@ -505,21 +505,11 @@ function save() {
 
 
 function newfunc(funcval) {
-
     var newone = proto.cloneNode(true);
     var inputbox=document.createElement("span");
     newone.appendChild(inputbox);
     
-    if (funcval !== null && funcval !== undefined) {
-        inputbox.appendChild(document.createTextNode(funcval));
-        //setstr(inputbox,funcval);
-    } else {
-        
-        
-        //applies setstr string replacements
-        inputbox.appendChild(document.createTextNode(randfunc()));
-        //setstr(inputbox,randfunc());
-    }
+    inputbox.appendChild(document.createTextNode(funcval || randfunc()));
     $(inputbox).mathquill("editable");
     
     
