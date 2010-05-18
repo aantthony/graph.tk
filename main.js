@@ -449,29 +449,39 @@ var latexchars={
 "integral":"∫"
 };
 
-function getlatexpart(x) {
-if(x==","){return "";}
-    if(!(latexchars[x]===undefined)) {
-        return latexchars[x];
-    }
-    return x;
+function getlatexpart(match, submatch)
+{
+  if(submatch == ",")
+    return "";
+  if(latexchars[submatch] !== undefined)
+    return latexchars[submatch];
+  return submatch;
 }
 
 
 //gets the value of a mathquill textbox (HTMLElement obj)
-function getstr(obj,latex){
-if(latex){return $(obj).mathquill("latex");}
-return $(obj).mathquill("latex").replace(/}{/g,")/(").replace(/\\([a-zA-Z\.\,]+)/g,function(a,b){return getlatexpart(b);}).replace(/{/g,"(").replace(/}/g,")").replace(/\\/g,""); }
+function getstr(obj, latex)
+{
+  if(latex)
+    return $(obj).mathquill("latex");
+  return (
+    $(obj).mathquill("latex")
+      .replace(/}{/g, ")/(") //so far only fractions have >1 MathBlock's
+      .replace(/\\([a-zA-Z\.\,]+)/g, getlatexpart) //LaTeX symbols => special characters
+      .replace(/{/g, "(") //LaTeX blocks {} usually correspond to () in text
+      .replace(/}/g, ")")
+      .replace(/\\/g, "") //leftover backslashes
+    );
+}
 
 
 //sets the value of a mathquill textbox. This is only a temporary solution.
-function setstr(obj,val) {
-$(obj).mathquill("latex",val)
-
+function setstr(obj, val) {
+  $(obj).mathquill("latex", val)
 }
 
-function setonchange(obj,val){
-obj.onchange=eval("(function(){"+val+"})");
+function setonchange(obj, val){
+  obj.onchange = eval("(function(){"+val+"})");
 }
 
 
