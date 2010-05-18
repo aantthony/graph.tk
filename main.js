@@ -1,4 +1,4 @@
-//jquery and mathquill must be availble first before including this script.
+//jquery and mathquill must be available first before including this script.
 
 /*
 
