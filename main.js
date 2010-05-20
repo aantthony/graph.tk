@@ -510,6 +510,8 @@ function newfunc(funcval) {
     newone.appendChild(inputbox);
     
     inputbox.appendChild(document.createTextNode(funcval || randfunc()));
+    flist.appendChild(newone);
+    $(inputbox).mathquill('editable');
     
     g.push(function (x) {
         return 0;
@@ -524,8 +526,6 @@ function newfunc(funcval) {
             bs[0].style.background = col(flist.childNodes.length);
         }
     }
-    flist.appendChild(newone);
-    $(inputbox).mathquill("editable");
     if (loaded) {
         
         inputbox.focus();
