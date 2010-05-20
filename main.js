@@ -526,6 +526,7 @@ function newfunc(funcval) {
         }
     }
     flist.appendChild(newone);
+    $(inputbox).mathquill("redraw");
     if (loaded) {
         
         inputbox.focus();
@@ -1528,6 +1529,7 @@ if (!iphone && g.length == 1 && getstr(flist.childNodes[0].getElementsByTagName(
 draw();
 document.getElementById("ldall").style.display = "none";
 document.getElementById("all").style.display = "block";
+$('#flist').mathquill("redraw");
 var lsd = 0;
 
 
