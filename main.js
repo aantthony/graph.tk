@@ -510,9 +510,6 @@ function newfunc(funcval) {
     newone.appendChild(inputbox);
     
     inputbox.appendChild(document.createTextNode(funcval || randfunc()));
-    $(inputbox).mathquill("editable");
-    
-    
     
     g.push(function (x) {
         return 0;
@@ -528,6 +525,7 @@ function newfunc(funcval) {
         }
     }
     flist.appendChild(newone);
+    $(inputbox).mathquill("editable");
     if (loaded) {
         
         inputbox.focus();
