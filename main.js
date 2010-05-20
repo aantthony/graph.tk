@@ -563,6 +563,7 @@ function extrafunc(string, jjq) {
     string = string.replace(/[•⋅∙]/g, "*");
     string = string.replace(/[Ii]nfinity/g, "∞");
     string = string.replace(/[Ii]nf/g, "∞");
+    string = string.replace(/⁻ⁱ/g, "^-1").replace(/ⁿ/g, "^n").replace(/⁻²/g, "^-2").replace(/⁻?⁰/g, "^0").replace(/⁻³/g, "^-3").replace(/⁻⁴/g, "^-4").replace(/⁻⁵/g, "^-5").replace(/⁻⁶/g, "^-6").replace(/⁻⁷/g, "^-7").replace(/⁻⁸/g, "^-8").replace(/⁻⁹/g, "^-9");
     string = string.replace(/(sin|cos|tan)\^\(\-1\)/g, "a$1"); //inverse trig functions written as sin^(-1)(x)
   	string = string.replace(/(sin|cos|tan|sec|csc|cot|log|ln)\^([\daex])\(/g, "$1_n($2,");
   	string = string.replace(/(sin|cos|tan|sec|csc|cot|log|ln)\^([\daex])([^\(])/g, "$1_n($2,$3)");
@@ -571,8 +572,8 @@ function extrafunc(string, jjq) {
   	for(i in latexchars){
   		string=string.replace(i,latexchars[i]);
   	}
-    string = string.replace(/[÷∕⁄]/g, "/").replace(/−/g, "-").replace(/′/g, "'").replace(/sum/g, "∑").replace(/⁻ⁱ/g, "^-1").replace(/ⁿ/g, "^n").replace(/⁻²/g, "^-2").replace(/⁻?⁰/g, "^0").replace(/⁻³/g, "^-3").replace(/⁻⁴/g, "^-4").replace(/⁻⁵/g, "^-5").replace(/⁻⁶/g, "^-6").replace(/¼/g, "0.25").replace(/½/g, "0.5").replace(/¾/g, "0.75").replace(/⅓/g, "(1/3)").replace(/⅔/g, "(2/3)").replace(/⅕/g, "0.2").replace(/⅖/g, "0.4").replace(/⅗/g, "0.6").replace(/⅘/g, "0.8").replace(/⅙/g, "(1/6)").replace(/⅚/g, "(5/6)").replace(/⅛/g, "0.125").replace(/⅜/g, "0.375").replace(/⅝/g, "0.625").replace(/⅞/g, "0.875").replace(/nx/g, "n*x").replace(/diff\(/g, "djkb(").replace(/⁻⁷/g, "^-7").replace(/⁻⁸/g, "^-8").replace(/⁻⁹/g, "^-9");
-    if (jjq !== null && jjq !== undefined) {
+    string = string.replace(/[÷∕⁄]/g, "/").replace(/−/g, "-").replace(/′/g, "'").replace(/sum/g, "∑").replace(/¼/g, "0.25").replace(/½/g, "0.5").replace(/¾/g, "0.75").replace(/⅓/g, "(1/3)").replace(/⅔/g, "(2/3)").replace(/⅕/g, "0.2").replace(/⅖/g, "0.4").replace(/⅗/g, "0.6").replace(/⅘/g, "0.8").replace(/⅙/g, "(1/6)").replace(/⅚/g, "(5/6)").replace(/⅛/g, "0.125").replace(/⅜/g, "0.375").replace(/⅝/g, "0.625").replace(/⅞/g, "0.875").replace(/nx/g, "n*x").replace(/diff\(/g, "djkb(");
+    if (jjq===true) {
         string = string.replace(/[gfy]'\[([\d]+)\]\(/g, "djkb($1,1,");
         string = string.replace(/[gfy]\[([\d]+)\]'\(/g, "djkb($1,1,");
         string = string.replace(/[gfy]'\(/g, "djkb(0,1,");
@@ -779,9 +780,7 @@ function showcon() {
 }
 
 function consolelog(vla, question) {
-    if (window.JSON) {
-        vla = JSON.stringify(vla);
-    }
+    vla = JSON.stringify(vla);
     var right = document.createElement("div");
     var left = document.createElement("b");
     left.style.textAlign = "left";
@@ -1493,17 +1492,10 @@ if (shouldload) {
     if (window.localStorage) {
         var data = localStorage.getItem("fn");
         if (data != null) {
-            if (window.JSON) {
-                try {
-                    data = JSON.parse(data);
-                    loadd(data);
-                } catch (ex) {}
-            } else {
-                try {
-                    data = safeeval("(" + data + ")");
-                    loadd(data);
-                } catch (ex) {}
-            }
+            try {
+                data = JSON.parse(data);
+                loadd(data);
+            } catch (ex) {}
         }
     }
     ready = true;
@@ -1520,11 +1512,12 @@ if (shouldload) {
     }
 }
 if (window.parent.length > 0) {
+    //in an iframe
     document.getElementById("funcs").style.display = "none"
 }
 if (!iphone && g.length == 1 && getstr(flist.childNodes[0].getElementsByTagName("span")[0]) == "e^x") {
+    //set up default functions
     newfunc("\\frac{1}{8}*x");
-    //newfunc("f'[1](x)");
     //newfunc("sum[1,15,sin(n*(x+pi))/n]");
     showp = 1;
 }
