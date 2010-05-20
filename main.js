@@ -562,6 +562,8 @@ function extrafunc(string, jjq) {
     string = string.replace(/√/g, "sqrt");
     string = string.replace(/[•⋅∙]/g, "*");
     string = string.replace(/[Ii]nfinity/g, "∞");
+    string = string.replace(/[Ii]nf/g, "∞");
+    string = string.replace(/(sin|cos|tan)\^\(\-1\)/g, "a$1"); //inverse trig functions written as sin^(-1)(x)
   	string = string.replace(/(sin|cos|tan|sec|csc|cot|log|ln)\^([\daex])\(/g, "$1_n($2,");
   	string = string.replace(/(sin|cos|tan|sec|csc|cot|log|ln)\^([\daex])([^\(])/g, "$1_n($2,$3)");
   	string = string.replace(/log_([\daex])\(/g, "logb($1,");
@@ -603,7 +605,7 @@ function extrafunc(string, jjq) {
         string = string.replace(/dx/g, "1");
     }
     var sargs, ext, enn, iad;
-    string = string.replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/\+\+/g, "+").replace(/\-\-/g, "+").replace(/Γ/g, "γ").replace(/γ\(/g, "fact(-1+").replace(/²/g, "^2").replace(/³/g, "^3").replace(/⁴/g, "^4").replace(/⁵/g, "^5").replace(/⁶/g, "^6").replace(/⁷/g, "^7").replace(/⁸/g, "^8").replace(/⁹/g, "^9").replace(/xxx/g, "x*x*x").replace(/(xx)/g, "x*x").replace(/(xx)/g, "x*x").replace(/([\d\.]+|[a-zπ])\!/g, "fact($1)").replace(/\(([^\(^\)]+)\)\!/g, "fact($1)").replace(/([^o^t^a-z^A-Z])g\(/g, "$1g[0](").replace(/^g\(/, "g[0](").replace(/\|([^\|]+)\|/g, "abs($1)").replace(/f\(x\)/g, "y").replace(/x\(/g, "x*(").replace(/x\^-1/g, "(1/x)").replace(/e\^(-[\d\.xy])/g, "exp($1)").replace(/e\^\(/g, "exp(").replace(/([^\(\)\^\]\[\,\.])\^\(/g,"Math.pow($1,").replace(/\(([^\)\(\[\]\.\^\,]+)\)\^\(/g,"Math.pow($1,").replace(/₀/g, "_0").replace(/₁/g, "_1").replace(/₂/g, "_2").replace(/₃/g, "_3").replace(/₄/g, "_4").replace(/₅/g, "_5").replace(/₆/g, "_6").replace(/₇/g, "_7").replace(/₈/g, "_8").replace(/₉/g, "_9").replace(/ₐ/g, "_a").replace(/ₑ/g, "_e").replace(/ₓ/g, "_x");
+    string = string.replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/\++/g, "+").replace(/(\-\-)+/g, "+").replace(/\-(\-\-)+/,"-").replace(/Γ/g, "γ").replace(/γ\(/g, "fact(-1+").replace(/²/g, "^2").replace(/³/g, "^3").replace(/⁴/g, "^4").replace(/⁵/g, "^5").replace(/⁶/g, "^6").replace(/⁷/g, "^7").replace(/⁸/g, "^8").replace(/⁹/g, "^9").replace(/xxx/g, "x*x*x").replace(/(xx)/g, "x*x").replace(/(xx)/g, "x*x").replace(/([\d\.]+|[a-zπ])\!/g, "fact($1)").replace(/\(([^\(^\)]+)\)\!/g, "fact($1)").replace(/([^o^t^a-z^A-Z])g\(/g, "$1g[0](").replace(/^g\(/, "g[0](").replace(/\|([^\|]+)\|/g, "abs($1)").replace(/f\(x\)/g, "y").replace(/x\(/g, "x*(").replace(/x\^-1/g, "(1/x)").replace(/e\^(-[\d\.xy])/g, "exp($1)").replace(/e\^\(/g, "exp(").replace(/([^\(\)\^\]\[\,\.])\^\(/g,"Math.pow($1,").replace(/\(([^\)\(\[\]\.\^\,]+)\)\^\(/g,"Math.pow($1,").replace(/₀/g, "_0").replace(/₁/g, "_1").replace(/₂/g, "_2").replace(/₃/g, "_3").replace(/₄/g, "_4").replace(/₅/g, "_5").replace(/₆/g, "_6").replace(/₇/g, "_7").replace(/₈/g, "_8").replace(/₉/g, "_9").replace(/ₐ/g, "_a").replace(/ₑ/g, "_e").replace(/ₓ/g, "_x");
     
     if (string.indexOf("_") != -1 && /(mass|m\:)/.test(string)) {
         string = string.replace(/([a-zA-Z])_([\d])/g, "$1*$2+");
