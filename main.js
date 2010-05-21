@@ -1615,4 +1615,12 @@ if (window.applicationCache) {
         }
     }, false);
 }
+
+//Keyboard shortcuts
+document.body.onkeydown=function(e){
+    if(e.shiftKey&&e.which===13){newfunc();}
+    
+};
+
+
 loaded = true;
