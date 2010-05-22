@@ -574,7 +574,9 @@ function extrafunc(string, jjq) {
   	string = string.replace(/log_([\daex])([^\(])/g, "logb($1,$2)");
     
   	for(i in latexchars){
+        if(i.length>1){//don't replace "," with space
   		string=string.replace(i,latexchars[i]);
+        }
   	}
     string = string.replace(/(∑|∏)_\(([^\)]+)\)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
     string = string.replace(/(∑|∏)_([\d]+)\^([\d]+)(.+)$/,"$1[$2,$3,$4]");
