@@ -11,7 +11,6 @@ This is a web application that graphs multiple functions, calculates expressions
 
 ## Plans
 ### Minor Ideas
-* Automatically select all on function creation
 * allow things like dy/dx x
 * allow things like &int;x dx
 
