@@ -258,7 +258,7 @@ var randfuncs = "x^2~f'(x)-1~2e^-x~2x+3~{λ:λ=3}~e^(-λ*x)~(0.5,0.5)~∑[1...�
 
 
 //Latex versions of randfuncs
-randfuncs = "x^2    f'\\left(x\\right)-1    2e^{-x}    2x+3    e^{-\\lambda*x}    \\left(0.5,0.5\\right)    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n    \\text{m:H_2SO_4}    \\left|x^2-4\\right|+2    \\frac1x    x^{-2}    x!    \\ln x    \\sum_{n=1}^{\\infinity}\\frac{x^n}{n}    \\sin x    e^x:\\left[−2,2\\right]    \\tan\\left(x\\right)    \\left(x+2\\right)\\left(x-3\\right)^2    diff\\left(0,2,2x\\right)    \\left(x-2\\right)^2    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}    \\prod_{n=1}^5\\left(x-n\\right)    \\sum_{n=0}^5n    x^x    \\Gamma\\left(x\\right)    \\frac{x!}{3!-x}    x%3    \\left(x>3\\right)?2x:-3    \\fact\\left(x\\right)    \\frac\\phi x    \\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined    g\\left[0\\right]'\\left(2x\\right)    g\\left[0\\right]\\left(x\\right)+1    \\sqrt x".split("    "); //four spaces
+randfuncs = "x^2    f'\\left(x\\right)-1    2e^{-x}    2x+3    \\lambda=3    e^{-\\lambda*x}    \\left(0.5,0.5\\right)    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n    \\prod_{1}^{4}x-n    m:H_2SO_4    \\left|x^2-4\\right|+2    \\frac1x    x^{-2}    x!    \\ln x    \\sum_{n=1}^{\\infinity}\\frac{x^n}{n}    \\sin x    e^x:\\left[−2,2\\right]    \\tan\\left(x\\right)    \\left(x+2\\right)\\left(x-3\\right)^2    diff\\left(0,2,2x\\right)    \\left(x-2\\right)^2    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}    \\prod_{n=1}^5\\left(x-n\\right)    \\sum_{n=0}^5n    x^x    \\Gamma\\left(x\\right)    \\frac{x!}{3!-x}    x%3    \\left(x>3\\right)?2x:-3    \\fact\\left(x\\right)    \\frac\\phi x    \\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined    g\\left[0\\right]'\\left(2x\\right)    g\\left[0\\right]\\left(x\\right)+1    \\sqrt x".split("    "); //four spaces
 
 var randomfi = 0;
 
@@ -437,6 +437,7 @@ var latexchars={
 'Psi':"Ψ",
 'Omega':"Ω",
 "perp":"⊥",
+",":" ",
 "nabla":"∇",
 "forall":"∀",
 "sum":"∑",
@@ -571,9 +572,15 @@ function extrafunc(string, jjq) {
   	string = string.replace(/(sin|cos|tan|sec|csc|cot|log|ln)\^([\daex])([^\(])/g, "$1_n($2,$3)");
   	string = string.replace(/log_([\daex])\(/g, "logb($1,");
   	string = string.replace(/log_([\daex])([^\(])/g, "logb($1,$2)");
+    
   	for(i in latexchars){
   		string=string.replace(i,latexchars[i]);
   	}
+    string = string.replace(/(∑|∏)_\(([^\)]+)\)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
+    string = string.replace(/(∑|∏)_([\d]+)\^([\d]+)(.+)$/,"$1[$2,$3,$4]");
+    string = string.replace(/(∑|∏)_\(([^\)]+)\)\^([\d]+)(.+)$/,"$1[$2,$3,$4]");
+    string = string.replace(/(∑|∏)_([\d]+)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
+    
     string = string.replace(/[÷∕⁄]/g, "/").replace(/−/g, "-").replace(/′/g, "'").replace(/sum/g, "∑").replace(/¼/g, "0.25").replace(/½/g, "0.5").replace(/¾/g, "0.75").replace(/⅓/g, "(1/3)").replace(/⅔/g, "(2/3)").replace(/⅕/g, "0.2").replace(/⅖/g, "0.4").replace(/⅗/g, "0.6").replace(/⅘/g, "0.8").replace(/⅙/g, "(1/6)").replace(/⅚/g, "(5/6)").replace(/⅛/g, "0.125").replace(/⅜/g, "0.375").replace(/⅝/g, "0.625").replace(/⅞/g, "0.875").replace(/nx/g, "n*x").replace(/diff\(/g, "djkb(");
     if (jjq===true) {
         string = string.replace(/[gfy]'\[([\d]+)\]\(/g, "djkb($1,1,");
@@ -628,9 +635,9 @@ function extrafunc(string, jjq) {
             string = string.replace(/∑\[([^,]+),([^,]+),([^\]^\+^\-^n^\(]+\([^\]^\+^\-^n^\(]+\)[^\]^\+^\-^n^\(]+)\*([^\]^\+^\-]+)\]/g, "($3)*∑[$1,$2,$4]");
             string = string.replace(/∑\[([^,]+),([^,]+),([^\]^\+^\-]+)\*([^\]^\+^\-^n^\(]+\([^\]^\+^\-^n^\(]+\)[^\]^\+^\-^n^\(]+)\]/g, "($4)*∑[$1,$2,$3]");
         }
-        string = string.replace(/∑\[([^,]+),∞,([^n^\]]+)\/fact\(n\)\]/g, "((e*$2)-∑[0,$1-1,$2/fact(n)])");
-        string = string.replace(/∑\[([^,]+),∞,pow\(([\d]+|[^\(^\)]),n\)\/fact\(n\)\]/g, "(exp($2)-∑[0,$1-1,pow($2,n)])");
-        string = string.replace(/∑\[([^,]+),∞,pow\(([\d]+),n\)\/\(fact\(n\)\)\]/g, "(exp($2)-∑[0,$1-1,pow($2,n)])");
+        string = string.replace(/∑\[([^,]+),∞,([^n^\]]+)\/(fact\(n\)|\(fact\(n\)\))\]/g, "((e*$2)-∑[0,$1-1,$2/fact(n)])");
+        string = string.replace(/∑\[([^,]+),∞,pow\(([\d]+|[^\(^\)]),n\)\/(fact\(n\)|\(fact\(n\)\))\]/g, "(exp($2)-∑[0,$1-1,pow($2,n)])");
+        string = string.replace(/∑\[([^,]+),∞,pow\(([\d]+),n\)\/(fact\(n\)|\(fact\(n\)\))\]/g, "(exp($2)-∑[0,$1-1,pow($2,n)])");
         string = string.replace(/1\/pow\(([^\)^,]+),([^\(^\))]+)\)/g, "pow($1,-$2)");
         var args = /∑\[([^,]+),∞,pow\(n,([^\)]+)\)\]/.exec(string);
         if (args != null) {
@@ -647,7 +654,6 @@ function extrafunc(string, jjq) {
             }
         }
         string = string.replace(/∑\[([^,]+),([^,]+),n\]/g, "(-0.5*(-1+($1)-($2))*(($1)+($2)))").replace(/∑\[0*[01],∞,pow\(n,([^n^\(^\)]+)\)\/\(?fact\(n\)\)?\]/g, "(e*bellb($1))").replace(/∑\[0*2,∞,pow\(n,([^n^\(^\)]+)\)\/\(?fact\(n\)\)?\]/g, "(e*bellb($1)-1)").replace(/∑\[0*3,∞,pow\(n,([^n^\(^\)]+)\)\/\(?fact\(n\)\)?\]/g, "(e*bellb($1)-1-pow(2,(-1+$1)))").replace(/∑\[0*[01],∞,n\/fact\(n\)\]/g, "(e)").replace(/∑\[0*2,∞,n\/fact\(n\)\]/g, "(e-1)").replace(/∑\[0*3,∞,n\/fact\(n\)\]/g, "(e-2)").replace(/∑\[0*4,∞,n\/fact\(n\)\]/g, "(0.5*(2*e-5))").replace(/∑\[0*5,∞,n\/fact\(n\)\]/g, "((1/3)*(3*e-8))").replace(/∑\[([^,]+),∞,pow\(([^\,]+),-n\)\]/g, "((pow($2,1-$1))/(-1+($2)))").replace(/∑\[([^,]+),([^,]+),pow\(([^\,]+),-n\)\]/g, "(-((pow($3,-$1-$2))*(pow($3,$1)-pow($3,1+$2)))/(-1+($3)))").replace(/∑\[([^,]+),∞,pow\(([^\,]+),n\)\]/g, "((abs($2)<1)?pow($2,$1)/(1-$2):undefined)").replace(/∏\[0,x,n\]/g, "(0)");
-        
         string=string.replace(/∑\[([\d\*\+\-a-wyz]+),([\d\*\+\-a-wyz]+|∞),([^\]]+)\]/,function(all,a,b,c){
             if (c.indexOf("n") == -1) {
                 return "((" + c + ")*(1+(" + b + ")-(" + a + ")))";
