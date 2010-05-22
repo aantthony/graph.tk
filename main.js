@@ -470,7 +470,7 @@ function getstr(obj, latex)
       .replace(/\\([a-zA-Z\.\,]+)/g, getlatexpart) //LaTeX symbols => special characters
       .replace(/{/g, "(") //LaTeX blocks {} usually correspond to () in text
       .replace(/}/g, ")")
-      .replace(/\\/g, "") //leftover backslashes
+      .replace(/\\/g, "") //leftover backslashess
     );
 }
 
@@ -527,6 +527,9 @@ function newfunc(funcval) {
     }
     flist.appendChild(newone);
     $(inputbox).mathquill("redraw");
+    if(!funcval){
+        $(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
+    }
     if (loaded) {
         
         inputbox.focus();
