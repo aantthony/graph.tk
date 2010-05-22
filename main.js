@@ -470,7 +470,7 @@ function getstr(obj, latex)
       .replace(/\\([a-zA-Z\.\,]+)/g, getlatexpart) //LaTeX symbols => special characters
       .replace(/{/g, "(") //LaTeX blocks {} usually correspond to () in text
       .replace(/}/g, ")")
-      .replace(/\\/g, "") //leftover backslashess
+      .replace(/\\/g, "") //leftover backslashes
     );
 }
 
