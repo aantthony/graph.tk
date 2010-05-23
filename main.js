@@ -1535,7 +1535,7 @@ if (window.parent.length) {
 }
 if (!iphone && g.length == 1 && getstr(flist.childNodes[0].getElementsByTagName("span")[0]) == "e^x") {
     //set up default functions
-    loadd(JSON.parse("{\"status\":\"ok\",\"g\":[\"e^x\",\"\\\\frac{1}{8}\\\\left(x+2\\\\right)\\\\left(x-4\\\\right)^2\",\"f'\\\\left[1\\\\right]\\\\left(x\\\\right)\",\"\\\\sum_{n=1}^{\\\\infty}\\\\frac{\\\\sin\\\\left(nx\\\\right)}{n}\"]}"));
+    loadd({"status":"ok","g":["e^x","\\frac{1}{8}\\left(x+2\\right)\\left(x-4\\right)^2","f'\\left[1\\right]\\left(x\\right)","\\sum_{n=1}^{\\infty}\\frac{\\sin\\left(nx\\right)}{n}"]});
     //the sum is a little slow. (the last one in defaultGraphs)
     showp = 1;
 }
