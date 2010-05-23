@@ -579,9 +579,9 @@ function extrafunc(string, jjq) {
         }
   	}
     string = string.replace(/(∑|∏)_\(([^\)]+)\)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
-    string = string.replace(/(∑|∏)_([\d]+)\^([\d]+)(.+)$/,"$1[$2,$3,$4]");
-    string = string.replace(/(∑|∏)_\(([^\)]+)\)\^([\d]+)(.+)$/,"$1[$2,$3,$4]");
-    string = string.replace(/(∑|∏)_([\d]+)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
+    string = string.replace(/(∑|∏)_([\d]+|.)\^([\d]+|.)(.+)$/,"$1[$2,$3,$4]");
+    string = string.replace(/(∑|∏)_\(([^\)]+)\)\^([\d]+|.)(.+)$/,"$1[$2,$3,$4]");
+    string = string.replace(/(∑|∏)_([\d]+|.)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
     
     string = string.replace(/[÷∕⁄]/g, "/").replace(/−/g, "-").replace(/′/g, "'").replace(/sum/g, "∑").replace(/¼/g, "0.25").replace(/½/g, "0.5").replace(/¾/g, "0.75").replace(/⅓/g, "(1/3)").replace(/⅔/g, "(2/3)").replace(/⅕/g, "0.2").replace(/⅖/g, "0.4").replace(/⅗/g, "0.6").replace(/⅘/g, "0.8").replace(/⅙/g, "(1/6)").replace(/⅚/g, "(5/6)").replace(/⅛/g, "0.125").replace(/⅜/g, "0.375").replace(/⅝/g, "0.625").replace(/⅞/g, "0.875").replace(/nx/g, "n*x").replace(/diff\(/g, "djkb(");
     if (jjq===true) {
