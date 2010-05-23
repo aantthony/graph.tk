@@ -1507,13 +1507,13 @@ function loadd(d) {
 }
 var ready = false;
 if (shouldload) {
-    if (window.localStorage) {
+   if (window.localStorage) {
         var data = localStorage.getItem("fn");
         if (data != null) {
             try {
                 data = JSON.parse(data);
                 loadd(data);
-            } catch (ex) {}
+            } catch (ex)  {}
         }
     }
     ready = true;
@@ -1529,14 +1529,14 @@ if (shouldload) {
         loadd(data);
     }
 }
-if (window.parent.length > 0) {
+if (window.parent.length) {
     //in an iframe
     document.getElementById("funcs").style.display = "none"
 }
 if (!iphone && g.length == 1 && getstr(flist.childNodes[0].getElementsByTagName("span")[0]) == "e^x") {
     //set up default functions
-    newfunc("\\frac{1}{8}*x");
-    //newfunc("sum[1,15,sin(n*(x+pi))/n]");
+    loadd(JSON.parse("{\"status\":\"ok\",\"g\":[\"e^x\",\"\\\\frac{1}{8}\\\\left(x+2\\\\right)\\\\left(x-4\\\\right)^2\",\"f'\\\\left[1\\\\right]\\\\left(x\\\\right)\",\"\\\\sum_{n=1}^{\\\\infty}\\\\frac{\\\\sin\\\\left(nx\\\\right)}{n}\"]}"));
+    //the sum is a little slow. (the last one in defaultGraphs)
     showp = 1;
 }
 
