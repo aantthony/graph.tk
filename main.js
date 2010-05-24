@@ -559,6 +559,8 @@ function extrafunc(string, jjq) {
     if (!settings.special) {
         return string;
     }
+    //This is called way too many times at startup for some reason
+    consolelog(JSON.stringify(string),"extrafunc");
     string = string.replace(/\^\(\)/g,"");
     string = string.replace(/X/g, "x");
     string = string.replace(/ /g, "");
@@ -617,7 +619,7 @@ function extrafunc(string, jjq) {
         string = string.replace(/dx/g, "1");
     }
     var sargs, ext, enn, iad;
-    string = string.replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/\++/g, "+").replace(/(\-\-)+/g, "+").replace(/\-(\-\-)+/,"-").replace(/Γ/g, "γ").replace(/γ\(/g, "fact(-1+").replace(/²/g, "^2").replace(/³/g, "^3").replace(/⁴/g, "^4").replace(/⁵/g, "^5").replace(/⁶/g, "^6").replace(/⁷/g, "^7").replace(/⁸/g, "^8").replace(/⁹/g, "^9").replace(/xxx/g, "x*x*x").replace(/(xx)/g, "x*x").replace(/(xx)/g, "x*x").replace(/([\d\.]+|[a-zπ])\!/g, "fact($1)").replace(/\(([^\(^\)]+)\)\!/g, "fact($1)").replace(/([^o^t^a-z^A-Z])g\(/g, "$1g[0](").replace(/^g\(/, "g[0](").replace(/\|([^\|]+)\|/g, "abs($1)").replace(/f\(x\)/g, "y").replace(/x\(/g, "x*(").replace(/x\^-1/g, "(1/x)").replace(/e\^(-[\d\.xy])/g, "exp($1)").replace(/e\^\(/g, "exp(").replace(/([^\(\)\^\]\[\,\.])\^\(/g,"Math.pow($1,").replace(/\(([^\)\(\[\]\.\^\,]+)\)\^\(/g,"Math.pow($1,").replace(/₀/g, "_0").replace(/₁/g, "_1").replace(/₂/g, "_2").replace(/₃/g, "_3").replace(/₄/g, "_4").replace(/₅/g, "_5").replace(/₆/g, "_6").replace(/₇/g, "_7").replace(/₈/g, "_8").replace(/₉/g, "_9").replace(/ₐ/g, "_a").replace(/ₑ/g, "_e").replace(/ₓ/g, "_x");
+    string = string.replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/\++/g, "+").replace(/(\-\-)+/g, "+").replace(/\-(\-\-)+/,"-").replace(/Γ/g, "γ").replace(/γ\(/g, "fact(-1+").replace(/²/g, "^2").replace(/³/g, "^3").replace(/⁴/g, "^4").replace(/⁵/g, "^5").replace(/⁶/g, "^6").replace(/⁷/g, "^7").replace(/⁸/g, "^8").replace(/⁹/g, "^9").replace(/xxx/g, "x*x*x").replace(/(xx)/g, "x*x").replace(/(xx)/g, "x*x").replace(/([\d\.]+|[a-zπ])\!/g, "fact($1)").replace(/\(([^\(^\)]+)\)\!/g, "fact($1)").replace(/([^o^t^a-z^A-Z])g\(/g, "$1g[0](").replace(/^g\(/, "g[0](").replace(/\|([^\|]+)\|/g, "abs($1)").replace(/f\(x\)/g, "y").replace(/x\(/g, "x*(").replace(/x\^-1/g, "(1/x)").replace(/e\^(-[\d\.xy])/g, "exp($1)").replace(/e\^\(/g, "exp(").replace(/([^\(\)\^\]\[\,\.])\^\(/g,"pow($1,").replace(/\(([^\)\(\[\]\.\^\,]+)\)\^\(/g,"pow($1,").replace(/₀/g, "_0").replace(/₁/g, "_1").replace(/₂/g, "_2").replace(/₃/g, "_3").replace(/₄/g, "_4").replace(/₅/g, "_5").replace(/₆/g, "_6").replace(/₇/g, "_7").replace(/₈/g, "_8").replace(/₉/g, "_9").replace(/ₐ/g, "_a").replace(/ₑ/g, "_e").replace(/ₓ/g, "_x");
     
     if (string.indexOf("_") != -1 && /(mass|m\:)/.test(string)) {
         string = string.replace(/([a-zA-Z])_([\d])/g, "$1*$2+");
@@ -626,6 +628,7 @@ function extrafunc(string, jjq) {
     }
     if(!jjq){string=string.replace(/θ/g, "theta").replace(/theta/g, "(atan(y/x))")};
     string = string.replace(/([^\)]|[\d]+|[\d]+\.[\d]+)\^([\d]|[^\(^-])/g, "pow($1,$2)").replace(/([^\)]|[\d]+|[\d]+\.[\d]+)\^-([\d]+|[^\(^-])/g, "pow($1,-$2)").replace(/([a-z])\^\(([^\)]+)\)/g, "pow($1,$2)").replace(/\(([^\(^\)]+)\)\^\(([^\(^\)]+)\)/g, "pow($1,$2)").replace(/\(([^\(^\)]+)\)\^([^\(^\)])/g, "pow($1,$2)").replace(/ r /g, "(sqrt(x*x+y*y))").replace(/([\d]+)([^\+^%^\-^\*^\/^\d^\.^\}^\)^\:^>^<^\[^\]^\(^\{^\,])/g, "$1*$2").replace(/([^_^a-z^0-9][\d]+)\(/g, "$1*(").replace(/^([\d]+)\(/, "$1*(").replace(/\)pow/g, ")*pow").replace("γ(n+1)", "n!").replace("1/(n*n)", "n^-2").replace(/\)\(/g, ")*(").replace(/\(\+?pow\(([a-z]),([a-z])\)\)/g, "pow($1,$2)");
+    
     var hassum = string.indexOf("∑") != -1;
     string = string.replace(/([ail])n/g, "$1é");
     if (hassum) {
@@ -675,8 +678,10 @@ function extrafunc(string, jjq) {
         
         });
     }
+    
     string=string.replace(/ζ\(([\d\.]+)\)/g,function(x,z){return zeta(z);});
     string = string.replace(/ζ/g, "zeta").replace(/≠/g, "!=").replace(/∏\[[12],([^,]+),n\]/g, "fact($1)").replace(/∏\[([\d\*\+\-a-wyz]+),([\d\*\+\-a-wyz]+),n\]/, "(fact($2)/fact(($1)-1))");
+    
     sargs = /∏\[([\d\*\+\-a-wyz]+),([\d\*\+\-a-wyz]+|∞),([^\]]+)\]/.exec(string);
     if (sargs != null) {
         if (sargs[3].indexOf("n") == -1) {
@@ -697,18 +702,23 @@ function extrafunc(string, jjq) {
     if (string[0] == "(" && string.indexOf(",") != -1) {
         string = "pt" + string;
     }
+    
     string = string.replace(/^pow\(x,2\)\+pow\(y,2\)=(.+)/, "sqrt(($1)-x*x)").replace(/^pow\(x,2\)\+([\d\/e\*]+)\*pow\(y,2\)=(.+)$/, "sqrt(($2-x*x)/($1))").replace(/^([0-9e\/\*\+\-\(\)]+)\*pow\(x,2\)\+pow\(y,2\)=(.+)$/, "sqrt(($2-($1*x*x)))").replace(/^([0-9e\/\*\+\-\(\)]+)\*pow\(x,2\)\+([0-9e\/\*\+\-\(\)]+)\*pow\(y,2\)=(.+)$/, "sqrt(($3-($1*x*x))/($2))").replace(/^[yfg]=/, "").replace(/^([\da-z\.\*\/]+)\*[yfg]=(.+)$/, "($2)/($1)").replace(/∞/g, "Infinity").replace(/¯/g, ",").replace(/pow\((.),4\)/g, "($1*$1*$1*$1)").replace(/pow\((.),3\)/g, "($1*$1*$1)").replace(/pow\((.),2\)/g, "($1*$1)").replace(/pow\((.),1\)/g, "($1)").replace(/pow\((.),0\)/g, "(1)").replace(/pow\(e,([^\)^\(]+)\)/g, "exp($1)").replace(/\(\)/g, "(0)").replace(/\)([a-z])/g, ")*$1");
+    
     if (jjq != null) {
         string = string.replace(/fx/g, "(g[0](x))");
     }
     string = string.replace(/é/g, "n");
     string = string.replace(/(sin|cos|tan|ln|log|abs|floor|ceil|sec|csc|tg|cot|exp)\*?x/g, "$1(x)");
+    
     string = string.replace(/pow\(([\d\.]+),([\d\.]+)\)/, function (d, x, y) {
         return pow(x, y);
     });
+    
     string = string.replace(/pow\(([\d\.^,]+),([\d\.^,\+\-]+)\)/, function (d, x, y) {
         return pow(x, safeeval(y));
     });
+    
     string = "(" + string + ")";
     string = string.replace(/([\+\*\/\-])\(0\)/g, "$10");
     string = string.replace(/\)\-0\)/g, "))");
