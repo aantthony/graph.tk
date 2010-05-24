@@ -559,8 +559,6 @@ function extrafunc(string, jjq) {
     if (!settings.special) {
         return string;
     }
-    //This is called way too many times at startup for some reason
-    consolelog(JSON.stringify(string),"extrafunc");
     string = string.replace(/\^\(\)/g,"");
     string = string.replace(/X/g, "x");
     string = string.replace(/ /g, "");
@@ -584,7 +582,6 @@ function extrafunc(string, jjq) {
     string = string.replace(/(∑|∏)_([\d]+|.)\^([\d]+|.)(.+)$/,"$1[$2,$3,$4]");
     string = string.replace(/(∑|∏)_\(([^\)]+)\)\^([\d]+|.)(.+)$/,"$1[$2,$3,$4]");
     string = string.replace(/(∑|∏)_([\d]+|.)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
-    
     string = string.replace(/[÷∕⁄]/g, "/").replace(/−/g, "-").replace(/′/g, "'").replace(/sum/g, "∑").replace(/¼/g, "0.25").replace(/½/g, "0.5").replace(/¾/g, "0.75").replace(/⅓/g, "(1/3)").replace(/⅔/g, "(2/3)").replace(/⅕/g, "0.2").replace(/⅖/g, "0.4").replace(/⅗/g, "0.6").replace(/⅘/g, "0.8").replace(/⅙/g, "(1/6)").replace(/⅚/g, "(5/6)").replace(/⅛/g, "0.125").replace(/⅜/g, "0.375").replace(/⅝/g, "0.625").replace(/⅞/g, "0.875").replace(/nx/g, "n*x").replace(/diff\(/g, "djkb(");
     if (jjq===true) {
         string = string.replace(/[gfy]'\[([\d]+)\]\(/g, "djkb($1,1,");
@@ -743,14 +740,11 @@ function extrafunc(string, jjq) {
     string = string.replace(/^(.+)[\|\:]\[([\d\-\.\+]+),([\d\-\.\+]+)\]$/, "((x>($2))&&(x<($3)))?($1):undefined");
     string=string.replace(/α/g,"alpha").replace(/β/g,"beta").replace(/γ/g,"gamma").replace(/δ/g,"delta").replace(/ζ/g,"zeta").replace(/η/g,"eta").replace(/θ/g,"theta").replace(/ι/g,"iota").replace(/κ/g,"kappa").replace(/μ/g,"mu").replace(/ν/g,"nu").replace(/ξ/g,"xi").replace(/ο/g,"omicron").replace(/ρ/g,"rho").replace(/σ/g,"sigma").replace(/τ/g,"tau").replace(/υ/g,"upsilon").replace(/χ/g,"chi").replace(/ψ/g,"psi").replace(/ω/g,"omega").replace(/ϕ/g,"phi").replace(/φ/g,"phiv").replace(/ϵ/g,"epsilon").replace(/ε/g,"epsiv").replace(/ς/g,"sigmaf").replace(/ϝ/g,"gammad").replace(/ϰ/g,"kappav").replace(/ϖ/g,"piv").replace(/ϱ/g,"rhov").replace(/ϑ/g,"thetav").replace(/π/g,"pi").replace(/λ/g,"lambda").replace(/Γ/g,"Gamma").replace(/Δ/g,"Delta").replace(/Θ/g,"Theta").replace(/Λ/g,"Lambda").replace(/Ξ/g,"Xi").replace(/Π/g,"Pi").replace(/Σ/g,"Sigma").replace(/Υ/g,"Upsilon").replace(/Φ/g,"Phi").replace(/Ψ/g,"Psi").replace(/Ω/g,"Omega").replace(/⊥/g,"perp").replace(/∇/g,"nabla").replace(/∀/g,"forall").replace(/∐/g,"coprod").replace(/∫/g,"int");
     string=string.replace(/\)Math/g,")*Math");
-   
     //there should be no "^"s
     if(/\^/.test(string)){
         throw("xor");
     
     }
-    
-    
     return string;
 }
 
@@ -789,9 +783,6 @@ function valiad(obj) {
         obj.style.background = "red";
     }
 }
-
-
-
 //Console methods
 var big = false;
 function size() {
@@ -875,7 +866,7 @@ if(obj===undefined)
         draw();
         return;
     }
-    
+    consolelog("getf: "+getstr(obj));
     var func = getfunction(getstr(obj));
     if (func) {
         obj.style.background = "white";
@@ -985,8 +976,6 @@ function nextframe() {
     solving = false;
     stopper.value = solving ? "Stop" : "Solve";
 }
-
-
 
 //Format number
 function forms(num, digits) {
