@@ -519,7 +519,7 @@ function newfunc(funcval) {
     //inputbox.setAttribute("onchange", "getf(this," + flist.childNodes.length + ")");
     setonchange(inputbox,"getf(undefined," + flist.childNodes.length + ")");
     
-    getf(inputbox, flist.childNodes.length, true);
+    //getf(inputbox, flist.childNodes.length, true);
     if (newone.getElementsByClassName) {
         var bs = newone.getElementsByClassName("b");
         if (bs.length > 0) {
@@ -578,6 +578,7 @@ function extrafunc(string, jjq) {
   		string=string.replace(i,latexchars[i]);
         }
   	}
+    string = string.replace(/(∑|∏)([^\[^\_^\^^\{][^\[]*)$/,"$1[1,∞,$2]");
     string = string.replace(/(∑|∏)_\(([^\)]+)\)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
     string = string.replace(/(∑|∏)_([\d]+|.)\^([\d]+|.)(.+)$/,"$1[$2,$3,$4]");
     string = string.replace(/(∑|∏)_\(([^\)]+)\)\^([\d]+|.)(.+)$/,"$1[$2,$3,$4]");
@@ -628,9 +629,9 @@ function extrafunc(string, jjq) {
     
     var hassum = string.indexOf("∑") != -1;
     string = string.replace(/([ail])n/g, "$1é");
+    string = string.replace(/([∑∏])\[n=/g, "$1[");
+    string = string.replace(/([∑∏])\[([^,]+)\.\.\./g, "$1[$2,");
     if (hassum) {
-        string = string.replace(/([∑∏])\[n=/g, "$1[");
-        string = string.replace(/([∑∏])\[([^,]+)\.\.\./g, "$1[$2,");
         for (var nnnd = 0; nnnd < 6; nnnd++) {
             string = string.replace(/∑\[([^,]+),([^,]+),([^\]^\+^\-^n^\(]+)\*([^\]^\+^\-]+)\]/g, "($3)*∑[$1,$2,$4]");
             string = string.replace(/∑\[([^,]+),([^,]+),([^\]^\+^\-]+)\*([^\]^\+^\-^n^\)]+)\]/g, "($4)*∑[$1,$2,$3]");
