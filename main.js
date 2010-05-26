@@ -30,8 +30,6 @@ var iphone = /iPhone/.test(window.navigator.userAgent);
 
 var kinput="span";//span for mathquill, input for form input
 if (window.parent.length) {
-    //in an iframe
-    document.getElementById("funcs").style.display = "none";
     kinput="input";
 }
 if(iphone){kinput="input"}
@@ -1667,5 +1665,9 @@ document.body.onkeydown=function(e){
     
 };
 }
+if (window.parent.length) {
+document.getElementById("funcs").style.display = "none";
+}
 
 loaded = true;
+
