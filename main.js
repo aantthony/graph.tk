@@ -895,7 +895,7 @@ if(obj===undefined)
         draw();
         return;
     }
-    consolelog("getf: "+getstr(obj));
+    //consolelog("getf: "+getstr(obj));
     var func = getfunction(getstr(obj));
     if (func) {
         obj.style.background = "white";
@@ -1600,12 +1600,12 @@ function tstart(event) {
         event.preventDefault();
     }
 }
+
 if (iphone) {
     document.getElementById("shc").style.display = "none";
     document.getElementById("quest").style.display = "none";
     document.getElementById("sde").style.display = "none";
     document.getElementById("pb").style.display = "none";
-    document.getElementById("prototype").getElementsByClassName("b")[0].style.display = "none";
     document.getElementById("tss").style.display = "none";
     document.body.addEventListener("touchstart", tstart, false);
     document.body.addEventListener("touchend", draw, false);
@@ -1661,8 +1661,6 @@ if (window.applicationCache) {
 if(kinput=="span"){
 document.body.onkeydown=function(e){
     if(e.shiftKey&&e.which===13){newfunc();}
-    if(e.which==8){cancelEvent(e);return false;}
-    
 };
 }
 if (window.parent.length) {
