@@ -19,7 +19,7 @@ This is a web application that graphs multiple functions, calculates expressions
 * CAS - Not likely to happen, but it would be cool
 
 
-### License
+## License
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
