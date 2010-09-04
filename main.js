@@ -386,12 +386,12 @@ var logt = document.getElementById("logt");
 
 var latexchars={
 'gt':">",
+"left":"",
+"right":"",
 'ge':">=",
 'lt':"<",
 'le':"<=",
 "infty":"∞",
-"left":"",
-"right":"",
 "cdot":"*",
 "frac":"",
 "alpha":"α",
