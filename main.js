@@ -653,7 +653,7 @@ function extrafunc(string, jjq) {
         string = string.replace(/^(mass\:|m\:)/, "");
     }
     if(!jjq){string=string.replace(/θ/g, "theta").replace(/theta/g, "(atan(y/x))")};
-    string = string.replace(/([^\)]|[\d]+|[\d]+\.[\d]+)\^([\d]|[^\(^-])/g, "pow($1,$2)").replace(/([^\)]|[\d]+|[\d]+\.[\d]+)\^-([\d]+|[^\(^-])/g, "pow($1,-$2)").replace(/([a-z])\^\(([^\)]+)\)/g, "pow($1,$2)").replace(/\(([^\(^\)]+)\)\^\(([^\(^\)]+)\)/g, "pow($1,$2)").replace(/\(([^\(^\)]+)\)\^([^\(^\)])/g, "pow($1,$2)").replace(/ r /g, "(sqrt(x*x+y*y))").replace(/([\d]+)([^\+^%^\-^\*^\/^\d^\.^\}^\)^\:^>^<^\[^\]^\(^\{^\,])/g, "$1*$2").replace(/([^_^a-z^0-9][\d]+)\(/g, "$1*(").replace(/^([\d]+)\(/, "$1*(").replace(/\)pow/g, ")*pow").replace("γ(n+1)", "n!").replace("1/(n*n)", "n^-2").replace(/\)\(/g, ")*(").replace(/\(\+?pow\(([a-z]),([a-z])\)\)/g, "pow($1,$2)");
+    string = string.replace(/([^\)]|[\d]+|[\d]+\.[\d]+)\^([\d]|[^\(^-])/g, "(pow($1,$2))").replace(/([^\)]|[\d]+|[\d]+\.[\d]+)\^-([\d]+|[^\(^-])/g, "(pow($1,-$2))").replace(/([a-z])\^\(([^\)]+)\)/g, "(pow($1,$2))").replace(/\(([^\(^\)]+)\)\^\(([^\(^\)]+)\)/g, "(pow($1,$2))").replace(/\(([^\(^\)]+)\)\^([^\(^\)])/g, "(pow($1,$2))").replace(/ r /g, "(sqrt(x*x+y*y))").replace(/([\d]+)([^\+^%^\-^\*^\/^\d^\.^\}^\)^\:^>^<^\[^\]^\(^\{^\,])/g, "$1*$2").replace(/([^_^a-z^0-9][\d]+)\(/g, "$1*(").replace(/^([\d]+)\(/, "$1*(").replace(/\)pow/g, ")*pow").replace("γ(n+1)", "n!").replace("1/(n*n)", "n^-2").replace(/\)\(/g, ")*(").replace(/\(\+?pow\(([a-z]),([a-z])\)\)/g, "(pow($1,$2))");
     
     var hassum = string.indexOf("∑") != -1;
     string = string.replace(/([ail])n/g, "$1é");
