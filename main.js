@@ -320,7 +320,7 @@ var all = document.getElementById("all");
 //It is much faster to cache the entire page in a javascript.
 //It is also insane.
 
-all.innerHTML = "<img style=\"display:none\" src=\"grabbing.gif\" height=\"16\" width=\"16\"><canvas id=\"canvas\" width=\"800\" height=\"600\"><div style=\"margin:16px;font-family:sans-serif\"><h1>Error</h1>Your internet browser is way too old for this!. <a href=\"about\">About this page.</a><br />Download google chrome, firefox or safari<br><br>Choose one of these browsers, or find another one.<br><br><a href=\"http://www.google.com/chrome/\"><img id=\"i_chrome\" alt=\"Google Chrome\"></a>&nbsp;<a href=\"http://www.google.com/chrome/\">Get Google Chrome</a><br><a href=\"http://www.mozilla.com/firefox\"><img id=\"i_firefox\" alt=\"Firefox\"></a>&nbsp;<a href=\"http://www.mozilla.com/firefox\">Get Firefox</a><br><a href=\"http://www.apple.com/safari\"><img id=\"i_safari\" alt=\"Safari\"></a>&nbsp;<a href=\"http://www.apple.com/safari\">Get Safari</a><br><a href=\"http://www.opera.com/download/\"><img align=\"middle\" id=\"i_opera\" alt=\"Opera\"></a>&nbsp;<a href=\"http://www.opera.com/download/\">Get Opera</a><br></div></canvas><div id=\"ptd\" style=\"position:fixed;z-Index:80000;color:black;opacity:0.6;left:8px;bottom:8px;border:none;background:white;-webkit-transition:opacity 0.5s ease-in-out;-moz-transition:opacity 0.5s ease-in-out;-o-transition:opacity 0.5s ease-in-out;transition: opacity 0.5s ease-in-out;font:10pt 'Menlo','Andale Mono','Consolas','DejaVu Sans Mono','Droid Sans Mono','Lucida Console','Monaco','monofur',monospace\">(0,0)</div><div id=\"con\" style=\"display:none\" class=\"overlay\"><div id=\"logt\"><div>graph.tk v1.1 &copy; 2010 Anthony - NO WARRANTY<br>Notes:<br>Sometimes x^n will not be x to the power of n, but x XOR n, which is the normal javascript meaning. I have made modifications that allow some easier equations. A dot after the expression means it was evaluated in a non-javascript-standard way. Use size() to change size.<br><br>Some cool things to type:<br> Fe (iron mass), g(0), g[1](0), en[26], M[26], symbol[26]</div></div><br><input type=\"text\" style=\"width:100%\" id=\"conin\" onkeydown=\"if(event.which==13){consoleex(this)};if(event.which==38){this.value=last}\"></div><div id=\"funcs\" class=\"overlay\"><ul class=\"f\" id=\"flist\"><li id=\"prototype\"><div class=\"b\" style=\"background:#07c\"></div></li></ul><input type=\"button\" value=\"+\" id=\"pb\" onclick=\"newfunc();_ga_track_event('New')\"><a href=\"javascript:void(showcon())\" style=\"font-size:small;margin:8px\" id=\"shc\">Console</a><a href=\"javascript:void(tdiff())\" style=\"font-size:small;margin:8px\" id=\"sde\">Diff Eq</a><a href=\"javascript:void(scren())\" style=\"font-size:small;margin:8px\" id=\"tss\">Screenshot</a><small id=\"nosave\"></small><a href=\"about\" target=\"_blank\">\t<div id=\"quest\">?</div></a></div><div id=\"overlay\" style=\"display:none;bottom:0;right:0\" class=\"overlay\"><table><tbody><tr><td style=\"width:100px\"><input type=\"button\" value=\"f ' (x)\" onclick=\"if(this.value=='f \\' (x)'){this.value='f \\' \\' (x)';second=true;}else{this.value='f \\' (x)';second=false;}\"> = </td><td><input type=\"text\" id=\"nnn\" value=\"g(x)\" onchange=\"this.onkeydown()\" onkeydown=\"getg(this)\" onkeyup=\"this.onkeydown()\"></td></tr><tr><td>x<sub>0</sub> = </td><td><input type=\"text\" value=\"0\" id=\"x0\" onchange=\"this.onkeydown()\" onkeydown=\"valiad(this)\" onkeyup=\"this.onkeydown()\"></td></tr><tr><td>y<sub>0</sub> = </td><td><input type=\"text\" value=\"1\" id=\"y0\" onchange=\"this.onkeydown()\" onkeydown=\"valiad(this)\" onkeyup=\"this.onkeydown()\"></td></tr><tr><td>&nbsp;</td><td><input type=\"button\" value=\"Solve\" id=\"stopper\" onclick=\"if(solving){solving=false;}else{dosolve(document.getElementById('x0').value,document.getElementById('y0').value)}\"></td></tr></tbody></table></div>";
+all.innerHTML = "<img style=\"display:none\" src=\"grabbing.gif\" height=\"16\" width=\"16\"><canvas id=\"canvas\" width=\"800\" height=\"600\"><div style=\"margin:16px;font-family:sans-serif\"><h1>Error</h1>Your internet browser is way too old for this!. <a href=\"about\">About this page.</a><br />Download google chrome, firefox or safari<br><br>Choose one of these browsers, or find another one.<br><br><a href=\"http://www.google.com/chrome/\"><img id=\"i_chrome\" alt=\"Google Chrome\"></a>&nbsp;<a href=\"http://www.google.com/chrome/\">Get Google Chrome</a><br><a href=\"http://www.mozilla.com/firefox\"><img id=\"i_firefox\" alt=\"Firefox\"></a>&nbsp;<a href=\"http://www.mozilla.com/firefox\">Get Firefox</a><br><a href=\"http://www.apple.com/safari\"><img id=\"i_safari\" alt=\"Safari\"></a>&nbsp;<a href=\"http://www.apple.com/safari\">Get Safari</a><br><a href=\"http://www.opera.com/download/\"><img align=\"middle\" id=\"i_opera\" alt=\"Opera\"></a>&nbsp;<a href=\"http://www.opera.com/download/\">Get Opera</a><br></div></canvas><div id=\"ptd\" style=\"position:fixed;z-Index:80000;color:black;opacity:0.6;left:8px;bottom:8px;border:none;background:white;-webkit-transition:opacity 0.5s ease-in-out;-moz-transition:opacity 0.5s ease-in-out;-o-transition:opacity 0.5s ease-in-out;transition: opacity 0.5s ease-in-out;font:10pt 'Menlo','Andale Mono','Consolas','DejaVu Sans Mono','Droid Sans Mono','Lucida Console','Monaco','monofur',monospace\">(0,0)</div><div id=\"con\" style=\"display:none\" class=\"overlay\"><div id=\"logt\"><div>graph.tk v1.1 &copy; 2010 Anthony - NO WARRANTY<br>Notes:<br>Sometimes x^n will not be x to the power of n, but x XOR n, which is the normal javascript meaning. I have made modifications that allow some easier equations. A dot after the expression means it was evaluated in a non-javascript-standard way. Use size() to change size.<br><br>Some cool things to type:<br> Fe (iron mass), g(0), g[1](0), en[26], M[26], symbol[26]</div></div><br><input type=\"text\" style=\"width:100%\" id=\"conin\" onkeydown=\"if(event.which==13){consoleex(this)};if(event.which==38){this.value=last}\"></div><div id=\"funcs\" class=\"overlay\"><ul class=\"f\" id=\"flist\"><li id=\"prototype\"><div class=\"b\" style=\"background:#07c\"></div><span class=\"matheditor\"></span><span class=\"delete\" onmouseup=\"delfunc(this);\">X</span></li></ul><input type=\"button\" value=\"+\" id=\"pb\" onclick=\"newfunc();_ga_track_event('New')\"><a href=\"javascript:void(showcon())\" style=\"font-size:small;margin:8px\" id=\"shc\">Console</a><a href=\"javascript:void(tdiff())\" style=\"font-size:small;margin:8px\" id=\"sde\">Diff Eq</a><a href=\"javascript:void(scren())\" style=\"font-size:small;margin:8px\" id=\"tss\">Screenshot</a><small id=\"nosave\"></small><a href=\"about\" target=\"_blank\">\t<div id=\"quest\">?</div></a></div><div id=\"overlay\" style=\"display:none;bottom:0;right:0\" class=\"overlay\"><table><tbody><tr><td style=\"width:100px\"><input type=\"button\" value=\"f ' (x)\" onclick=\"if(this.value=='f \\' (x)'){this.value='f \\' \\' (x)';second=true;}else{this.value='f \\' (x)';second=false;}\"> = </td><td><input type=\"text\" id=\"nnn\" value=\"g(x)\" onchange=\"this.onkeydown()\" onkeydown=\"getg(this)\" onkeyup=\"this.onkeydown()\"></td></tr><tr><td>x<sub>0</sub> = </td><td><input type=\"text\" value=\"0\" id=\"x0\" onchange=\"this.onkeydown()\" onkeydown=\"valiad(this)\" onkeyup=\"this.onkeydown()\"></td></tr><tr><td>y<sub>0</sub> = </td><td><input type=\"text\" value=\"1\" id=\"y0\" onchange=\"this.onkeydown()\" onkeydown=\"valiad(this)\" onkeyup=\"this.onkeydown()\"></td></tr><tr><td>&nbsp;</td><td><input type=\"button\" value=\"Solve\" id=\"stopper\" onclick=\"if(solving){solving=false;}else{dosolve(document.getElementById('x0').value,document.getElementById('y0').value)}\"></td></tr></tbody></table></div>";
 
 
 var ptd = document.getElementById("ptd");
@@ -526,7 +526,8 @@ function save() {
 function newfunc(funcval) {
     var newone = proto.cloneNode(true);
     var inputbox=document.createElement(kinput);
-    newone.appendChild(inputbox);
+    var inputbox_container=newone.getElementsByClassName("matheditor")[0];
+    inputbox_container.appendChild(inputbox);
     
     
     if(kinput=="span"){
@@ -573,9 +574,29 @@ function delfunc() {
     if (flist.childNodes.length > 1) {
         g.pop();
         flist.removeChild(flist.lastChild);
-        flist.lastChild.getElementsByTagName(kinput)[0].focus();
+        flist.lastChild.getElementsByClassName("matheditor")[0].getElementsByTagName(kinput)[0].focus();
         save();
     }
+}
+
+function delfunc(delete_button_node){
+    this_node=delete_button_node.parentNode;
+    index=0;
+
+    other_node=flist.firstChild;
+    while(other_node!=null){
+	if(other_node==this_node)
+	    break;
+        index++;
+	other_node=other_node.nextSibling;
+    }
+    
+	alert(index);
+
+    g.splice(index,1);
+
+    flist.removeChild(this_node)
+    save();
 }
 
 
@@ -882,7 +903,7 @@ function getf(obj, idd, force) {
 //a function has been modified. get new one.
 if(obj===undefined)
 {
-    obj=flist.childNodes[idd].getElementsByTagName(kinput)[0];
+    obj=flist.childNodes[idd].getElementsByClassName("matheditor")[0].getElementsByTagName(kinput)[0];
 }
 
     if (idd > (g.length - 1)) {
@@ -1523,7 +1544,7 @@ function loadd(d) {
                 if (n > 0) {
                     newfunc(d.g[n])
                 } else {
-                    setstr(flist.childNodes[n].getElementsByTagName(kinput)[0],d.g[n]);
+                    setstr(flist.childNodes[n].getElementsByClassName("matheditor")[0].getElementsByTagName(kinput)[0],d.g[n]);
                     
                 }
             }
@@ -1556,7 +1577,7 @@ if (shouldload) {
         loadd(data);
     }
 }
-if (!iphone && g.length == 1 && getstr(flist.childNodes[0].getElementsByTagName(kinput)[0]) == "e^x") {
+if (!iphone && g.length == 1 && getstr(flist.childNodes[0].getElementsByClassName("matheditor")[0].getElementsByTagName(kinput)[0]) == "e^x") {
     //set up default functions
     loadd({"status":"ok","g":["e^x","\\frac{1}{8}\\left(x+2\\right)\\left(x-4\\right)^2","f'\\left[1\\right]\\left(x\\right)","\\sum_{n=1}^{\\infty}\\frac{\\sin\\left(nx\\right)}{n}"]});
     //the sum is a little slow. (the last one in defaultGraphs)
