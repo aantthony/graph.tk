@@ -591,8 +591,6 @@ function delfunc(delete_button_node){
 	other_node=other_node.nextSibling;
     }
     
-	alert(index);
-
     g.splice(index,1);
 
     flist.removeChild(this_node)
