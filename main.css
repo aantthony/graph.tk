@@ -13,9 +13,22 @@ div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;ma
 #quest{background:#07c;-webkit-border-radius:4px;-moz-border-radius:4px;-o-border-radius:4px;border-radius:4px;width:20px;height:20px;color:white;text-align:center;text-decoration:none;float:right}
 #conin{font-family: 'Menlo',monospace;padding-top:4px;padding-bottom:4px}
 
-
-
-
+/*I will not join that clusterfuck.  I do not like it Sam-I-am.*/
+.delete{
+	background:#B00;
+	color:white;
+	width:16px;
+	height:16px;
+	font-size:14px;
+	fant-family:sans-serif;
+	font-weight:bold;
+	text-align:center;
+	display: inline-block;
+/*	float:right;*/
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	margin-left:16px;
+}
 
 
 /*
