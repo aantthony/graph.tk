@@ -869,7 +869,7 @@ function consoleex(val) {
             ans = obj;
             consolelog(obj, val.value + "=" + ddsddd + " .");
         } catch (xbb) {
-            consolelog(xbb, "!" + val.value);
+            consolelog(xbb.message, "!" + val.value);
         }
     }
     val.value = "";
