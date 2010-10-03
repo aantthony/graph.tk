@@ -1435,6 +1435,9 @@ function cancelEvent(e) {
 
 //Scale const for scrolling zoom
 var scaleconst = 0.001;
+if (/AppleWebKit\/[\d]+\.[\d]+\+/.test(navigator.userAgent)) {
+    scaleconst = 0.01;
+}
 if (/Firefox/.test(navigator.userAgent)) {
     scaleconst = 0.01;
 }
