@@ -502,9 +502,6 @@ function setstr(obj, val) {
   }
 }
 
-function setonchange(obj, val){
-  obj.onchange = eval("(function(){"+val+"})");
-}
 
 
 function save() {
@@ -543,9 +540,9 @@ function newfunc(funcval) {
     g.push(function (x) {
         return 0;
     });
-    //inputbox.setAttribute("onchange", "getf(this," + flist.childNodes.length + ")");
-    setonchange(inputbox,"getf(undefined," + flist.childNodes.length + ")");
-    
+    //inputbox.onchange = eval("(function(){getf(undefined," + flist.childNodes.length + ")})");
+    var currentnodeslength = flist.childNodes.length;
+    inputbox.onchange = function(){getf(undefined,currentnodeslength);};
     //getf(inputbox, flist.childNodes.length, true);
     if (newone.getElementsByClassName) {
         var bs = newone.getElementsByClassName("b");
