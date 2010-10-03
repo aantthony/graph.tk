@@ -15,18 +15,11 @@ div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;ma
 
 /*I will not join that clusterfuck.  I do not like it Sam-I-am.*/
 .delete{
-	background:#B00;
-	color:white;
-	width:16px;
-	height:16px;
-	font-size:14px;
-	fant-family:sans-serif;
-	font-weight:bold;
-	text-align:center;
+    background:url(delete.png) no-repeat;
+	width:20px;
+	height:21px;
 	display: inline-block;
 /*	float:right;*/
-	-moz-border-radius: 8px;
-	-webkit-border-radius: 8px;
 	margin-left:16px;
     cursor:pointer;
 }
