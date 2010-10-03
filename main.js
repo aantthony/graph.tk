@@ -22,17 +22,24 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     */
-
-var showp = 0;//index for newtonian solver at the bottom left.
+var difflevel = 0; //Used to prevent massive stacks in the recursive djkb()
 var loaded = false;
-var ctx;//canvas context (2d)
-var iphone = /iPhone/.test(window.navigator.userAgent);
+var ready = false;
+var g = [];
+//E is the function that returns dy/dx for the differential equation
 
-var kinput="span";//span for mathquill, input for form input
-if (window.parent.length) {
-    kinput="input";
-}
-if(iphone){kinput="input"}
+var E = function (x, y, dx, dy) {
+    return g[0](x);
+};
+var fofy = 0; //Current y in solving of diffeq
+var drag = false;//Are you dragging the graph
+
+
+
+
+
+
+
 
 //iphone ui is dumbed down. however this code does not support iPhones. iPhones will continue to use the old graph.tk
 
@@ -61,80 +68,6 @@ for (var index = 0; index < symbol.length; index++) {
     window[symbol[index]] = M[index];
 }
 
-
-var settings = {
-    "special": true
-};
-var difflevel = 0; //Used to prevent massive stacks in the recursive djkb()
-
-var ready = false;
-var g = [];
-//E is the function that returns dy/dx for the differential equation
-
-var E = function (x, y, dx, dy) {
-    return g[0](x);
-};
-var fofy = 0; //Current y in solving of diffeq
-var drag = false;//Are you dragging the graph
-
-//Visible region on screen
-var boundleft = -10;
-var boundright = 10;
-var boundtop = 10;
-var boundbottom = -10;
-
-
-//for google analytics tracking of events
-function _ga_track_event(n) {
-    if (window.pageTracker) {
-        setTimeout(function () {
-            pageTracker._trackEvent("Graph", n)
-        }, 20)
-    }
-};
-
-//begin plotting from an (x,y) point
-function plotf(px, py) {
-    if (!isNaN(py)) {
-        if (py > boundtop + 2) {
-            ctx.moveTo(px, -boundtop - 2);
-            return;
-        } else if (py < boundbottom - 2) {
-            ctx.moveTo(px, -boundbottom + 2);
-            return;
-        }
-        ctx.moveTo(px, -py);
-    }
-}
-
-//plot an (x,y) point
-function plot(px, py) {
-    if (!isNaN(py)) {
-        if (py > boundtop + 2) {
-            ctx.lineTo(px, -boundtop - 2);
-            return;
-        } else if (py < boundbottom - 2) {
-            ctx.lineTo(px, -boundbottom + 2);
-            return;
-        }
-        ctx.lineTo(px, -py);
-    }
-}
-var dotprod = "⋅";
-if (/Windows/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
-	//Safari leaves a massive gap on windows for the other one
-    dotprod = "∙";
-}
-function safeeval(z) {
-	//use safeeval instead of eval()
-    var naughty = "eval,document,window,location,cookie,alert,comfirm,prompt,this,parent,child,xml,xmlhttp,clip,draw,getfunction,get2dfunction,extrafunc,calcnextframe,nextframe,canvas".split(",");
-    for (var nau_g = 0; nau_g < naughty.length; nau_g++) {
-        if (z.indexOf(naughty[nau_g]) != -1) {
-            throw ("Unsafe Code: " + naughty[nau_g])
-        }
-    }
-    return eval(z);
-}
 
 //Basic math functions
 var sin = Math.sin;
@@ -171,6 +104,15 @@ function ln_n(n,x){return pow(ln(x),n);}
 
 function logb(b, v) {
     return ln(v) / ln(b);
+}
+
+function u(x) {
+    //unit step function
+    return (x>=0)?(x?1:0.5):(0);
+}
+
+function signum(x){
+    return 2*u(x)-1;
 }
 
 function piecewise(cond, val, other) {
@@ -261,18 +203,6 @@ function bellb(x) {
 
 
 
-var randfuncs = "x^2~f'(x)-1~2e^-x~2x+3~{λ:λ=3}~e^(-λ*x)~(0.5,0.5)~∑[1...∞,sin(nx)/n]~m:H_2SO_4~|x^2-4|+2~1/x~x^-2~x!~lnx~∑[1,infinity,(x^n)/n!]~sinx~e^x:[−2,2]~tan(x)~(x+2)(x-3)^2~diff(0,2,2x)~(x-2)^2~∑[1,∞,sin((2n−1)x)/(2n−1)]~~∏[1,5,(x-n)]~∑[0,5,n]~x^x~gamma(x)~(x!)/(3!-x)~x%3~(x>3)?2x:-3~fact(x)~phi/x~(x>=0)?m_e*G/(r_e+100000x)^2:undefined~g[0]'(2x)~g[0](x)+1~sqrt(x)".split("~");
-
-if(kinput=="span"){
-randfuncs = "x^2    f'\\left(x\\right)-1    2e^{-x}    2x+3    \\lambda=3    e^{-\\lambda*x}    \\left(0.5,0.5\\right)    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n    \\prod_{1}^{4}x-n    m:H_2SO_4    \\left|x^2-4\\right|+2    \\frac1x    x^{-2}    x!    \\ln x    \\sum_{n=1}^{\\infinity}\\frac{x^n}{n}    \\sin x    e^x:\\left[−2,2\\right]    \\tan\\left(x\\right)    \\left(x+2\\right)\\left(x-3\\right)^2    diff\\left(0,2,2x\\right)    \\left(x-2\\right)^2    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}    \\prod_{n=1}^5\\left(x-n\\right)    \\sum_{n=0}^5n    x^x    \\Gamma\\left(x\\right)    \\frac{x!}{3!-x}    x%3    \\left(x>3\\right)?2x:-3    \\fact\\left(x\\right)    \\frac\\phi x    \\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined    g\\left[0\\right]'\\left(2x\\right)    g\\left[0\\right]\\left(x\\right)+1    \\sqrt x".split("    "); //four spaces
-}
-var randomfi = 0;
-
-//Not actually random.
-function randfunc() {
-    return randfuncs[(randomfi++) % randfuncs.length];
-}
-
 //Draw a dot instead of a line.
 function pt(vx, vy) {
     if (vy === undefined) {
@@ -301,6 +231,102 @@ function djkb(ia, lvl, x) {
     res = g[ia](x);
     difflevel -= 1;
     return res;
+}
+
+
+
+
+
+
+
+var showp = 0;//index for newtonian solver at the bottom left.
+
+var ctx;//canvas context (2d)
+var iphone = /iPhone/.test(window.navigator.userAgent);
+
+var kinput="span";//span for mathquill, input for form input
+if (window.parent.length) {
+    kinput="input";
+}
+if(iphone){kinput="input"}
+
+
+
+//Visible region on screen
+var boundleft = -10;
+var boundright = 10;
+var boundtop = 10;
+var boundbottom = -10;
+
+
+//for google analytics tracking of events
+function _ga_track_event(n) {
+    if (window.pageTracker) {
+        setTimeout(function () {
+            pageTracker._trackEvent("Graph", n)
+        }, 20)
+    }
+};
+
+//begin plotting from an (x,y) point
+function plotf(px, py) {
+    if (!isNaN(py)) {
+        if (py > boundtop + 2) {
+            ctx.moveTo(px, -boundtop - 2);
+            return;
+        } else if (py < boundbottom - 2) {
+            ctx.moveTo(px, -boundbottom + 2);
+            return;
+        }
+        ctx.moveTo(px, -py);
+    }
+}
+
+//plot an (x,y) point
+function plot(px, py) {
+    if (!isNaN(py)) {
+        if (py > boundtop + 2) {
+            ctx.lineTo(px, -boundtop - 2);
+            return;
+        } else if (py < boundbottom - 2) {
+            ctx.lineTo(px, -boundbottom + 2);
+            return;
+        }
+        ctx.lineTo(px, -py);
+    }
+}
+var dotprod = "⋅";
+if (/Windows/.test(navigator.userAgent) && /Safari/.test(navigator.userAgent)) {
+	//Safari leaves a massive gap on windows for the other one
+    dotprod = "∙";
+}
+function safeeval(z) {
+	//use safeeval instead of eval()
+    var naughty = "eval,document,window,location,cookie,alert,comfirm,prompt,this,parent,child,xml,xmlhttp,clip,draw,getfunction,get2dfunction,extrafunc,calcnextframe,nextframe,canvas".split(",");
+    for (var nau_g = 0; nau_g < naughty.length; nau_g++) {
+        if (z.indexOf(naughty[nau_g]) != -1) {
+            throw ("Unsafe Code: " + naughty[nau_g])
+        }
+    }
+    return eval(z);
+}
+
+
+
+
+
+
+
+var randfuncs = "x^2~f'(x)-1~2e^-x~2x+3~{λ:λ=3}~e^(-λ*x)~(0.5,0.5)~∑[1...∞,sin(nx)/n]~m:H_2SO_4~|x^2-4|+2~1/x~x^-2~x!~lnx~∑[1,infinity,(x^n)/n!]~sinx~e^x:[−2,2]~tan(x)~(x+2)(x-3)^2~diff(0,2,2x)~(x-2)^2~∑[1,∞,sin((2n−1)x)/(2n−1)]~~∏[1,5,(x-n)]~∑[0,5,n]~x^x~gamma(x)~(x!)/(3!-x)~x%3~(x>3)?2x:-3~fact(x)~phi/x~(x>=0)?m_e*G/(r_e+100000x)^2:undefined~g[0]'(2x)~g[0](x)+1~sqrt(x)".split("~");
+
+if(kinput=="span"){
+randfuncs = "x^2    f'\\left(x\\right)-1    2e^{-x}    2x+3    \\lambda=3    e^{-\\lambda*x}    \\left(0.5,0.5\\right)    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n    \\prod_{1}^{4}x-n    m:H_2SO_4    \\left|x^2-4\\right|+2    \\frac1x    x^{-2}    x!    \\ln x    \\sum_{n=1}^{\\infinity}\\frac{x^n}{n}    \\sin x    e^x:\\left[−2,2\\right]    \\tan\\left(x\\right)    \\left(x+2\\right)\\left(x-3\\right)^2    diff\\left(0,2,2x\\right)    \\left(x-2\\right)^2    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}    \\prod_{n=1}^5\\left(x-n\\right)    \\sum_{n=0}^5n    x^x    \\Gamma\\left(x\\right)    \\frac{x!}{3!-x}    x%3    \\left(x>3\\right)?2x:-3    \\fact\\left(x\\right)    \\frac\\phi x    \\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined    g\\left[0\\right]'\\left(2x\\right)    g\\left[0\\right]\\left(x\\right)+1    \\sqrt x".split("    "); //four spaces
+}
+var randomfi = 0;
+
+//Not actually random.
+function randfunc() {
+    return randfuncs[(randomfi++) % randfuncs.length];
 }
 
 
@@ -540,7 +566,6 @@ function newfunc(funcval) {
     g.push(function (x) {
         return 0;
     });
-    //inputbox.onchange = eval("(function(){getf(undefined," + flist.childNodes.length + ")})");
     var currentnodeslength = flist.childNodes.length;
     inputbox.onchange = function(){getf(undefined,currentnodeslength);};
     //getf(inputbox, flist.childNodes.length, true);
@@ -605,9 +630,7 @@ var second = false;//is diffeq a second derivative?
 
 //The function parser
 function extrafunc(string, jjq) {
-    if (!settings.special) {
-        return string;
-    }
+
     string = string.replace(/\^\(\)/g,"");
     string = string.replace(/X/g, "x");
     string = string.replace(/ /g, "");
@@ -634,6 +657,7 @@ function extrafunc(string, jjq) {
     string = string.replace(/(∑|∏)_([\d]+|.)\^\(([^\)]+)\)(.+)$/,"$1[$2,$3,$4]");
     string = string.replace(/[÷∕⁄]/g, "/").replace(/−/g, "-").replace(/′/g, "'").replace(/sum/g, "∑").replace(/¼/g, "0.25").replace(/½/g, "0.5").replace(/¾/g, "0.75").replace(/⅓/g, "(1/3)").replace(/⅔/g, "(2/3)").replace(/⅕/g, "0.2").replace(/⅖/g, "0.4").replace(/⅗/g, "0.6").replace(/⅘/g, "0.8").replace(/⅙/g, "(1/6)").replace(/⅚/g, "(5/6)").replace(/⅛/g, "0.125").replace(/⅜/g, "0.375").replace(/⅝/g, "0.625").replace(/⅞/g, "0.875").replace(/nx/g, "n*x").replace(/diff\(/g, "djkb(");
     if (jjq===true) {
+        //Generic Function
         string = string.replace(/[gfy]'\[([\d]+)\]\(/g, "djkb($1,1,");
         string = string.replace(/[gfy]\[([\d]+)\]'\(/g, "djkb($1,1,");
         string = string.replace(/[gfy]'\(/g, "djkb(0,1,");
@@ -648,6 +672,7 @@ function extrafunc(string, jjq) {
         string = string.replace(/[gfy]''''\(/g, "djkb(0,4,");
         string = string.replace(/f\(/g, "g(");
     } else {
+        //Differential Equation
         string = string.replace(/[gy]'\[([\d]+)\]\(/g, "djkb($1,1,");
         string = string.replace(/[gy]\[([\d]+)\]'\(/g, "djkb($1,1,");
         string = string.replace(/[gy]'\(/g, "djkb(0,1,");
@@ -666,7 +691,7 @@ function extrafunc(string, jjq) {
         string = string.replace(/dx/g, "1");
     }
     var sargs, ext, enn, iad;
-    string = string.replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/\++/g, "+").replace(/(\-\-)+/g, "+").replace(/\-(\-\-)+/,"-").replace(/Γ/g, "γ").replace(/γ\(/g, "fact(-1+").replace(/²/g, "^2").replace(/³/g, "^3").replace(/⁴/g, "^4").replace(/⁵/g, "^5").replace(/⁶/g, "^6").replace(/⁷/g, "^7").replace(/⁸/g, "^8").replace(/⁹/g, "^9").replace(/xxx/g, "x*x*x").replace(/(xx)/g, "x*x").replace(/(xx)/g, "x*x").replace(/([\d\.]+|[a-zπ])\!/g, "fact($1)").replace(/\(([^\(^\)]+)\)\!/g, "fact($1)").replace(/([^o^t^a-z^A-Z])g\(/g, "$1g[0](").replace(/^g\(/, "g[0](").replace(/\|([^\|]+)\|/g, "abs($1)").replace(/f\(x\)/g, "y").replace(/x\(/g, "x*(").replace(/x\^-1/g, "(1/x)").replace(/e\^(-[\d\.xy])/g, "exp($1)").replace(/e\^\(/g, "exp(").replace(/([^\(\)\^\]\[\,\.])\^\(/g,"pow($1,").replace(/\(([^\)\(\[\]\.\^\,]+)\)\^\(/g,"pow($1,").replace(/₀/g, "_0").replace(/₁/g, "_1").replace(/₂/g, "_2").replace(/₃/g, "_3").replace(/₄/g, "_4").replace(/₅/g, "_5").replace(/₆/g, "_6").replace(/₇/g, "_7").replace(/₈/g, "_8").replace(/₉/g, "_9").replace(/ₐ/g, "_a").replace(/ₑ/g, "_e").replace(/ₓ/g, "_x");
+    string = string.replace(/≥/g, ">=").replace(/≤/g, "<=").replace(/\++/g, "+").replace(/(\-\-)+/g, "+").replace(/\-(\-\-)+/,"-").replace(/Γ/g, "γ").replace(/γ\(/g, "fact(-1+").replace(/²/g, "^2").replace(/³/g, "^3").replace(/⁴/g, "^4").replace(/⁵/g, "^5").replace(/⁶/g, "^6").replace(/⁷/g, "^7").replace(/⁸/g, "^8").replace(/⁹/g, "^9").replace(/xxx/g, "x*x*x").replace(/xx/g, "x*x").replace(/([\d\.]+|[a-zπ])\!/g, "fact($1)").replace(/\(([^\(^\)]+)\)\!/g, "fact($1)").replace(/([^o^t^a-z^A-Z])g\(/g, "$1g[0](").replace(/^g\(/, "g[0](").replace(/\|([^\|]+)\|/g, "abs($1)").replace(/f\(x\)/g, "y").replace(/x\(/g, "x*(").replace(/x\^-1/g, "(1/x)").replace(/e\^(-[\d\.xy])/g, "exp($1)").replace(/e\^\(/g, "exp(").replace(/([^\(\)\^\]\[\,\.])\^\(/g,"pow($1,").replace(/\(([^\)\(\[\]\.\^\,]+)\)\^\(/g,"pow($1,").replace(/₀/g, "_0").replace(/₁/g, "_1").replace(/₂/g, "_2").replace(/₃/g, "_3").replace(/₄/g, "_4").replace(/₅/g, "_5").replace(/₆/g, "_6").replace(/₇/g, "_7").replace(/₈/g, "_8").replace(/₉/g, "_9").replace(/ₐ/g, "_a").replace(/ₑ/g, "_e").replace(/ₓ/g, "_x");
     
     if (string.indexOf("_") != -1 && /(mass|m\:)/.test(string)) {
         string = string.replace(/([a-zA-Z])_([\d])/g, "$1*$2+");
