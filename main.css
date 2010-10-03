@@ -1,0 +1,213 @@
+ul.f{list-style:none;margin:0px;padding:0;width:300px}ul.f li{margin:0;padding:0;border-bottom:1px solid #444;background:white;margin-bottom:2px}ul.f input{width:275px;border:none;font:16px sans-serif;background:none}#all{display:none}ul.f li:hover{background:#eee}#canvas{background:white;margin:0;padding:0;position:fixed;top:0;left:0}#logt{background:white;width:300px;resize:both;height:100px;overflow:auto;margin:0;padding:2px;-webkit-user-select:text;-moz-user-select:text;-o-user-select:text;user-select:text;
+font-family:'Menlo','Andale Mono', Consolas, 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Monaco, monofur, monospace;font-size:90%
+
+}body{font-family:sans-serif;position:relative;margin:0;padding:0;overflow:hidden;background:white;-webkit-user-select:none;-moz-user-select:none;-o-user-select:none;user-select:none}div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;margin-right:3px;color:white;text-align:center}.overlay{position:fixed;border:4px solid white;-webkit-box-shadow:0px 0px 5px black;-moz-box-shadow:0px 0px 5px black;-o-box-shadow:0px 0px 5px black;box-shadow:0px 0px 5px black;box-shadow:3px 3px 5px black;z-Index:80000;color:black;opacity:0.8;background:rgb(128,128,128)}#con{top:0;left:0;font-size:small;padding:8px;opacity:0.97}img{border:none;vertical-align:middle}#funcs{top:0;right:0;background:white}#quest{background:#07c;-webkit-border-radius:4px;-moz-border-radius:4px;-o-border-radius:4px;border-radius:4px;width:20px;height:20px;color:white;text-align:center;text-decoration:none;float:right}
+#conin{font-family: 'Menlo',monospace;padding-top:4px;padding-bottom:4px}
+
+
+
+
+/*
+ * LaTeX Math in pure HTML and CSS -- No images whatsoever
+ * v0.xa
+ * by Jay and Han
+ * Lesser GPL Licensed: http: //www.gnu.org/licenses/lgpl.html
+ * 
+ * This file is automatically included by mathquill.js
+ * 
+ */
+
+@font-face {
+  /*font-family: Symbola;
+  src: url(font/Symbola.eot);
+  src: local("Symbola Regular"), local("Symbola"),
+    url(font/Symbola.ttf) format("truetype"),
+    url(font/Symbola.otf) format("opentype"),
+    url(font/Symbola.svg) format("svg");*/
+  font-family:Times;
+}
+
+.mathquill-editable {
+  display: -moz-inline-box;
+  display: inline-block;
+  border: none;
+}
+.mathquill-textbox {
+  overflow-x: auto;
+}
+.mathquill-editable.empty, .mathquill-editable * {
+  cursor: text;
+}
+.mathquill-textbox:after, .mathquill-editable .cursor:only-child:after {
+  visibility: hidden;
+  content: 'c';
+}
+.mathquill-textbox > .cursor:only-child:after, .mathquill-editable .text .cursor:only-child:after {
+  content: '';
+}
+
+.mathquill-rendered-math {
+  color: black;
+  white-space: pre-wrap;
+  font-family: Symbola, "Times New Roman", serif;
+  font-size: 110%;
+  line-height: 1;
+  position: relative;
+  outline: none;
+  padding: 2px;
+}
+.mathquill-rendered-math var, .mathquill-rendered-math .nonSymbola {
+  font-family: "Times New Roman", serif;
+}
+.mathquill-rendered-math * {
+  color: inherit;
+  background-color: transparent;
+  font-size: inherit;
+  line-height: inherit;
+  display: -moz-inline-box;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+.mathquill-editable.hasCursor, .mathquill-rendered-math .hasCursor {
+  outline: 2px solid rgb(205,235,255);
+  outline: 2px solid rgba(0,155,255,.2);
+}
+
+.mathquill-rendered-math .cursor {
+  border-left: 1px solid black;
+  margin-right: -1px;
+  display: inline;
+  position: relative;
+  z-index: 1;
+}
+
+.mathquill-rendered-math .cursor.blink {
+  visibility: hidden;
+}
+
+.mathquill-rendered-math .empty {
+  color: #AAA;
+}
+
+.mathquill-rendered-math .text, .mathquill-rendered-math .text *, .mathquill-textbox * {
+  display: inline;
+}
+.mathquill-textbox .mathquill-rendered-math, .mathquill-textbox .mathquill-rendered-math * { /* stupid no-granularity cascading */
+  display: inline-block;
+}
+.mathquill-textbox .mathquill-rendered-math .cursor { /* seriously */
+  display: inline;
+}
+
+.mathquill-rendered-math var { /* variables -- just in case you do something weird to your <var>'s */
+  font-style: italic;
+  font-weight: normal;
+}
+.mathquill-rendered-math var.florin { /* florin looks so much better than italic f */
+  margin: 0 -.1em;
+}
+
+.mathquill-rendered-math big {
+  font-size: 125%;
+}
+
+.mathquill-rendered-math sup, .mathquill-rendered-math sub {
+  position: relative;
+  font-size: 90%;
+}
+.mathquill-rendered-math sup {
+  vertical-align: .5em;
+}
+.mathquill-rendered-math sub {
+  vertical-align: -.4em;
+}
+
+.mathquill-rendered-math .binary-operator {
+  padding: 0 .2em;
+}
+
+.mathquill-rendered-math .unary-operator {
+  padding-left: .2em;
+}
+
+.mathquill-rendered-math .fraction {
+  position: relative;
+  font-size: 90%;
+  text-align: center;
+  vertical-align: -.5em;
+  padding: 0 .1em;
+}
+.mathquill-rendered-math .numerator, .mathquill-rendered-math .denominator {
+  display: block;
+}
+.mathquill-rendered-math .numerator {
+  border-bottom: 1px solid #222; /* black is too black, contrasts with antialised text */
+  padding: 0 .1em;
+}
+.mathquill-rendered-math .denominator {
+  border-top: 1px solid #222;
+  float: right; /* take out of normal flow to manipulate baseline */
+  width: 100%;
+}
+
+.mathquill-rendered-math sup .fraction, .mathquill-rendered-math sub .fraction {
+  font-size: 70%;
+  vertical-align: -.4em;
+}
+.mathquill-rendered-math sup .numerator, .mathquill-rendered-math sub .numerator {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.mathquill-rendered-math sup .denominator, .mathquill-rendered-math sub .denominator {
+  padding-top: 0;
+}
+
+.mathquill-rendered-math .latex-command-input {
+  font-family: "Courier New", monospace;
+  border: 1px solid gray;
+  padding-right: 1px;
+  margin-right: 1px;
+  margin-left: 2px;
+}
+.mathquill-rendered-math .latex-command-input.empty {
+  color: white;
+  color: transparent;
+}
+.mathquill-rendered-math .latex-command-input:before {
+  color: black;
+  content: '\\';
+}
+
+.mathquill-rendered-math .sqrt-prefix {
+  vertical-align: top;
+  position: relative;
+  top: 2px;
+}
+.mathquill-rendered-math .sqrt-stem {
+  border-top: 1px solid black;
+  margin-top: 1px;
+  padding-left: 2px;
+  padding-right: .2em;
+  margin-right: .1em;
+}
+
+.mathquill-rendered-math .paren {
+  vertical-align: bottom;
+  position: relative;
+}
+
+.mathquill-rendered-math .selection, .mathquill-rendered-math .selection .mathquill-rendered-math, .mathquill-rendered-math .selection sup, .mathquill-rendered-math .selection sub {
+  background-color: #ADF;
+}
+.mathquill-rendered-math .selection.blur, .mathquill-rendered-math .selection.blur .mathquill-rendered-math, .mathquill-rendered-math .selection.blur sup, .mathquill-rendered-math .selection.blur sub {
+  background-color: #CCC;
+}
+
+.mathquill-rendered-math .non-italicized-function {
+  padding-right: .2em;
+}
+
+/*.mathquill-rendered-math .not {
+  margin-right: -.75em;
+}*/
