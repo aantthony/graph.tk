@@ -28,6 +28,7 @@ div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;ma
 	-moz-border-radius: 8px;
 	-webkit-border-radius: 8px;
 	margin-left:16px;
+    cursor:pointer;
 }
 
 
