@@ -22,26 +22,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     */
-var difflevel = 0; //Used to prevent massive stacks in the recursive djkb()
-var loaded = false;
-var ready = false;
+
 var g = [];
 //E is the function that returns dy/dx for the differential equation
 
 var E = function (x, y, dx, dy) {
     return g[0](x);
 };
-var fofy = 0; //Current y in solving of diffeq
+
+var ready = false;
 var drag = false;//Are you dragging the graph
-
-
-
-
-
-
-
-
-//iphone ui is dumbed down. however this code does not support iPhones. iPhones will continue to use the old graph.tk
 
 //Physical Constants
 var c = 299792458;
@@ -238,6 +228,20 @@ function djkb(ia, lvl, x) {
 
 
 
+
+
+
+
+//Varibles below this point will be privately encapsulated in the to be graph object.
+//This way the user can have many variable names, without affecting any of the below code.
+//But for debugging, it's easier to have direct access.
+
+
+
+
+var difflevel = 0; //Used to prevent massive stacks in the recursive djkb()
+var loaded = false;
+var fofy = 0; //Current y in solving of diffeq
 
 var showp = 0;//index for newtonian solver at the bottom left.
 
