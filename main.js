@@ -1074,6 +1074,14 @@ function forms(num, digits) {
         return (num * 3) + "/3";
     } else if (num % (e / 4) == 0) {
         return (num / e) + "e";
+    } else if(num!=1){
+    
+        if (( log(num)   )%1 == 0) {
+            var exponent=log(num);
+            
+            var exptext="⁰¹²³⁴⁵⁶⁷⁸⁹";
+            return "e"+((abs(exponent)<10)?( exponent>0?exptext[exponent]:("⁻"+exptext[abs(exponent)])   ):"^"+exponent);
+        }
     }
     if (digits === undefined) {
         return num.toString()
@@ -1672,14 +1680,27 @@ if (!ready) {
 
 function newton(gid, itterations, start) {
     var _x = start;
+    //var _second_last_x;
+    //var _third_last_x;
     for (var it = 0; it < itterations; it++) {
         var m = djkb(gid, 1, _x);
         var y_1 = g[gid](_x);
+        //_third_last_x=_second_last_x;
+        //_second_last_x=_x;
         _x -= y_1 / m;
         if (m === 0) {
             break;
         }
     }
+    
+    //Converge check
+    //var final_delta=abs(_x-_second_last_x);
+    //var before_delta=abs(_x-_third_last_x);
+    //final delta should be less than before delta
+    //if(final_delta<before_delta){
+    //    return Infinity;
+    //}
+    
     if (isNaN(_x) || _x == Infinity || _x == -Infinity) {
         return Infinity;
     }
