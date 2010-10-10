@@ -1075,12 +1075,10 @@ function forms(num, digits) {
     } else if (num % (e / 4) == 0) {
         return (num / e) + "e";
     } else if(num!=1){
-    
         if (( log(num)   )%1 == 0) {
             var exponent=log(num);
-            
             var exptext="⁰¹²³⁴⁵⁶⁷⁸⁹";
-            return "e"+((abs(exponent)<10)?( exponent>0?exptext[exponent]:("⁻"+exptext[abs(exponent)])   ):"^"+exponent);
+            return "e"+((abs(exponent)<10)?((exponent<0?"⁻":"")+exptext[abs(exponent)]):"^"+exponent);
         }
     }
     if (digits === undefined) {
