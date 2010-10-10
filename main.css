@@ -21,7 +21,7 @@ div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;ma
 	display: inline-block;
 /*	float:right;*/
 	margin-left:16px;
-    cursor:default;
+    cursor:pointer;
     opacity:0.4;
 }
 .delete:hover{
