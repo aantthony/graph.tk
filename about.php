@@ -82,8 +82,7 @@ function selected($n){
 			var x=0;
 			var max=1650;
 			function z(){
-				x-=1;
-				sc.style.marginLeft=(-(max/2*Math.cos(x/1000)+max/2))+"px";
+				sc.style.marginLeft=(-(-max/2*Math.cos(x++/1000)+max/2))+"px";
 				setTimeout(z,0);
 			}
 			z();
