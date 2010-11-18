@@ -1,0 +1,10 @@
+#compiled
+index.php
+f.js
+manifest.php
+# OS generated files #
+######################
+.DS_Store?
+thumbs.db
+Icon?
+Thumbs.db
