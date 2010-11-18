@@ -73,8 +73,7 @@ function selected($n){
 		?>
 		<div class="gallery">
 			<div id="sc">
-				<img src="_about/pic1.png" /><img src="_about/pic2.png" /><img src="_about/pic3.png" /><img src="_about/pic4.png" />
-				<img src="_about/pic5.png" /><img src="_about/pic6.png" /><img src="_about/pic7.png" /><img src="_about/pic8.png" />
+				<img src="_about/pic1.png" /><img src="_about/pic2.png" /><img src="_about/pic3.png" /><img src="_about/pic4.png" /><img src="_about/pic5.png" /><img src="_about/pic6.png" /><img src="_about/pic7.png" /><img src="_about/pic8.png" />
 				</div>
 		</div>
 		<script type="text/javascript">
@@ -847,5 +846,10 @@ function selected($n){
 		<a href="/">Graph.tk</a> | <a href="?privacy">Privacy</a> | <a href="https://github.com/aantthony/graph.tk">Source Code</a> | <a href="?contact">Contact</a>
 	</div>
 </div>
+<script type="text/javascript"> var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www."); document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));</script>
+<script type="text/javascript">try {
+var pageTracker = _gat._getTracker("UA-15603369-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
 </body>
 </html>
