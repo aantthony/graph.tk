@@ -1,0 +1,58 @@
+*{margin:0;padding:0;}
+h1,h2,h3{
+    font-weight:normal;
+    padding-bottom:2px;
+}
+body{
+    background:url(top.png) repeat-x;
+    font-family:HelveticaNeue-Light, HelveticaNeue, Helvetica,sans-serif;
+}
+p{
+    font-size:small;
+    margin-bottom:1em
+}
+img{border:none}
+.faint{
+    color:#777;
+    font-size:small
+}
+
+
+#header{
+    padding-top:8px
+}
+#header .right{margin-left:173px;height:189px}
+#header .left{width:173px;padding-top:32px}
+.all{
+    width:880px;
+    margin:auto;
+}
+.left{float:left;width:192px}
+.right{margin-left:192px}
+#bar{height:88px;background:black url(bar.png);color:white}
+#bar .left{font-size:xx-large;padding-top:22px;height:66px}
+#bar .right{padding-top:11px}
+#bar .right p{padding-top:4px;height:29px;font-size:11pt}
+#bar .right ul{list-style:none;}
+#bar .right ul li{float:left;background:#ccc;margin-right:10px;width:89px;padding:6px;height:18px;text-align:center;color:black;border-top-right-radius:2px;border-top-left-radius:2px;-moz-border-radius:2px;}
+#bar .right ul li.selected{background:white !important}
+#bar .right ul li:hover{background:#eee}
+#bar .right ul a:link,#bar .right ul a:visited{color:black}
+#page{padding-top:8px}
+.ql{list-style:none;font-size:small}
+.ql li{margin-bottom:4px}
+#page .gallery{background:black;overflow:hidden;margin-top:16px;border:6px solid black;height:212px}
+.gallery img{margin-right:6px}
+.gallery div{width:3000px;margin-left:0;}
+#page .right{min-height:120px}
+#sc img{width:288px;height:212px}
+#footer{border-top:1px solid #999;font-size:small;padding:8px;margin-bottom:16px;color:#999}
+#footer a:link, #footer a:visited{color:#999;text-decoration:none}
+#footer a:hover,#bar a:hover{text-decoration:underline}
+#bar a:link, #bar a:visited{color:white;text-decoration:none}
+
+
+code{border:1px solid #ccc;}
+input[type=text],textarea,input[type=email] {border: 1px solid #444; color:#444;font-size:medium; width: 100%;font-family:sans-serif;background: #f8f8f8;text-shadow:white 0px 1px 0px;padding:4px}
+code b{color:rgb(166,23,0);text-decoration:none;font-weight:normal}code i{color:rgb(0,119,119);font-style:normal}code strong{color:rgb(196,26,22);text-decoration:none;font-weight:normal}code span.u{color:rgb(127,18,178);}code{color:#333;display:block;margin-top:8px;margin-bottom:8px;background:#fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAIAAADwyuo0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACNJREFUeNpiOHLkyLt372bOnAkkmRgYGFavXh0aGgokAQIMANUHDq+pjDQJAAAAAElFTkSuQmCC') repeat-y;padding:8px}
+
