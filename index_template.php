@@ -49,7 +49,7 @@ function doConditionalGet($timestamp) {
     exit;
 }
 $ddd=filemtime($file);
-$nnn=filemtime(substr($_SERVER['PHP_SELF'],1));
+$nnn=filemtime($_SERVER['SCRIPT_FILENAME']);
 if($nnn>$ddd)
 {
 	doConditionalGet($nnn);
