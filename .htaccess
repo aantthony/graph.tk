@@ -27,9 +27,9 @@ RewriteEngine on
 RewriteCond %{HTTP_HOST} ^www\.graph\.tk$ [NC]
 RewriteRule ^(.*)$ http://graph.tk/$1 [R=301,L]
 
-RewriteRule ^about([.]+)?$ /about.php$1 [L]
-RewriteRule ^video([.]+)?$ /video.php$1 [L]
-RewriteRule ^g_[\d]+\.js$ /js.php [L]
+RewriteRule ^about([.]+)?$ about.php$1 [L]
+RewriteRule ^video([.]+)?$ video.php$1 [L]
+RewriteRule ^g_[\d]+\.js$ js.php [L]
 RewriteRule ^manifest\.manifest$ /manifest.php [L]
 <FilesMatch "\.(gz|ico|js|css|png|pdf|jpg|jpeg|gif|m4v|mp4)$">
 ExpiresActive On
