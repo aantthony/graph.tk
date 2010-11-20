@@ -15,7 +15,7 @@ div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;ma
 
 /*I will not join that clusterfuck.  I do not like it Sam-I-am.*/
 .delete{
-    background:url(/delete.png) no-repeat;
+    background:url("delete.png") no-repeat;
 	width:20px;
 	height:21px;
 	display: inline-block;
