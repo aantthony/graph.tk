@@ -33,6 +33,7 @@
 var f=[];
 
 var graph=(function(){
+
 var iphone=/Mobile/.test(navigator.userAgent);
 var canvas,ctx;
 var ptd;            //Point Display
@@ -53,81 +54,6 @@ if (window.parent.length||iphone) {
 
 
 
-var latexchars={
-'gt':">",
-"left":"",
-"right":"",
-'ge':">=",
-'lt':"<",
-'le':"<=",
-"infty":"∞",
-"cdot":"*",
-"frac":"",
-"alpha":"α",
-"beta":"β",
-'gamma':"γ",
-'delta':"δ",
-'zeta':"ζ",
-'eta':"η",
-'theta':"θ",
-'iota':"ι",
-'kappa':"κ",
-'mu':"μ",
-'nu':"ν",
-'xi':"ξ",
-'omicron':"ο",
-'rho':"ρ",
-'sigma':"σ",
-'tau':"τ",
-'upsilon':"υ",
-'chi':"χ",
-'psi':"ψ",
-'omega':"ω",
-'phi':"ϕ",
-"phiv":"φ",
-"varphi":"φ",
-"epsilon":"ϵ",
-"epsiv":"ε",
-"varepsilon":"ε",
-"sigmaf":"ς",
-"sigmav":"ς",
-"gammad":"ϝ",
-"Gammad":"ϝ",
-"digamma":"ϝ",
-"kappav":"ϰ",
-"varkappa":"ϰ",
-"piv":"ϖ",
-"varpi":"ϖ",
-"rhov":"ϱ",
-"varrho":"ϱ",
-"thetav":"ϑ",
-"vartheta":"ϑ",
-"pi":"π",
-"lambda":"λ",
-'Gamma':"Γ",
-'Delta':"Δ",
-'Theta':"Θ",
-'Lambda':"Λ",
-'Xi':"Ξ",
-'Pi':"Π",
-'Sigma':"Σ",
-'Upsilon':"Υ",
-'Phi':"Φ",
-'Psi':"Ψ",
-'Omega':"Ω",
-"perp":"⊥",
-",":" ",
-"nabla":"∇",
-"forall":"∀",
-"sum":"∑",
-"summation":"∑",
-"prod":"∏",
-"product":"∏",
-"coprod":"∐",
-"coproduct":"∐",
-"int":"∫",
-"integral":"∫"
-};
 
 function getlatexpart(match, submatch)
 {
@@ -141,10 +67,10 @@ function getlatexpart(match, submatch)
 
 
 
-function _ga_track_event(n) {
+function track(event) {
     if (window.pageTracker) {
         setTimeout(function () {
-            pageTracker._trackEvent("Graph", n)
+            pageTracker._trackEvent("Graph", event)
         }, 20)
     }
 };
@@ -167,7 +93,6 @@ var randfuncs = "x^2~f'(x)-1~2e^-x~2x+3~{λ:λ=3}~e^(-λ*x)~(0.5,0.5)~∑[1...�
 
 if(kinput=="span"){
 randfuncs = "x^2    f'\\left(x\\right)-1    2e^{-x}    2x+3    \\lambda=3    e^{-\\lambda*x}    \\left(0.5,0.5\\right)    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n    \\prod_{1}^{4}x-n    m:H_2SO_4    \\left|x^2-4\\right|+2    \\frac1x    x^{-2}    x!    \\ln x    \\sum_{n=1}^{\\infinity}\\frac{x^n}{n}    \\sin x    e^x:\\left[−2,2\\right]    \\tan\\left(x\\right)    \\left(x+2\\right)\\left(x-3\\right)^2    diff\\left(0,2,2x\\right)    \\left(x-2\\right)^2    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}    \\prod_{n=1}^5\\left(x-n\\right)    \\sum_{n=0}^5n    x^x    \\Gamma\\left(x\\right)    \\frac{x!}{3!-x}    x%3    \\left(x>3\\right)?2x:-3    \\fact\\left(x\\right)    \\frac\\phi x    \\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined    g\\left[0\\right]'\\left(2x\\right)    g\\left[0\\right]\\left(x\\right)+1    \\sqrt x".split("    "); //four spaces
-
 }
 
 var randfunc_index = 0;
@@ -183,15 +108,28 @@ function randfunc() {
 
 
 
+
+
 var width, height, draw;
 
+function resize(){
+
+    width=window.innerWidth  || document.body.clientWidth;
+    height=window.innerHeight|| document.body.clientHeight || 120;
+    
+    canvas.width = width;
+    canvas.height = height;
+    ctx && draw();
+}
 //Mouse coordinates
 var mx = 400;
 var my = 300;
 
 //Last mouse coordinates
-var lmx;
-var lmy;
+var lmx=mx;
+var lmy=my;
+
+var drag;
 
 var scalex = 1;
 var scaley = scalex; //this always holds
@@ -199,9 +137,269 @@ var panx = 0;
 var pany = 0;
 
 
+//Visible region on screen
+var boundleft = -10;
+var boundright = 10;
+var boundtop = 10;
+var boundbottom = -10;
+
+
 //Location of canvas on screen. While dragging this changes.
 var cx = 0;
 var cy = 0;
+
+
+function draw(){
+    e = Math.E;//they can be accidentially changed
+    pi = Math.PI;
+    
+    if (!ctx) {
+        return;
+    }
+    ctx.lineCap = "butt";
+    
+    ctx.clearRect(0, 0, width, height);
+    ctx.save();
+    
+    //try{
+    
+    ctx.translate(panx,pany);
+    ctx.scale(scalex*0.8, scaley*0.8);
+    // It is 0.8 deliberately to see the bleed/cutoff.
+    
+    boundleft = (-panx) / scalex;
+    boundright = (width - panx) / scalex;
+    boundbottom = -(height - pany) / scaley;
+    boundtop = pany / scaley;
+    
+    
+    
+    var gridsize = pow(2, 6 - Math.round(log(scalex) / log(2)));
+    var overleft = gridsize * ~~ (boundleft / gridsize) - gridsize;
+    var overright = gridsize * ~~ (boundright / gridsize) + gridsize;
+    var overtop = gridsize * ~~ (boundtop / gridsize) + gridsize;
+    var overbottom = gridsize * ~~ (boundbottom / gridsize) - gridsize;
+    
+    //Draw grid lines
+    
+    ctx.lineWidth=2/scalex;
+    ctx.beginPath();
+    ctx.move(overleft,0);
+    ctx.line(overright,0);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.move(0,overbottom);
+    ctx.line(0,overtop);
+    ctx.stroke();
+    
+    
+    ctx.strokeStyle = "#888";
+    
+    ctx.lineWidth = 0.1 / scalex;
+    for (var x = overleft; x <= overright; x += gridsize / 4) {
+        ctx.beginPath();
+        ctx.move(x, overbottom);
+        ctx.line(x, overtop);
+        ctx.stroke();
+    }
+    for (var y = overbottom; y <= overtop; y += gridsize / 4) {
+        ctx.beginPath();
+        ctx.move(overleft, y);
+        ctx.line(overright, y);
+        ctx.stroke();
+    }
+
+
+
+    ctx.lineWidth = 0.4 / scalex;
+    
+    for (var x = overleft; x <= overright; x += gridsize) {
+        ctx.beginPath();
+        ctx.move(x, overbottom);
+        ctx.line(x, overtop);
+        ctx.stroke();
+    }
+    
+    for (var y = overbottom; y <= overtop; y += gridsize) {
+        ctx.beginPath();
+        ctx.move(overleft, y);
+        ctx.line(overright, y);
+        ctx.stroke();
+    }
+    
+    ctx.beginPath();
+        ctx.move(0,0);
+        ctx.line(100,100);
+        ctx.stroke();
+
+    
+    //}catch(ex){}
+    
+    ctx.restore();
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+function newfunc(funcval) {
+    var newone = proto.cloneNode(true);
+    var inputbox=document.createElement(kinput);
+    var inputbox_container=newone.getElementsByClassName("matheditor")[0];
+    inputbox_container.appendChild(inputbox);
+    
+    
+    if(kinput=="span"){
+        inputbox.appendChild(document.createTextNode(funcval || randfunc()));
+        $(inputbox).mathquill('editable');
+    }else {
+        inputbox.value=funcval || randfunc();
+        inputbox.onkeydown=inputbox.onkeyup=function(){this.onchange()};
+        
+    }
+    g.push(function (x) {
+        return 0;
+    });
+    var currentnodeslength = flist.childNodes.length;
+    inputbox.onchange = function(){getf(undefined,currentnodeslength);};
+    //getf(inputbox, flist.childNodes.length, true);
+    if (newone.getElementsByClassName) {
+        var bs = newone.getElementsByClassName("b");
+        colors_in_use.push(colorss.pop());
+        if (bs.length > 0) {
+            bs[0].style.background = colors_in_use[flist.childNodes.length];
+        }
+    }
+    flist.appendChild(newone);
+    if(kinput=="span"){
+        $(inputbox).mathquill("redraw");
+        if(!funcval){
+            $(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
+        }
+    }else{
+        inputbox.onchange();
+    }
+    if (loaded) {
+        
+        inputbox.focus();
+        //inputbox.select();
+        save();
+        draw();
+    }
+}
+
+function delfunc() {
+    if (flist.childNodes.length > 1) {
+        g.pop();
+        flist.removeChild(flist.lastChild);
+        flist.lastChild.getElementsByClassName("matheditor")[0].getElementsByTagName(kinput)[0].focus();
+        save();
+    }
+}
+
+function delfunc(delete_button_node){
+    this_node=delete_button_node.parentNode;
+    index=0;
+
+    other_node=flist.firstChild;
+    while(other_node!=null){
+        if(other_node==this_node){
+            break;
+            index++;
+        }
+        other_node=other_node.nextSibling;
+    }
+    
+    g.splice(index,1);
+
+    colorss.push(colors_in_use.splice(index,1)[0]);
+    
+    flist.removeChild(this_node);
+    save();
+};
+
+
+
+var drawwhiledrag_c=0;
+function mousedown(e) {
+    lmx=mx=e.x || e.pageX;
+    lmy=my=e.y || e.pageY;
+    drag = true;
+    canvas.style.cursor = "url(grabbing.gif), grabbing";
+    if (!iphone && !drawwhiledrag_c) {
+        setTimeout(drawwhiledrag, 1000);
+        drawwhiledrag_c++;
+    }
+};
+
+function mousemove(e) {
+    e = e || window.event;
+    if (e.x !== undefined) {
+        mx = e.x;
+        my = e.y;
+    } else {
+        mx = e.pageX;
+        my = e.pageY;
+    }
+    if(drag){
+        cx += mx - lmx;
+        cy += my - lmy;
+        canvas.style.left = cx + "px";
+        canvas.style.top = cy + "px";
+    }
+    lmx = mx;
+    lmy = my;
+};
+var scaleconst = 0.001;
+if (/AppleWebKit\/[\d]+\.[\d]+\+/.test(navigator.userAgent)) {
+    scaleconst = 0.01;
+}
+if (/Firefox/.test(navigator.userAgent)) {
+    scaleconst = 0.01;
+}
+if (/Opera/.test(navigator.userAgent)) {
+    scaleconst = 0.03
+}
+if (!/Mac OS X/.test(navigator.userAgent)) {
+    scaleconst = 0.1
+}
+
+function mousewheel(e){
+
+
+    //scale = exp( log(scale) +delta   )    (base 2);
+    //      = scale * 2^delta
+    scalex*=Math.pow(2,e.wheelDeltaX*scaleconst);
+    scaley*=Math.pow(2,e.wheelDeltaY*scaleconst);
+    draw();
+
+}
+function perform_translation(){
+    panx+=cx;
+    pany+=cy;
+    cx=cy=0;
+    canvas.style.left = cx + "px";
+    canvas.style.top = cy + "px";
+}
+
+function drawwhiledrag() {
+    if (drag) {
+        perform_translation();
+        draw();
+        setTimeout(drawwhiledrag, 1000);
+    }else{
+        drawwhiledrag_c--;
+    }
+}
 
 
 
@@ -218,19 +416,21 @@ function lame_browser(){
 var graph={
     "version":"GIT_VERSION",
     "add":function(latex){
-        _ga_track_event('New');
+        track('New');
     },
     "showcon":function(){
         con.style.display=con.style.display=="block" ? "none":"block";
     },
     "delete":function(delete_button_none){
-    
-    
+        delfunc(delete_button_none);
     },
-    "load":function (){
+    "screenshot":function(){
+        window.location = canvas.toDataURL("image/png");
+    },
+    "init":function (){
     
     
-    
+        var fullscreen=window.parent.length?false:true;
     
         if (window.location.hash != "") {
             //index.html#y=x^2+2
@@ -242,9 +442,12 @@ var graph={
             }
         }
         (new Image()).src="grabbing.gif";
-        var canvas=document.createElement("canvas");
+        canvas=document.createElement("canvas");
+        if(fullscreen){
         canvas.width=window.innerWidth;
         canvas.height=window.innerHeight;
+        
+        }
         document.body.appendChild(canvas);
         if(canvas.getContext){
             ctx=canvas.getContext("2d");
@@ -257,6 +460,7 @@ var graph={
         }
         
         canvas.style.background="white";
+        canvas.style.cursor = "default";
         canvas.style.position="fixed";
         ptd=document.createElement("div");
         ptd.id="ptd";
@@ -283,17 +487,51 @@ var graph={
         var funcs=document.createElement("div");
         funcs.setAttribute("class","overlay");
         funcs.id="funcs";
-        funcs.innerHTML="<ul><li id=\"prototype\"><div class=\"b\" style=\"background:#07c\"></div><span class=\"matheditor\"></span><span class=\"delete\" onmouseup=\"graph.delete(this);\"></span></li></ul><input type=\"button\" value=\"+\" onclick=\"graph.add()\"><a href=\"javascript:void(graph.showcon())\">Console</a><a href=\"javascript:void(tdiff())\">Diff Eq</a><a href=\"javascript:void(scren())\">Screenshot</a><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"Info\" /></a>";
+        funcs.innerHTML="<ul><li id=\"prototype\"><div class=\"b\" style=\"background:#07c\"></div><span class=\"matheditor\"></span><span class=\"delete\" onmouseup=\"graph.delete(this);\"></span></li></ul><input type=\"button\" value=\"+\" onclick=\"graph.add()\"><a href=\"javascript:void(graph.showcon())\">Console</a><a href=\"javascript:void(tdiff())\">Diff Eq</a><a href=\"javascript:void(graph.screenshot())\">Screenshot</a><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"Info\" /></a>";
         document.body.appendChild(funcs);
         
         proto = document.getElementById("prototype").cloneNode(true);
         proto.removeAttribute("id");
-
+        
+        
+        window.onresize=resize;
+        canvas.onmousedown=mousedown;
+        document.body.addEventListener("mouseup",function(){drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
+        document.body.addEventListener("mousemove",mousemove,false);
+               window.addEventListener("mousewheel",mousewheel,false);
+        
         $("#h3").remove();
+        ctx.move=function(px,py,pz){
+    if (!isNaN(py)) {
+        if (py > boundtop*4) {
+            ctx.moveTo(px, -boundtop*4);
+            return;
+        } else if (py < boundbottom*4) {
+            ctx.moveTo(px, -boundbottom*4);
+            return;
+        }
+        ctx.moveTo(px, -py);
+    }
+    
+        };
+        ctx.line=function(px,py,pz){
+    if (!isNaN(py)) {
+        if (py > boundtop *4) {
+            ctx.lineTo(px, -boundtop *4);
+            return;
+        } else if (py < boundbottom *4) {
+            ctx.lineTo(px, -boundbottom*4);
+            return;
+        }
+        ctx.lineTo(px, -py);
+    }
+    
+        };
+        resize();
     }
 };
 
 
     return graph;
 })();
-graph.load();
+graph.init();

@@ -1,5 +1,4 @@
-//jquery and mathquill must be available first before including this script.
-
+//math globals
 /*
 
     Copyright © Anthony 2010
@@ -22,6 +21,40 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     */
+
+function format(num, digits) {
+    e = Math.E;
+    pi = Math.PI;
+    if (!num) {
+        return "0";
+    } else if (num == pi) {
+        return "π";
+    } else if (num == e) {
+        return "e";
+    } else if (num % (pi / 4) == 0) {
+        return (num / pi) + "π";
+    } else if (num % (1 / 3) == 0) {
+        return (num * 3) + "/3";
+    } else if (num % (e / 4) == 0) {
+        return (num / e) + "e";
+    } else if(num!=1){
+        if (( log(num)   )%1 == 0) {
+            var exponent=log(num);
+            var exptext="⁰¹²³⁴⁵⁶⁷⁸⁹";
+            return "e"+((abs(exponent)<10)?((exponent<0?"⁻":"")+exptext[abs(exponent)]):"^"+exponent);
+        }
+    }
+    if (digits === undefined) {
+        return num.toString()
+    }
+    if (num.toPrecision) {
+        if (Math.abs(num) < 0.0000001) {
+            return "0.0000000";
+        }
+        return num.toPrecision(digits);
+    }
+    return num;
+}
 
 
 
@@ -225,4 +258,83 @@ function djkb(ia, lvl, x) {
 
 
 
+
+
+
+
+var latexchars={
+'gt':">",
+"left":"",
+"right":"",
+'ge':">=",
+'lt':"<",
+'le':"<=",
+"infty":"∞",
+"cdot":"*",
+"frac":"",
+"alpha":"α",
+"beta":"β",
+'gamma':"γ",
+'delta':"δ",
+'zeta':"ζ",
+'eta':"η",
+'theta':"θ",
+'iota':"ι",
+'kappa':"κ",
+'mu':"μ",
+'nu':"ν",
+'xi':"ξ",
+'omicron':"ο",
+'rho':"ρ",
+'sigma':"σ",
+'tau':"τ",
+'upsilon':"υ",
+'chi':"χ",
+'psi':"ψ",
+'omega':"ω",
+'phi':"ϕ",
+"phiv":"φ",
+"varphi":"φ",
+"epsilon":"ϵ",
+"epsiv":"ε",
+"varepsilon":"ε",
+"sigmaf":"ς",
+"sigmav":"ς",
+"gammad":"ϝ",
+"Gammad":"ϝ",
+"digamma":"ϝ",
+"kappav":"ϰ",
+"varkappa":"ϰ",
+"piv":"ϖ",
+"varpi":"ϖ",
+"rhov":"ϱ",
+"varrho":"ϱ",
+"thetav":"ϑ",
+"vartheta":"ϑ",
+"pi":"π",
+"lambda":"λ",
+'Gamma':"Γ",
+'Delta':"Δ",
+'Theta':"Θ",
+'Lambda':"Λ",
+'Xi':"Ξ",
+'Pi':"Π",
+'Sigma':"Σ",
+'Upsilon':"Υ",
+'Phi':"Φ",
+'Psi':"Ψ",
+'Omega':"Ω",
+"perp":"⊥",
+",":" ",
+"nabla":"∇",
+"forall":"∀",
+"sum":"∑",
+"summation":"∑",
+"prod":"∏",
+"product":"∏",
+"coprod":"∐",
+"coproduct":"∐",
+"int":"∫",
+"integral":"∫"
+};
 
