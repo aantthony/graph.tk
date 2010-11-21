@@ -61,6 +61,7 @@ for (var index = 0; index < symbol.length; index++) {
 
 
 //Basic math functions
+
 var sin = Math.sin;
 var cos = Math.cos;
 var tan = Math.tan;

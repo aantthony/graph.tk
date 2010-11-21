@@ -3,6 +3,8 @@ ul.f li{margin:0;padding:0;border-bottom:1px solid #444;background:white;margin-
 ul.f input{width:275px;border:none;font:16px sans-serif;background:none}
 #all{display:none}
 ul.f li:hover{background:#eee}
+#ptd{position:fixed;z-Index:80000;color:black;opacity:0.6;left:8px;bottom:8px;border:none;background:white;-webkit-transition:opacity 0.5s ease-in-out;-moz-transition:opacity 0.5s ease-in-out;-o-transition:opacity 0.5s ease-in-out;transition: opacity 0.5s ease-in-out;font:10pt 'Menlo','Andale Mono','Consolas','DejaVu Sans Mono','Droid Sans Mono','Lucida Console','Monaco','monofur',monospace}
+
 #canvas{background:white;margin:0;padding:0;position:fixed;top:0;left:0}
 #logt{background:white;width:300px;resize:both;height:100px;overflow:auto;margin:0;padding:2px;-webkit-user-select:text;-moz-user-select:text;-o-user-select:text;user-select:text;font-family:'Menlo','Andale Mono', Consolas, 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Monaco, monofur, monospace;font-size:90%}
 body{font-family:sans-serif;position:relative;margin:0;padding:0;overflow:hidden;background:white;-webkit-user-select:none;-moz-user-select:none;-o-user-select:none;user-select:none}
@@ -11,7 +13,7 @@ div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;ma
 #con{top:0;left:0;font-size:small;padding:8px;opacity:0.97}img{border:none;vertical-align:middle}
 #funcs{top:0;right:0;background:white}
 #quest{background:#07c;-webkit-border-radius:4px;-moz-border-radius:4px;-o-border-radius:4px;border-radius:4px;width:20px;height:20px;color:white;text-align:center;text-decoration:none;float:right}
-#conin{font-family: 'Menlo',monospace;padding-top:4px;padding-bottom:4px}
+#conin{width:100%;font-family: 'Menlo',monospace;padding-top:4px;padding-bottom:4px}
 
 /*I will not join that clusterfuck.  I do not like it Sam-I-am.*/
 .delete{
