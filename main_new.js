@@ -20,207 +20,12 @@
     
 */
 
-var c = 299792458;
-var G = 6.67300e-11;
-var m_e = 5.9742e24;
-var m_m = 7.36e22;
-var m_s = 1.98892e30;
-var R_E = 6378100;
-var r_e = 6378100;
-var h = 6.626068e-34;
-var log2pi = 1.8378770664093453;
-var e = Math.E;
-var pi = Math.PI;
-var phi = (1 + Math.sqrt(5)) / 2;
-var epsilon_0 = 8.85418782e-12;
-
-var en = ["Massless void", "Hydrogen", "Helium", "Lithium", "Beryllium", "Boron", "Carbon", "Nitrogen", "Oxygen", "Fluorine", "Neon", "Sodium", "Magnesium", "aluminium", "Silicon", "Phosphorus", "Sulphur", "Chlorine", "Argon", "Potassium", "Calcium", "Scandium", "Titanium", "Vanadium", "Chromium", "Manganese", "Iron", "Cobalt", "Nickel", "Copper", "Zinc", "Gallium", "Germanium", "Arsenic", "Selenium", "Bromine", "Krypton", "Rubidium", "Strontium", "Yttrium", "Zirkonium", "Niobium", "Molybdaenum", "Technetium", "Ruthenium", "Rhodium", "Palladium", "Silver", "Cadmium", "Indium", "Tin", "Antimony", "Tellurium", "Iodine", "Xenon", "Cesium", "Barium", "Lanthanum", "Cerium", "Praseodymium", "Neodymium", "Promethium", "Samarium", "Europium", "Gadolinium", "Terbium", "Dysprosium", "Holmium", "Erbium", "Thulium", "Ytterbium", "Lutetium", "Hafnium", "Tantalum", "Tungsten", "Rhenium", "Osmium", "Iridium", "Platinum", "Gold", "Hydrargyrum", "Thallium", "Lead", "Bismuth", "Polonium", "Astatine", "Radon", "Francium", "Radium", "Actinium", "Thorium", "Protactinium", "Uranium", "Neptunium", "Plutonium", "Americium", "Curium", "Berkelium", "Californium", "Einsteinium", "Fermium", "Mendelevium", "Nobelium", "Lawrencium", "Rutherfordium", "Dubnium", "Seaborgium", "Bohrium", "Hassium", "Meitnerium", "Ununnilium", "Unununium"];
-var M = [0.0, 1.00794, 4.002602, 6.941, 9.012182, 10.811, 12.0107, 14.0067, 15.9994, 18.9994, 20.1797, 22.98976928, 24.305, 26.9815386, 28.0855, 30.973762, 32.065, 35.453, 39.948, 39.0983, 40.078, 44.955912, 47.867, 50.9415, 51.9961, 54.938045, 55.845, 58.933195, 58.6934, 63.546, 65.38, 69.723, 72.64, 74.9216, 78.96, 79.904, 83.798, 85.4678, 87.62, 88.90585, 91.224, 92.90638, 95.96, 98, 101.07, 102.9055, 106.42, 107.8682, 112.411, 114.818, 118.71, 121.76, 127.6, 126.90447, 131.293, 132.9054519, 137.327, 138.90547, 140.116, 140.90765, 144.242, 145, 150.36, 151.964, 157.25, 158.92535, 162.5001, 164.93032, 167.259, 168.93421, 173.054, 174.9668, 178.49, 180.94788, 183.84, 186.207, 190.23, 192.217, 192.084, 196.966569, 200.59, 204.3833, 207.2, 208.980401, 210, 210, 220, 223, 226, 227, 232.03806, 231.03588, 238.02891, 237, 244, 243, 247, 247, 251, 252, 257, 258, 259, 262, 261, 262, 266, 264, 277, 268, 271, 272];
-var symbol = ["Zero", "H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Te", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg"];
 
 
-//Make the periodic table global
-for (var index = 0; index < symbol.length; index++) {
-    window[symbol[index]] = M[index];
-}
+/*if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,replacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=replacer;if(replacer&&typeof replacer!=='function'&&(typeof replacer!=='object'||typeof replacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
 
 
-//Basic math functions
-
-var sin = Math.sin;
-var cos = Math.cos;
-var tan = Math.tan;
-var tg = Math.tan;
-var exp = Math.exp;
-var log = Math.log;
-var ln = Math.log;
-var abs = Math.abs;
-var acos = Math.acos;
-var asin = Math.asin;
-var atan = Math.atan;
-var atan2 = Math.atan2;
-var ceil = Math.ceil;
-var floor = Math.floor;
-var max = Math.max;
-var min = Math.min;
-var random = Math.random;
-var round = Math.round;
-var sqrt = Math.sqrt;
-var pow = Math.pow;
-
-
-//sin^n (x)
-function sin_n(n,x){return pow(sin(x),n);}
-function cos_n(n,x){return pow(cos(x),n);}
-function tan_n(n,x){return pow(tan(x),n);}
-function cot_n(n,x){return pow(cot(x),n);}
-function sec_n(n,x){return pow(sec(x),n);}
-function csc_n(n,x){return pow(csc(x),n);}
-function log_n(n,x){return pow(log(x),n);}
-function ln_n(n,x){return pow(ln(x),n);}
-
-function logb(b, v) {
-    return ln(v) / ln(b);
-}
-
-function u(x) {
-    //unit step function
-    return (x>=0)?(x?1:0.5):(0);
-}
-
-function signum(x){
-    return 2*u(x)-1;
-}
-
-function piecewise(cond, val, other) {
-    if (cond) {
-        return val;
-    }
-    return other;
-}
-function sinc(x) {
-    if (x === 0) {
-        return 1;
-    }
-    return sin(pi * x) / (pi * x);
-}
-function sec(x) {return 1 / (cos(x));}
-function csc(x) {return 1 / (sin(x));}
-function cosec(x) {return 1 / (sin(x));}
-function cot(x) {return 1 / (tan(x));}
-var ctg = cot;
-var ctn = cot;
-
-//Not so basic math
-
-//Bell numbers
-var blln = [1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, 115975, 678570, 4213597, 27644437, 190899322, 1382958545, 10480142147, 82864869804, 682076806159, 5832742205057, 51724158235372, 474869816156751, 4506715738447323];
-
-//Riemann zeta function
-function zeta(x) {
-    if (x === 0) {
-        return -0.5;
-    } else if (x == 1) {
-        return Infinity;
-    } else if (x == 2) {
-        return pi * pi / 6;
-    } else if (x == 4) {
-        return pi * pi * pi * pi / 90;
-    } else if (x < 1) {
-        return Infinity;
-    }
-    var sum = 4.4 * pow(x, -5.1);
-    for (var npw = 1; npw < 10; npw++) {
-        sum += pow(npw, -x);
-    }
-    return sum;
-}
-
-function Gamma(x) {
-    if (x > 1.0) {
-        return (exp(x * (ln(x) - 1) + 0.5 * (-ln(x) + log2pi) + 1 / (12 * x) - 1 / (360 * (x * x * x)) + 1 / (1260 * pow(x, 5)) - 1 / (1680 * pow(x, 7))));
-    }
-    if (x > -0.5) {
-        return (1.0 + 0.150917639897307 * x + 0.24425221666910216 * pow(x, 2)) / (x + 0.7281333047988399 * pow(x, 2) - 0.3245138289924575 * pow(x, 3));
-    }
-    if (x < 0) {
-        if (x == ~~x) {
-            return;
-        } else {
-            return Math.PI / (Math.sin(Math.PI * x) * Gamma((1 - x)));
-        }
-    } else {
-        return pow(x - 1, x - 1) * Math.sqrt(2 * Math.PI * (x - 1)) * exp(1 - x + 1 / (12 * (x - 1) + 2 / (5 * (x - 1) + 53 / (42 * (x - 1)))));
-    }
-}
-function fact(ff) {
-    if (ff === 0 || ff == 1) {
-        return 1;
-    } else if (ff > 0 && ff == ~~ff && ff < 15) {
-        var s = 1;
-        for (var nns = 1; nns <= ff; nns++) {
-            s *= nns;
-        }
-        return~~s;
-    } else if (ff != (~~ff) || ff < 0) {
-        return Gamma(ff + 1);
-    }
-}
-function bellb(x) {
-    if (x == ~~x && x < blln.length) {
-        return blln[x];
-    } else {
-        var sum = 0;
-        for (var inj = 0; inj < 5; inj++) {
-            sum += pow(inj, x) / fact(inj);
-        }
-        return sum / e;
-    }
-}
-
-
-
-//Draw a dot instead of a line.
-function pt(vx, vy) {
-    if (vy === undefined) {
-        return vx;
-    }
-    return {
-        "x": vx,
-        "y": vy
-    };
-}
-
-// 'lvl'th derivative of g[ia](x) when x = 'x'
-
-var difflevel = 0; //Used to prevent massive stacks in the recursive djkb()
-
-function djkb(ia, lvl, x) {
-    difflevel++;
-    var res;
-    if (difflevel > 8) {
-        difflevel -= 1;
-        return 0;
-    }
-    var h = 0.0001;
-    if (lvl > 0) {
-        res = (djkb(ia, lvl - 1, x + h) - djkb(ia, lvl - 1, x - h)) / (2 * h);
-        difflevel -= 1;
-        return res;
-    }
-    res = g[ia](x);
-    difflevel -= 1;
-    return res;
-}
-
-
-
-
-
-
-
-
-
+*/
 
 
 
@@ -232,11 +37,108 @@ var iphone=/Mobile/.test(navigator.userAgent);
 var canvas,ctx;
 var ptd;            //Point Display
 var con;
+var proto;          //li prototype
 
-var kinput="span";//span for mathquill, input for form input
+var colorss = "#f08,#8f0,#80f,#f08,#880,#088,#808,#0ff,#f80,#f0f,#04f,#0a0,#f00,#07c".split(",");
+var colors_in_use = new Array(0);
+function col(n) {
+    return colorss[n % (colorss.length)];
+}
+
+
+var kinput="span";  //span for mathquill, input for form input
 if (window.parent.length||iphone) {
     kinput="input";
 }
+
+
+
+var latexchars={
+'gt':">",
+"left":"",
+"right":"",
+'ge':">=",
+'lt':"<",
+'le':"<=",
+"infty":"∞",
+"cdot":"*",
+"frac":"",
+"alpha":"α",
+"beta":"β",
+'gamma':"γ",
+'delta':"δ",
+'zeta':"ζ",
+'eta':"η",
+'theta':"θ",
+'iota':"ι",
+'kappa':"κ",
+'mu':"μ",
+'nu':"ν",
+'xi':"ξ",
+'omicron':"ο",
+'rho':"ρ",
+'sigma':"σ",
+'tau':"τ",
+'upsilon':"υ",
+'chi':"χ",
+'psi':"ψ",
+'omega':"ω",
+'phi':"ϕ",
+"phiv":"φ",
+"varphi":"φ",
+"epsilon":"ϵ",
+"epsiv":"ε",
+"varepsilon":"ε",
+"sigmaf":"ς",
+"sigmav":"ς",
+"gammad":"ϝ",
+"Gammad":"ϝ",
+"digamma":"ϝ",
+"kappav":"ϰ",
+"varkappa":"ϰ",
+"piv":"ϖ",
+"varpi":"ϖ",
+"rhov":"ϱ",
+"varrho":"ϱ",
+"thetav":"ϑ",
+"vartheta":"ϑ",
+"pi":"π",
+"lambda":"λ",
+'Gamma':"Γ",
+'Delta':"Δ",
+'Theta':"Θ",
+'Lambda':"Λ",
+'Xi':"Ξ",
+'Pi':"Π",
+'Sigma':"Σ",
+'Upsilon':"Υ",
+'Phi':"Φ",
+'Psi':"Ψ",
+'Omega':"Ω",
+"perp":"⊥",
+",":" ",
+"nabla":"∇",
+"forall":"∀",
+"sum":"∑",
+"summation":"∑",
+"prod":"∏",
+"product":"∏",
+"coprod":"∐",
+"coproduct":"∐",
+"int":"∫",
+"integral":"∫"
+};
+
+function getlatexpart(match, submatch)
+{
+  if(submatch == ",")
+    return "";
+  if(latexchars[submatch] !== undefined)
+    return latexchars[submatch];
+  return submatch;
+}
+
+
 
 
 function _ga_track_event(n) {
@@ -246,6 +148,67 @@ function _ga_track_event(n) {
         }, 20)
     }
 };
+
+
+function safeeval(z) {
+	//use safeeval instead of eval()
+    var naughty = "eval,document,window,location,cookie,alert,comfirm,prompt,this,parent,child,xml,xmlhttp,clip,draw,getfunction,get2dfunction,extrafunc,calcnextframe,nextframe,canvas".split(",");
+    for (var nau_g = 0; nau_g < naughty.length; nau_g++) {
+        if (z.indexOf(naughty[nau_g]) != -1) {
+            throw ("Unsafe Code: " + naughty[nau_g])
+        }
+    }
+    return eval(z);
+}
+
+
+
+var randfuncs = "x^2~f'(x)-1~2e^-x~2x+3~{λ:λ=3}~e^(-λ*x)~(0.5,0.5)~∑[1...∞,sin(nx)/n]~m:H_2SO_4~|x^2-4|+2~1/x~x^-2~x!~lnx~∑[1,infinity,(x^n)/n!]~sinx~e^x:[−2,2]~tan(x)~(x+2)(x-3)^2~diff(0,2,2x)~(x-2)^2~∑[1,∞,sin((2n−1)x)/(2n−1)]~~∏[1,5,(x-n)]~∑[0,5,n]~x^x~gamma(x)~(x!)/(3!-x)~x%3~(x>3)?2x:-3~fact(x)~phi/x~(x>=0)?m_e*G/(r_e+100000x)^2:undefined~g[0]'(2x)~g[0](x)+1~sqrt(x)".split("~");
+
+if(kinput=="span"){
+randfuncs = "x^2    f'\\left(x\\right)-1    2e^{-x}    2x+3    \\lambda=3    e^{-\\lambda*x}    \\left(0.5,0.5\\right)    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n    \\prod_{1}^{4}x-n    m:H_2SO_4    \\left|x^2-4\\right|+2    \\frac1x    x^{-2}    x!    \\ln x    \\sum_{n=1}^{\\infinity}\\frac{x^n}{n}    \\sin x    e^x:\\left[−2,2\\right]    \\tan\\left(x\\right)    \\left(x+2\\right)\\left(x-3\\right)^2    diff\\left(0,2,2x\\right)    \\left(x-2\\right)^2    \\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}    \\prod_{n=1}^5\\left(x-n\\right)    \\sum_{n=0}^5n    x^x    \\Gamma\\left(x\\right)    \\frac{x!}{3!-x}    x%3    \\left(x>3\\right)?2x:-3    \\fact\\left(x\\right)    \\frac\\phi x    \\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined    g\\left[0\\right]'\\left(2x\\right)    g\\left[0\\right]\\left(x\\right)+1    \\sqrt x".split("    "); //four spaces
+
+}
+
+var randfunc_index = 0;
+
+//Not actually random.
+function randfunc() {
+    return randfuncs[(randfunc_index++) % randfuncs.length];
+}
+
+
+
+
+
+
+
+var width, height, draw;
+
+//Mouse coordinates
+var mx = 400;
+var my = 300;
+
+//Last mouse coordinates
+var lmx;
+var lmy;
+
+var scalex = 1;
+var scaley = scalex; //this always holds
+var panx = 0;
+var pany = 0;
+
+
+//Location of canvas on screen. While dragging this changes.
+var cx = 0;
+var cy = 0;
+
+
+
+
+
+
+
 
 
 
@@ -265,7 +228,19 @@ var graph={
     
     },
     "load":function (){
-        $("#h3").remove();
+    
+    
+    
+    
+        if (window.location.hash != "") {
+            //index.html#y=x^2+2
+            window.shouldload = false;
+            if (window.location.hash[2] == "=") {
+                window.jsonfunc = window.location.hash.substring(3);
+            }else{
+                window.jsondata = unescape(window.location.hash.substring(6));
+            }
+        }
         (new Image()).src="grabbing.gif";
         var canvas=document.createElement("canvas");
         canvas.width=window.innerWidth;
@@ -311,6 +286,10 @@ var graph={
         funcs.innerHTML="<ul><li id=\"prototype\"><div class=\"b\" style=\"background:#07c\"></div><span class=\"matheditor\"></span><span class=\"delete\" onmouseup=\"graph.delete(this);\"></span></li></ul><input type=\"button\" value=\"+\" onclick=\"graph.add()\"><a href=\"javascript:void(graph.showcon())\">Console</a><a href=\"javascript:void(tdiff())\">Diff Eq</a><a href=\"javascript:void(scren())\">Screenshot</a><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"Info\" /></a>";
         document.body.appendChild(funcs);
         
+        proto = document.getElementById("prototype").cloneNode(true);
+        proto.removeAttribute("id");
+
+        $("#h3").remove();
     }
 };
 
