@@ -1,12 +1,12 @@
-ErrorDocument 400 /error.php?q=400
-ErrorDocument 401 /error.php?q=401
-ErrorDocument 403 /error.php?q=403
-ErrorDocument 404 /error.php?q=404
-ErrorDocument 406 /error.php?q=406
-ErrorDocument 415 /error.php?q=415
-ErrorDocument 500 /error.php?q=500
-ErrorDocument 501 /error.php?q=501
-ErrorDocument 509 /error.php?q=509
+#ErrorDocument 400 /error.php?q=400
+#ErrorDocument 401 /error.php?q=401
+#ErrorDocument 403 /error.php?q=403
+#ErrorDocument 404 /error.php?q=404
+#ErrorDocument 406 /error.php?q=406
+#ErrorDocument 415 /error.php?q=415
+#ErrorDocument 500 /error.php?q=500
+#ErrorDocument 501 /error.php?q=501
+#ErrorDocument 509 /error.php?q=509
 ServerSignature Off
 AddType text/plain txt
 AddType image/vnd.microsoft.icon ico
