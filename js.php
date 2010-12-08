@@ -32,7 +32,7 @@ function doConditionalGet($timestamp) {
 
 date_default_timezone_set("UTC");
 
-doConditionalGet(filemtime('f.js'));
+doConditionalGet(filemtime('min.js'));
 
 
 header('Content-Type: text/javascript; charset=UTF-8');

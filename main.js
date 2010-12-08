@@ -2,7 +2,7 @@
 
 /*
 
-    Copyright © Anthony 2010
+    Copyright (c) Anthony 2010
     http://graph.tk/
     
     nospamant[/at/ ]gmail[ /dot/ ]com

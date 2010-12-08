@@ -5,7 +5,7 @@ header('Content-Type: text/cache-manifest');
 date_default_timezone_set("Australia/Melbourne");
 
 
-$ddd=filemtime('f.js');
+$ddd=filemtime('min.js');
 $iphone=false;
 if(!((strpos(strtolower($_SERVER["HTTP_USER_AGENT"]),"iphone"))=== false)){$iphone=true;}
 ?>CACHE MANIFEST

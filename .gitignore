@@ -1,8 +1,8 @@
 #compiled
 index.php
-f.js
 manifest.php
 error.php
+tmp
 # OS generated files #
 ######################
 .DS_Store?

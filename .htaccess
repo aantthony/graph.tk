@@ -1,36 +1,24 @@
-#ErrorDocument 400 /error.php?q=400
-#ErrorDocument 401 /error.php?q=401
-#ErrorDocument 403 /error.php?q=403
-#ErrorDocument 404 /error.php?q=404
-#ErrorDocument 406 /error.php?q=406
-#ErrorDocument 415 /error.php?q=415
-#ErrorDocument 500 /error.php?q=500
-#ErrorDocument 501 /error.php?q=501
-#ErrorDocument 509 /error.php?q=509
-ServerSignature Off
-AddType text/plain txt
 AddType image/vnd.microsoft.icon ico
-AddType video/mp4 m4v
-AddType video/mp4 mp4
 AddType text/javascript js
 AddType application/x-chrome-extension crx
 AddType text/cache-manifest manifest
+
 php_flag zlib.output_compression On
 php_value zlib.output_compression_level 5
+
 <IfModule mod_deflate.c>
-AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript
-BrowserMatch ^Mozilla/4 gzip-only-text/html
-BrowserMatch ^Mozilla/4\.[0678] no-gzip
-BrowserMatch \bMSIE !no-gzip
+AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+#BrowserMatch ^Mozilla/4 gzip-only-text/html
+#BrowserMatch ^Mozilla/4\.[0678] no-gzip
+#BrowserMatch \bMSIE !no-gzip
 </IfModule>
 Header append Vary User-Agent env=!dont-vary
 #RewriteEngine on
+
 RewriteCond %{HTTP_HOST} ^www\.graph\.tk$ [NC]
 RewriteRule ^(.*)$ http://graph.tk/$1 [R=301,L]
 
 RewriteRule ^about([.]+)?$ about.php$1 [L]
-RewriteRule ^video([.]+)?$ video.php$1 [L]
-RewriteRule ^g_[\d]+\.js$ js.php [L]
 RewriteRule ^manifest\.manifest$ /manifest.php [L]
 <FilesMatch "\.(gz|ico|js|css|png|pdf|jpg|jpeg|gif|m4v|mp4)$">
 ExpiresActive On

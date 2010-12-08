@@ -104,6 +104,52 @@ body{
 
 
 
+ul.json li.end b:before{
+    color:transparent;
+}
+ul.json li b:before{
+    content:'▶';
+    font-size:x-small;
+    padding-right:2px;
+    color:#555;
+}
+ul.json li.show b:before{
+    content:'▼';
+}
+ul.json li.hide b:before{
+    content:'▶';
+}
+ul.json span{
+    color: #1C00CF;
+}
+ul.json b{
+    color:#881391;
+    font-weight:normal;
+}
+
+ul.json strong{
+    font-weight:normal;
+    color:#C41A16;
+}
+ul.json i{
+    color:#aaa;
+    font-style: normal;
+}
+ul.json .child{
+    padding-left:16px;
+}
+ul.json li.hide .child{
+    display:none;
+}
+ul.json{
+    list-style:none;
+    font-family:Menlo, Monaco, monospace;
+    font-size:11px;
+}
+
+
+
+
 /*
  * LaTeX Math in pure HTML and CSS -- No images whatsoever
  * v0.xa

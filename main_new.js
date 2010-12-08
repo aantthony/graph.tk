@@ -1,3 +1,5 @@
+//I'm rewriting it all becaue everything is just way too messy - (my fault)
+
 /*
 
     Copyright © Anthony 2010
@@ -101,9 +103,6 @@ var randfunc_index = 0;
 function randfunc() {
     return randfuncs[(randfunc_index++) % randfuncs.length];
 }
-
-
-
 
 
 
@@ -363,9 +362,167 @@ function drawwhiledrag() {
 
 
 
+function generateJSON(obj){
+		var w=document.createElement("ul");
+		w.className="json";
+		var mode=typeof obj;
+		if(obj===null){
+			mode="undefined";
+		}
+		if(mode=="function" && obj.length!=undefined && obj[0]!=undefined){
+			mode="object";
+		}
+		mode=mode.toString();
+		switch(mode){
+			case "number":
+			
+				var fn=document.createElement("span");
+				fn.appendChild(document.createTextNode(obj));
+				w.appendChild(fn);
+				return w;
+			
+				break;
+			case "string":
+				var fn=document.createElement("strong");
+				fn.appendChild(document.createTextNode("\""+obj+"\""));
+				w.appendChild(fn);
+				return w;
+			
+			break;
+			case "boolean":
+				w.appendChild(document.createTextNode(obj));
+				return w;
+			
+			break;
+			case "undefined":
+			case "function":
+				var fn=document.createElement("i");
+				if(obj===undefined){
+					
+					fn.appendChild(document.createTextNode("undefined"));
+				}else if(obj===null){
+					
+					fn.appendChild(document.createTextNode("null"));
+				}else{
+					
+					fn.appendChild(document.createTextNode(obj.toString()));
+				}
+				w.appendChild(fn);
+				return w;
+			break;
+			
+			case "object":
+			var found=false;
+			
+function do_loop(i){
+	
+	var li=document.createElement("li");
+	
+	var m2=typeof obj[i];
+	if(obj[i]===null || obj[i]===undefined){
+		m2="undefined";
+	}
+	
+	switch(m2){
+		
+		case "function":
+		case "object":
+		
+			var b=document.createElement("b");
+		
+			b.appendChild(document.createTextNode(i+": "));
+		
+			var div=document.createElement("div");
+			
+			div.appendChild(b);
+			div.appendChild(document.createTextNode((typeof(obj[i])).capitalize()));
+			li.appendChild(div);
+			li.obj=obj[i];
+
+			var children=document.createElement("div");
+			children.className="child";
+			li.appendChild(children);
+			li.done=false;
+			li.className="hide";
+			
+			li.addEventListener("click",function(e){
+				e.stopPropagation();
+				if(this.className=="show"){
+					this.className="hide";
+					return;
+				}
+				
+				this.className="show";
+				if(!this.done){
+					this.getElementsByClassName("child")[0].appendChild(generateJSON(this.obj));
+					this.done=true;
+				}
+				
+				return false;
+			},false);
+			
+			break;
+		default:
+		
+			var b=document.createElement("b");
+			li.className="end";
+			b.appendChild(document.createTextNode(i+": "));
+			
+			li.appendChild(b);
+			var str=obj[i];
+			if(m2=="undefined"){
+				var strong=document.createElement("i");
+				strong.appendChild(document.createTextNode(str));
+				li.appendChild(strong);
+			}else if(m2=="boolean"){
+				li.appendChild(document.createTextNode(str));
+			}else if(m2=="string"){
+				var strong=document.createElement("strong");
+				strong.appendChild(document.createTextNode("\""+str+"\""));
+				li.appendChild(strong);
+			}else if(m2=="number"){
+				var strong=document.createElement("span");
+				strong.appendChild(document.createTextNode(str));
+				li.appendChild(strong);
+			}else {
+				li.appendChild(document.createTextNode(str));
+			}
+	
+		
+		
+	}
+	w.appendChild(li);
+}
+    for(i in obj){
+        found=true;
+        do_loop(i);
+    }
+    if(!found){
+        if(obj.length!==undefined){
+            for(var i=0;i<obj.length;i++){
+                found=true;
+                do_loop(obj[i]);
+            }
+            if(!found){
+                w.appendChild(document.createTextNode(obj));
+                return w;
+            }
+        }else{
+            w.appendChild(document.createTextNode(obj));
+            return w;
+        }
+    }
+    break;
+    default:
+    
+    
+    }
+return w;
+		
+}
 
 
-
+String.prototype.capitalize=function(){return this.charAt(0).toUpperCase()+this.slice(1);};
 
 
 
