@@ -96,7 +96,7 @@ function selected($n){
 								</li>
 								<li>
 									<h3>Special functions</h3>
-									<p>It transforms your function into what the computer can calculate. Includes functions such as &Gamma;(x),<br />&zeta;(x), x!, sinc(x),<br /> &Sigma;[0,&infin;,n<sup>x</sup>/n!] ("sum"), and &Pi;[1,5,n] ("product")</p>
+									<p>It transforms your function into what the computer can calculate. Includes functions such as &Gamma;(x),<br />&zeta;(x), x!, sinc(x)</p>
 								</li>
 								<li>
 									<h3>LaTeX Rendering</h3>
