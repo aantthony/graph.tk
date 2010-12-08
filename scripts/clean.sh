@@ -4,4 +4,4 @@ rm -rf ./min/
 rm index.php
 
 mkdir ./min/
-echo * >./min/.gitignore
+echo "*" >./min/.gitignore
