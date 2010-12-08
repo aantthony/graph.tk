@@ -252,49 +252,8 @@ function draw(){
 
 
 function newfunc(funcval) {
-    var newone = proto.cloneNode(true);
-    var inputbox=document.createElement(kinput);
-    var inputbox_container=newone.getElementsByClassName("matheditor")[0];
-    inputbox_container.appendChild(inputbox);
-    
-    
-    if(kinput=="span"){
-        inputbox.appendChild(document.createTextNode(funcval || randfunc()));
-        $(inputbox).mathquill('editable');
-    }else {
-        inputbox.value=funcval || randfunc();
-        inputbox.onkeydown=inputbox.onkeyup=function(){this.onchange()};
-        
-    }
-    g.push(function (x) {
-        return 0;
-    });
-    var currentnodeslength = flist.childNodes.length;
-    inputbox.onchange = function(){getf(undefined,currentnodeslength);};
-    //getf(inputbox, flist.childNodes.length, true);
-    if (newone.getElementsByClassName) {
-        var bs = newone.getElementsByClassName("b");
-        colors_in_use.push(colorss.pop());
-        if (bs.length > 0) {
-            bs[0].style.background = colors_in_use[flist.childNodes.length];
-        }
-    }
-    flist.appendChild(newone);
-    if(kinput=="span"){
-        $(inputbox).mathquill("redraw");
-        if(!funcval){
-            $(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
-        }
-    }else{
-        inputbox.onchange();
-    }
-    if (loaded) {
-        
-        inputbox.focus();
-        //inputbox.select();
-        save();
-        draw();
-    }
+    functions.push(create_function(funcval));
+    update_function_list();
 }
 
 function delfunc() {
