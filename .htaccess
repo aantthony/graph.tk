@@ -13,6 +13,7 @@ AddType image/vnd.microsoft.icon ico
 AddType video/mp4 m4v
 AddType video/mp4 mp4
 AddType text/javascript js
+AddType application/x-chrome-extension crx
 AddType text/cache-manifest manifest
 php_flag zlib.output_compression On
 php_value zlib.output_compression_level 5
@@ -23,7 +24,7 @@ BrowserMatch ^Mozilla/4\.[0678] no-gzip
 BrowserMatch \bMSIE !no-gzip
 </IfModule>
 Header append Vary User-Agent env=!dont-vary
-RewriteEngine on
+#RewriteEngine on
 RewriteCond %{HTTP_HOST} ^www\.graph\.tk$ [NC]
 RewriteRule ^(.*)$ http://graph.tk/$1 [R=301,L]
 

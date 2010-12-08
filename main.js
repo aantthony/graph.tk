@@ -1503,7 +1503,7 @@ if (/Firefox/.test(navigator.userAgent)) {
 if (/Opera/.test(navigator.userAgent)) {
     scaleconst = 0.03
 }
-if (!/Mac OS X/.test(navigator.userAgent)) {
+if (/Chrome/.test(navigator.userAgent) || !/Mac OS X/.test(navigator.userAgent)) {
     scaleconst = 0.1
 }
 function hookEvent(element, eventName, callback) {
