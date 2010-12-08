@@ -24,7 +24,7 @@ function selected($n){
 <head>
 	<meta charset="utf-8" />
 	<title>graph.tk</title>
-	<link href="_about/main.css" type="text/css" rel="stylesheet" media="all">
+	<link href="res_about/main.css" type="text/css" rel="stylesheet" media="all">
 	<meta name="viewport" content="width=device-width; height=device-height; initial-scale=1.0; maximum-scale=1.0; user-scalable=false;"/>
 	<meta name="apple-mobile-web-app-capable" content="no" />
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -35,8 +35,8 @@ function selected($n){
 <body>
 <div class="all">
 	<div id="header">
-		<div class="left"><a href="/"><img src="_about/logo.png" /></a></div>
-		<div class="right"><a href="/"><img src="_about/shad.png" /></a></div>
+		<div class="left"><a href="/"><img src="res_about/logo.png" /></a></div>
+		<div class="right"><a href="/"><img src="res_about/shad.png" /></a></div>
 	</div>
 </div>
 <div id="bar">
@@ -73,7 +73,7 @@ function selected($n){
 		?>
 		<div class="gallery">
 			<div id="sc">
-				<img src="_about/pic1.png" /><img src="_about/pic2.png" /><img src="_about/pic3.png" /><img src="_about/pic4.png" /><img src="_about/pic5.png" /><img src="_about/pic6.png" /><img src="_about/pic7.png" /><img src="_about/pic8.png" />
+				<img src="res_about/pic1.png" /><img src="res_about/pic2.png" /><img src="res_about/pic3.png" /><img src="res_about/pic4.png" /><img src="res_about/pic5.png" /><img src="res_about/pic6.png" /><img src="res_about/pic7.png" /><img src="res_about/pic8.png" />
 				</div>
 		</div>
 		<script type="text/javascript">
