@@ -1,0 +1,16 @@
+{
+  "name": "Graph.tk",
+  "description": "Plot mathematical functions with this graphing utility",
+  "version": "0.0.0.1",
+  "icons": {
+    "128": "icon_128.png"
+  },
+  "app": {
+    "urls": [
+      "http://graph.tk/about"
+    ],
+    "launch": {
+      "web_url": "http://graph.tk/"
+    }
+  }
+}
