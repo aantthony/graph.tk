@@ -2,12 +2,17 @@
 This is a web application that graphs multiple functions, calculates expressions, and graphically solves differential equations.
 
 ### Try it out
-[graph.tk](http://graph.tk/) is the website which this code is used on. The version there is pretty old though.
+[graph.tk](http://graph.tk/) is the website which this code is used on. This repository is more up to date, but currently has bugs.
 
 ### Requirements:
 * JQuery
 * MathQuill
 * A browser that supports the html5 canvas tag.
+
+### More information about this application.
+* [Install Graph.tk as a Chrome app](https://chrome.google.com/webstore/detail/nkhkaamdeplibnmodcgodlkghphdbahk)
+* http://www.chromeexperiments.com/detail/graph-plotter/
+* http://graph.tk/about
 
 ## Plans
 ### Minor Ideas
@@ -15,7 +20,7 @@ This is a web application that graphs multiple functions, calculates expressions
 * allow things like &int;x dx
 
 ### Big Ideas
-* 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted. It can be done! I made [this](http://url3.tk/3d/)
+* 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted.
 * CAS - Not likely to happen, but it would be cool
 
 
