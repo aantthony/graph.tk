@@ -60,6 +60,7 @@ function selected($n){
 	<div class="left">Quick Links
 		<ul class="ql">
 			<li><a href="https://github.com/aantthony/graph.tk">Source on GitHub</a></li>
+			<li><a href="https://chrome.google.com/webstore/detail/nkhkaamdeplibnmodcgodlkghphdbahk">Chrome Web Store</a></li>
 			<li><a href="http://www.chromeexperiments.com/detail/graph-plotter/">Chromexperiments</a></li>
 			<li><a href="http://twitter.com/?status=Javascript graph app! http%3A%2F%2Fgraph.tk%2F">Share on Twitter</a></li>
 			<?php if($p=='overview') { ?><li><iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fgraph.tk%2Fabout%2F&amp;layout=button_count&amp;show_faces=true&amp;width=190&amp;action=like&amp;colorscheme=light&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:190px; height:21px;" allowTransparency="true"></iframe></li><?php } ?>
@@ -86,10 +87,28 @@ function selected($n){
 			}
 			z();
 		</script>
-		<h1>Overview</h1>
+<p style="padding:8px;padding-bottom:2px;font-size:large">It's very easy to use.<br />Use the "+" button to create a new equation.<br />Use "/" for fractions, "^" for exponentials, and "*" for multiplication. To type special characters use "\name". For example, "\sqrt" yields √ and \pi produces a &pi;.</p>
+Example Functions:
+<p><ul>
+<li>3/x</li>
+<li>x^2</li>
+<li>|x| or abs(x)</li>
+<li>x! or fact(x)</li>
+<li>sin(x)</li>
+<li>sin^2(x)</li>
+<li>sinc(x)</li>
+<li>pow(x,2)</li>
+<li>f '(x) or g[0] ' (x) [derivative of first function in list]</li>
+<li>g[1] '(x) [derivative of second function]</li>
+<li>f '' (x) [second derivative]</li>
+<li>Γ(x) [\Gamma(x)]</li>
+<li>ζ(x) [\zeta(x)]</li>
+</ul>
+</p>
+<h1>Features</h1>
 		
-		<p>
-			<ul>
+<p>
+	<ul>
 								<li>
 									<h3>Graphing</h3>
 									<p>Plot multiple functions on the dynamically resizing grid. Scroll to zoom, drag to move.</p>
@@ -144,8 +163,6 @@ function selected($n){
 		<li>diff(0,2,x) (second derivative of g[0])</li>
 		<li>exp(x) (e<sup>x</sup>)</li>
 		<li>log(x) (natural log of x)</li>
-		<li>sum[3,5,n] (3+4+5)</li>
-		<li>product[3,5,n] (3*4*5)</li>
 		<li>fact(x) (same as x!)</li>
 					</ul>
 				</li>
@@ -158,16 +175,10 @@ function selected($n){
 			
 			
 			?><h1>Send a Message</h1>
+			
 			<p>If you have any questions, bug reports, comments, suggestions, or even complaints, please leave a message. If you wish to be attributed for your ideas and suggestions then please say so.</p>
-			<form action="http://url3.tk/ajax.php" method="post" enctype="multipart/form-data">
-								<table style="width:100%;padding-right:90px;border:none">
-									<tr><td style="width:90px"><label for="cname">Your Name:</label></td><td><input name="cname" id="cname" type="text" value="" /></td></tr>
-									<tr><td><label for="cemail">Your Email:</label></td><td><input name="cemail" id="cemail" type="email" value="" /></td></tr>
-									<tr><td style="vertical-align:top;"><label for="cmsg">Message:</label></td><td style="vertical-align:top;"><textarea id="cmsg" name="cmsg" rows="13" style="resize:vertical"></textarea></td></tr>
-									<tr><td>&nbsp;</td><td><input type="hidden" name="a" value="msg" /><input name="sendbtn" type="submit" value="Send Message" /><span style="display:none"><input id="sbmj" style="display:none" type="button" onclick="this.disabled=true;this.value='Sending...';snd()" value="Send Message" /></span></td></tr>
-								</table>
-							</form>
-							
+			<p>Send an email to graph.tk&nbsp;[ at] gmail.com, or shout out to <a href="http://twitter.com/graph_tk">@graph_tk</a> on twitter. Alternatively, you may send a message via the <a href="http://url3.tk/#contact">contact form on url3.tk</a>.
+			</p>
 			<?php
 	 }else if($p=='privacy') {
 			
@@ -178,13 +189,10 @@ function selected($n){
 								<p>In no event should the webmaster be held liable for damages, including but not limited to the loss or corruption of data, any damages, or failure of the website to operate. There is absolutely no guarantee for anything on this site at all. There is absolutely no guarantee for any websites or content linked to from this website. The content and data on this site is not gaurenteeed to be up to date, safe, reliable, or true.</p>
 								<p>If the disclaimer of warranty and limitation of liability provided above cannot be given local legal effect according to their terms, reviewing courts shall apply local law that most closely approximates an absolute waiver of all civil liability in connection with the data or content hosted on this website.</p>
 								<h3>Copyright</h3>
-								<p>All content on this site is copyrighted &copy; by me, unless otherwise specified. Visitors are not allowed to illegaly submit copyright material.</p>
+								<p>All content on this site is copyrighted, unless otherwise specified. Graph.tk, is licensed under the GNU GPL.</p>
 								<p>Ideas/Suggestions: by sending an idea or suggestion you acknowledge that you give all rights over that intellectual property to the website owner. If you wish to have a citation please tell me.</p>
-								<h3>Spam</h3>
-								<p>Spambots are not permitted to visit or use this site. This includes Http referer, comment, and email spam with the intention of gaining web traffic, advertising space, and/or just pure annoyance. Web crawlers are permitted.</p>
 								<h3>Privacy</h3>
-								<p>We use third-party advertising companies to serve ads when you visit our website. These companies may use information (not including your name, address, email address, or telephone number) about your visits to this and other websites in order to provide advertisements about goods and services of interest to you. If you would like more information about this practice and to know your choices about not having this information used by these companies, <a href="http://www.google.com/privacy_ads.html">click here</a>.</p>
-								<p>This website collects information about your visits, for purposes such as hit counters, security, and site and performance analysis. This data will rarely be used to identify you personally.</p>
+								<p>This website collects information about your visits, for purposes such as hit counters, security, and site and performance analysis.</p>
 						
 						
 								<h3 style="text-align: center;">GNU GENERAL PUBLIC LICENSE</h3>
