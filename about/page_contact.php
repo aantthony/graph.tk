@@ -1,6 +1,6 @@
 <?php
 
-$p='contact'
+$p='contact';
 require './header.php';
 		
 	
