@@ -1,10 +1,11 @@
-#bin/bash
+#!/usr/bin/env bash
 #This script will shrink all of the javascript code into min.js
 #min.js will be accessed at g_3234234.js where the number is the time, which does not matter to the server.
 
-
+./scripts/clean.sh
 #packer - main.js
-mkdir tmp
+mkdir -p tmp
+mkdir -p min
 
 VERSION_CODE=$(git rev-parse --short HEAD)
 
@@ -24,11 +25,15 @@ TIME_CODE=${TIME_CODE:0:6}
 cat jquery.js mathquill_modified.js ./tmp/main_packed.js > min/${TIME_CODE}.js
 echo "created: min/${TIME_CODE}.js"
 
-cp main.css ./min/${TIME_CODE}.css
+#cp main.css ./min/${TIME_CODE}.css
+
+#fixes /delete.png or css_dir/delete.png problem, by making all delete.png references go to /delete.png now
+sed s/delete\.png/\\/delete\.png/ main.css >./min/${TIME_CODE}.css
 echo "created: min/${TIME_CODE}.css"
 rm -rf ./tmp
 
-sed s/CSS_FILE/min\\/${TIME_CODE}/ index_template.php | sed s/JS_FILE/min\\/${TIME_CODE}/ >index.php
-echo "created: index.php"
-sed s/CSS_FILE/min\\/${TIME_CODE}/ manifest_template.php | sed s/JS_FILE/min\\/${TIME_CODE}/ >manifest.php
-echo "created: manifest.php"
+sed s/CSS_FILE/min\\/${TIME_CODE}.css/ release.template.html | sed s/JS_FILE/min\\/${TIME_CODE}.js/ >release.html
+echo "created: release.html"
+sed s/CSS_FILE/min\\/${TIME_CODE}.css/ manifest.template.manifest | sed s/JS_FILE/min\\/${TIME_CODE}.js/ >manifest.manifest
+echo "created: manifest.manifest"
+

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
+
+
 rm -rf ./tmp/
 rm -rf ./min/
-rm index.php
+rm -f release.html
 
-mkdir ./min/
-echo "*" >./min/.gitignore

@@ -1,7 +1,7 @@
+manifest.manifest
 #compiled
-index.php
-manifest.php
-error.php
+release.html
+min
 tmp
 # OS generated files #
 ######################
