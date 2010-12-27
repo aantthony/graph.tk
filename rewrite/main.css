@@ -1,0 +1,165 @@
+*{margin:0;padding:0}
+body{
+    font-family:sans-serif;position:relative;
+    overflow:hidden;
+    background:white;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -o-user-select:none;
+    user-select:none;
+}
+.overlay{
+    position:fixed;
+    -webkit-box-shadow:0px 0px 5px black;
+    -moz-box-shadow:0px 0px 5px black;
+    -o-box-shadow:0px 0px 5px black;
+    box-shadow:0px 0px 5px black;
+    box-shadow:3px 3px 5px black;
+    z-Index:80000;
+    color:black;
+    opacity:0.8;
+    padding:4px;
+    background:#eee;
+}
+
+.delete{
+    background:url("delete.png") no-repeat;
+	width:20px;
+	height:21px;
+	display: inline-block;
+/*	float:right;*/
+	margin-left:16px;
+    cursor:pointer;
+    opacity:0.4;
+}
+.delete:hover{
+    opacity:1.0;
+}
+
+#con{
+    top:0;
+    left:0;
+    font-size:small;
+    padding:8px;
+    opacity:0.97;
+}
+
+
+#funcs{
+    right:0;
+    background:white;
+    padding:4px;
+    top:0
+}
+#funcs a:link{
+    font-size:small;
+    margin:8px;
+}
+#funcs ul{
+    list-style: none;
+    width:300px;
+}
+#funcs ul .b{
+	width:16px;
+	height:16px;
+	margin-top:3px;
+	border:1px solid black;
+	float:left;
+	
+}
+
+#funcs ul li{
+    border-bottom:1px solid #444;
+    background:white;
+    margin-bottom:2px;
+}
+
+#ptd{
+    position:fixed;
+    z-Index:80000;
+    color:black;
+    opacity:0.6;
+    left:8px;
+    bottom:8px;
+    background:white;
+    -webkit-transition:opacity 0.5s ease-in-out;
+    -moz-transition:opacity 0.5s ease-in-out;
+    -o-transition:opacity 0.5s ease-in-out;
+    transition: opacity 0.5s ease-in-out;
+    font-size:10pt;
+
+}
+
+#conin{
+    width:100%;
+}
+.monospace{
+    font-family:'Menlo','Andale Mono', Consolas, 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Monaco, monofur, monospace;
+}
+
+
+#logt{
+    background:white;
+    width:300px;
+    resize:both;
+    height:100px;
+    overflow:auto;
+    padding:2px;
+    -webkit-user-select:text;
+    -moz-user-select:text;
+    -o-user-select:text;
+    user-select:text;
+    font-size:90%;
+}
+
+
+
+ul.json li.end b:before{
+    color:transparent;
+}
+ul.json li b:before{
+    content:'▶';
+    font-size:x-small;
+    padding-right:2px;
+    color:#555;
+}
+ul.json li.show b:before{
+    content:'▼';
+}
+ul.json li.hide b:before{
+    content:'▶';
+}
+ul.json span{
+    color: #1C00CF;
+}
+ul.json b{
+    color:#881391;
+    font-weight:normal;
+}
+
+ul.json strong{
+    font-weight:normal;
+    color:#C41A16;
+}
+ul.json i{
+    color:#aaa;
+    font-style: normal;
+}
+ul.json .child{
+    padding-left:16px;
+}
+ul.json li.hide .child{
+    display:none;
+}
+ul.json{
+    list-style:none;
+    font-family:Menlo, Monaco, monospace;
+    font-size:11px;
+}
+
+
+
+/*Mathquill overrides*/
+.mathquill-editable{
+	border:none !important;
+}
