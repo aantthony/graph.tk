@@ -492,6 +492,7 @@ app.ui=(function(){
 		con.style.display="none";
 		con.innerHTML="<div id=\"logt\" class=\"monospace\"><div>graph.tk v1.2 (<a href=\"https://github.com/aantthony/graph.tk/commit/"+app.version+"\">"+app.version+"</a>) &copy; 2010 Anthony<br /><br />License: <a href=\"http://www.gnu.org/licenses/lgpl.html\" title=\"GNU Lesser General Public License\" target=\"_blank\">GNU LGPL</a><br />Source code: <a href=\"http://github.com/aantthony/graph.tk\" target=\"_blank\">graph.tk on GitHub</a><br /><div style=\"font-family:sans-serif;font-size:x-small\">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.<br /><br>Notes:<br>Sometimes x^n will not be x to the power of n, but x XOR n, which is the normal javascript meaning. I have made modifications that allow some easier equations. A dot after the expression means it was evaluated in a non-javascript-standard way. Use size() to change size.<br></div><br>Some cool things to type:<br> Fe, m:H_2O, g(0), g[1](0), en[26], M[26], symbol[26]</div></div><br><input type=\"text\" id=\"conin\" \">";
 		document.body.appendChild(con);
+		//Todo, change the console to look like kingsql.
 		var conin=document.getElementById("conin");
 		conin.onkeydown=function(event){
 			if(event.which==13){
