@@ -64,8 +64,12 @@ body{
 	height:16px;
 	margin-top:3px;
 	border:1px solid black;
+	background: url(b.png);
 	float:left;
 	
+}
+#funcs ul .b.disabled{
+	background: url(disabled.png);
 }
 
 #funcs ul li{

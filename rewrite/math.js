@@ -339,18 +339,33 @@ var latexchars={
 };
 
 //Compile: returns a function of ctx that plots the graph to ctx.
-var obj={"zero":0};
+var obj={};
+function simplify(e){
+	var terms=[];
+	for(var i=0;i<e.length;i++){
+		if(((typeof e[i]) == "object") && e[i].length==1){
+			alert("this code shouldn't be reached I think");
+			e[i]=e[i][0];
+		}
+		if(e[i]=="+" || e[i]=="-"){
+			
+		}
+		
+	}
+	return e;
+}
 function p(inp){
 	var eq=[];
 	e=inp.replace(/\s/g,"");
+	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
 	while(  (e.indexOf("(")!=-1) && (e.indexOf(")")!=-1) ){
-		e=e.replace(/\([\d\-\+\/\*\^a-zA-Z]+\)/g,function(n){
+		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z]+\)/g,function(n){
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
 			return "hash"+h+"hash";
 		});
 	}
-	var op="+-/*^";
+	var op="+-/*^:";
 	var terms=[];
 	var last=0;
 	for(var i=0;i<e.length;i++){
@@ -367,12 +382,16 @@ function p(inp){
 			//terms[i]="e";
 		}
 	}
-	//console.log(["terms",inp,terms]);
-	return terms;
+	if(terms.length==1){
+		//it's too simple. It could (and most likely is), the argument to a function.
+		return terms[0];
+	}else{
+		return simplify(terms);
+	}
 	
 }
 function compile(n){
-	obj=[];
+	obj={};
 	/*
 	
 	operator precedence:

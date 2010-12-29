@@ -527,7 +527,7 @@ app.ui=(function(){
 		_proto.appendChild(_proto_del);
 		
 		
-		funcs.innerHTML+="<input type=\"button\" value=\"+\" onclick=\"graph.add()\"><a href=\"javascript:void(graph.showcon())\">Console</a><a href=\"javascript:void(tdiff())\">Diff Eq</a><a href=\"javascript:void(graph.screenshot())\">Screenshot</a><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"Info\" /></a>";
+		funcs.innerHTML+="<input type=\"button\" value=\"+\" onclick=\"app.add()\"><a href=\"javascript:void(graph.showcon())\">Console</a><a href=\"javascript:void(tdiff())\">Diff Eq</a><a href=\"javascript:void(graph.screenshot())\">Screenshot</a><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"Info\" /></a>";
 		document.body.appendChild(funcs);
 		proto = _proto.cloneNode(true);
 		proto.removeAttribute("id");
