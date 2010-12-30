@@ -21,16 +21,18 @@ body{
     padding:4px;
     background:#eee;
 }
-
+li:hover .delete{visibility:visible}
 .delete{
-    background:url("delete.png") no-repeat;
+    background:url(buttons.png) no-repeat;
 	width:20px;
+	visibility:hidden;
 	height:21px;
+	background-position:-30px -21px;
 	display: inline-block;
-/*	float:right;*/
-	margin-left:16px;
+	float:right;
+	opacity:0.5;
+	margin:8px;
     cursor:pointer;
-    opacity:0.4;
 }
 .delete:hover{
     opacity:1.0;
@@ -43,39 +45,84 @@ body{
     padding:8px;
     opacity:0.97;
 }
-
-
+input[type=button]:hover{
+	opacity:1.0;
+}
+input[type=button]{
+	background:url(buttons.png);
+	border:none;
+	opacity:0.7;
+	width:30px;
+	height:21px;
+	color:rgba(0,0,0,0.0);
+	margin-left:4px;
+	margin-top:3px;
+	margin-bottom:4px;
+}
+.buttons{
+	border-top:1px solid #ececec;
+	background-image: -webkit-gradient(
+	    linear,
+	    left bottom,
+	    left top,
+	    color-stop(0, rgba(194,194,194,0.8)),
+	    color-stop(1, rgba(239,239,239,0.8))
+	);
+	background-image: -moz-linear-gradient(
+	    center bottom,
+	    rgba(194,194,194,0.8) 0%,
+	    rgba(239,239,239,0.8) 100%
+	);
+	
+}
+input[value="?"]{
+	background-position:0px 21px;
+	margin-right:6px;
+}
+input[value=".png"]{
+	background-position:30px 0px;
+}
+input[value=">_"]{
+	background-position:60px 0px;
+}
 #funcs{
     right:0;
-    background:white;
-    padding:4px;
+	opacity:1.0;
+    background:rgba(255,255,255,0.8);
+    padding:0;
     top:0
-}
-#funcs a:link{
-    font-size:small;
-    margin:8px;
 }
 #funcs ul{
     list-style: none;
     width:300px;
 }
-#funcs ul .b{
-	width:16px;
-	height:16px;
-	margin-top:3px;
-	border:1px solid black;
-	background: url(b.png);
-	float:left;
-	
+#funcs ul li:last-child .b{
+	border-bottom:none;
 }
-#funcs ul .b.disabled{
-	background: url(disabled.png);
+#funcs ul .b{
+	text-align:center;
+	width:34px;
+	position:absolute;
+	top:0;
+	bottom:0;
+	padding-top:8px;
+	border-top:1px solid rgba(255,255,255,0.7);
+	border-left:1px solid rgba(255,255,255,0.4);
+	border-right:1px solid rgba(0,0,0,0.7);
+	border-bottom:1px solid rgba(0,0,0,0.85);
+	background:url(s.png) repeat-x;
+	margin-right:3px;
+	
 }
 
 #funcs ul li{
     border-bottom:1px solid #444;
-    background:white;
-    margin-bottom:2px;
+	vertical-align:center;
+	min-height:35px;
+	position:relative;
+}
+#funcs ul li .matheditor{
+	margin-left:38px;
 }
 
 #ptd{

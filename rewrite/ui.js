@@ -514,6 +514,10 @@ app.ui=(function(){
 		var _proto_div=document.createElement("div");
 		_proto_div.className="b";
 		_proto_div.style.backgroundColor="#07c";
+		var _proto_input=document.createElement("input");
+		_proto_input.type="checkbox";
+		_proto_div.appendChild(_proto_input);
+		
 		
 		var _proto_math=document.createElement("span");
 		_proto_math.className="matheditor";
@@ -527,8 +531,11 @@ app.ui=(function(){
 		_proto.appendChild(_proto_math);
 		_proto.appendChild(_proto_del);
 		
+		var buttons=document.createElement("div");
+		buttons.className="buttons";
+		buttons.innerHTML+="<input type=\"button\" value=\"+\" onclick=\"app.add()\"><input type=\"button\" value=\"&gt;_\" onclick=\"app.console()\"><input type=\"button\" value=\".png\" onclick=\"app.png()\"><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"?\" /></a>";
 		
-		funcs.innerHTML+="<input type=\"button\" value=\"+\" onclick=\"app.add()\"><a href=\"javascript:void(graph.showcon())\">Console</a><a href=\"javascript:void(tdiff())\">Diff Eq</a><a href=\"javascript:void(graph.screenshot())\">Screenshot</a><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"Info\" /></a>";
+		funcs.appendChild(buttons);
 		document.body.appendChild(funcs);
 		proto = _proto.cloneNode(true);
 		proto.removeAttribute("id");
@@ -577,8 +584,15 @@ app.ui=(function(){
 	
 
 	
-	
-	
+	var _console=false;
+	ui.console={"show":function(){
+		if(!_console){
+			
+		}
+	},"log":function(){
+		
+		
+	}};
 	
 	return ui;
 })();
