@@ -29,7 +29,9 @@ li:hover .delete{visibility:visible}
 	height:21px;
 	background-position:-30px -21px;
 	display: inline-block;
-	float:right;
+	position:absolute;
+	right:0;
+	top:0;
 	opacity:0.5;
 	margin:8px;
     cursor:pointer;
@@ -122,7 +124,9 @@ input[value=">_"]{
 	position:relative;
 }
 #funcs ul li .matheditor{
+	margin-top:5px;
 	margin-left:38px;
+	margin-bottom:4px;
 }
 
 #ptd{

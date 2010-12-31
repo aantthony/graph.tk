@@ -443,16 +443,21 @@ app.ui=(function(){
 		}
 		ul.appendChild(li);
 		var inputbox = li.getElementsByClassName("matheditor")[0];
-		inputbox.appendChild(document.createTextNode("x+3"));
+		console.log(generateJSON(n));
+		inputbox.appendChild(document.createTextNode(n.equation||""));
+		inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
+		li.addEventListener("mouseup",function(e){
+			$(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
+			$(inputbox).trigger({ type: "keydown", which: 39 });
+			inputbox.getElementsByTagName("textarea")[0].focus();
+		},false);
 		$(inputbox).mathquill("editable");
 		$(inputbox).mathquill("redraw");
-		if(!n){
+		if(!n.auto){
             $(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
+			inputbox.getElementsByTagName("textarea")[0].focus();
         }
 		
-		
-		//If loaded:
-		//  inputbox.focus();
 		return li;
 	},
 	"colors":{

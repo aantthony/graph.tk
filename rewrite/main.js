@@ -83,7 +83,9 @@ function random_hash(){
     return s;
 }
 var graph=function(n){
-	var t=compile(n || randfunc());
+	var latex=n || randfunc();
+	var t=compile(latex);
+	t.equation=latex;
 	t.gid=random_hash();
 	t.color=app.ui.colors.free.pop();
 	t.node=app.ui.add(t);
