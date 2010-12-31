@@ -521,6 +521,7 @@ app.ui=(function(){
 		_proto_div.style.backgroundColor="#07c";
 		var _proto_input=document.createElement("input");
 		_proto_input.type="checkbox";
+		_proto_input.checked="checked";
 		_proto_div.appendChild(_proto_input);
 		
 		

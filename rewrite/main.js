@@ -83,11 +83,18 @@ function random_hash(){
     return s;
 }
 var graph=function(n){
-	var latex=n || randfunc();
+	var latex=n;
+	var auto=0;
+	if(n){
+		auto=true;
+	}else{
+		latex=randfunc();
+	}
 	var t=compile(latex);
 	t.equation=latex;
 	t.gid=random_hash();
 	t.color=app.ui.colors.free.pop();
+	t.auto=auto;
 	t.node=app.ui.add(t);
 	return t;
 };
@@ -98,7 +105,7 @@ app.add=function(n){
 }
 app.init=function (){
 	app.ui.init();
-	app.add();
+	app.add("x+3");
 	if (window.location.hash != "") {
 		//index.html#y=x^2+2
 		window.shouldload = false;
