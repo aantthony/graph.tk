@@ -7,7 +7,7 @@ ul.f li:hover{background:#eee}
 
 #canvas{background:white;margin:0;padding:0;position:fixed;top:0;left:0}
 #logt{background:white;width:300px;resize:both;height:100px;overflow:auto;margin:0;padding:2px;-webkit-user-select:text;-moz-user-select:text;-o-user-select:text;user-select:text;font-family:'Menlo','Andale Mono', Consolas, 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Monaco, monofur, monospace;font-size:90%}
-body{font-family:sans-serif;position:relative;margin:0;padding:0;overflow:hidden;background:white;-webkit-user-select:none;-moz-user-select:none;-o-user-select:none;user-select:none}
+body{font-family:sans-serif;position:relative;margin:0;padding:0;overflow:hidden;background:white;-webkit-user-select:none;-moz-user-select:none;-o-user-select:none;user-select:none;}
 div.b{font-size:12px;border:1px solid black;float:left;width:16px;height:16px;margin-right:3px;color:white;text-align:center}
 .overlay{position:fixed;border:4px solid white;-webkit-box-shadow:0px 0px 5px black;-moz-box-shadow:0px 0px 5px black;-o-box-shadow:0px 0px 5px black;box-shadow:0px 0px 5px black;box-shadow:3px 3px 5px black;z-Index:80000;color:black;opacity:0.8;background:rgb(128,128,128)}
 #con{top:0;left:0;font-size:small;padding:8px;opacity:0.97}img{border:none;vertical-align:middle}
