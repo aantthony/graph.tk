@@ -35,7 +35,7 @@ function safeeval(z) {
 
 
 
-randfuncs = "x^2	f'\\left(x\\right)-1	2e^{-x}	2x+3	\\lambda=3	e^{-\\lambda*x}	\\left(0.5,0.5\\right)	\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n	\\prod_{1}^{4}x-n	m:H_2SO_4	\\left|x^2-4\\right|+2	\\frac1x	x^{-2}	x!	\\ln x	\\sum_{n=1}^{\\infinity}\\frac{x^n}{n}	\\sin x	e^x:\\left[−2,2\\right]	\\tan\\left(x\\right)	\\left(x+2\\right)\\left(x-3\\right)^2	diff\\left(0,2,2x\\right)	\\left(x-2\\right)^2	\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}	\\prod_{n=1}^5\\left(x-n\\right)	\\sum_{n=0}^5n	x^x	\\Gamma\\left(x\\right)	\\frac{x!}{3!-x}	x%3	\\left(x>3\\right)?2x:-3	\\fact\\left(x\\right)	\\frac\\phi x	\\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined	g\\left[0\\right]'\\left(2x\\right)	g\\left[0\\right]\\left(x\\right)+1	\\sqrt x".split("	"); //1 tab - maybe it should be four spaces?
+randfuncs = "x^2@3x@2e^{-x}@2x+3@\\lambda=3@e^{-\\lambda*x}@\\left(0.5,0.5\\right)@\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n@\\prod_{1}^{4}x-n	m:H_2SO_4@\\left|x^2-4\\right|+2@\\frac1x@x^{-2}@x!@\\ln x@\\sum_{n=1}^{\\infinity}\\frac{x^n}{n}@\\sin x@e^x:\\left[−2,2\\right]@\\tan\\left(x\\right)@\\left(x+2\\right)\\left(x-3\\right)^2	diff\\left(0,2,2x\\right)@\\left(x-2\\right)^2@\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}@\\prod_{n=1}^5\\left(x-n\\right)@\\sum_{n=0}^5n@x^x@\\Gamma\\left(x\\right)@\\frac{x!}{3!-x}@x%3@\\left(x>3\\right)?2x:-3@\\fact\\left(x\\right)@\\frac\\phi x@\\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined@g\\left[0\\right]'\\left(2x\\right)@g\\left[0\\right]\\left(x\\right)+1@\\sqrt x".split("@");
 
 var randfunc_index = 0;
 
@@ -89,7 +89,6 @@ var graph=function(n){
 		auto=true;
 	}else{
 		latex=randfunc();
-        latex="3";
 	}
 	var t=compile(latex);
 	t.equation=latex;

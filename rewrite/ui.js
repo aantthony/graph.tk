@@ -6,14 +6,22 @@ Array.prototype.remove = function(elem) {
 String.prototype.capitalize=function(){return this.charAt(0).toUpperCase()+this.slice(1);};
 
 var app={};
+
+
+	//Visible region on screen: (Global so things eval'ed in math.js can access)
+    //Maybe all things should be in one object to avoid stuff like this.
+var boundleft = -10;
+var boundright = 10;
+var boundtop = 10;
+var boundbottom = -10;
+var width,height;
+app.config={"lineWidth":1.5};
 app.ui=(function(){
 	
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
-	
+	var draw;
 	var ctx;
 	var ptd,con,proto;
-	
-	var width,height,draw;
 
 	function resize(){
 	    width=window.innerWidth  || document.body.clientWidth;
@@ -37,11 +45,6 @@ app.ui=(function(){
 	var scaley = scalex;//not always
 
 
-	//Visible region on screen
-	var boundleft = -10;
-	var boundright = 10;
-	var boundtop = 10;
-	var boundbottom = -10;
 
 	var gridsize;
 
@@ -64,7 +67,7 @@ app.ui=(function(){
 	        return;
 	    }
 	    ctx.lineCap = "butt";
-
+        ctx.strokeStyle = ctx.fillStyle = "black";
 	    ctx.clearRect(0, 0, width, height);
 
 	    //try{
@@ -142,8 +145,9 @@ app.ui=(function(){
 		ctx.move(0,0);
 		ctx.line(100,100);
 		ctx.stroke();
-
-
+        
+        ctx.lineWidth=app.config.lineWidth;
+        graphs.forEach(function(e){ctx.strokeStyle=ctx.fillStyle=e.color;e.plot(ctx);});
 	    //}catch(ex){}
 
 
@@ -453,7 +457,8 @@ app.ui=(function(){
         var delete_=li.getElementsByClassName("delete")[0];
 		inputbox.appendChild(document.createTextNode(n.equation||""));
 		inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
-		b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
+		b_.style.backgroundColor=n.color;
+        b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
         delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
         li.addEventListener("mouseup",function(e){
 			$(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });

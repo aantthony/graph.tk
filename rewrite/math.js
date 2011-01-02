@@ -409,7 +409,7 @@ function compile(n){
 	var func=function(){throw("Not a function");};
 	//if it is a function
 	func=eval("("+"function(x){return "+eq[0]+";})");
-	func.plot=function(ctx){};
+	func.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+eq[0]+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+eq[0]+");}ctx.stroke();})");
 	return func;
 	
 	
