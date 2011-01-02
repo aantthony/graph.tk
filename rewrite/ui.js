@@ -471,9 +471,11 @@ app.ui=(function(){
         inputbox.onchange=function(){
             for(var i=0;i<graphs.length;i++){
                 if(graphs[i].gid==n.gid){
-                    var c=compile($(inputbox).mathquill("latex"));
+                    var l__=$(inputbox).mathquill("latex");
+                    var c=compile(l__);
                     graphs[i].f=c.f;
                     graphs[i].plot=c.plot;
+                    graphs[i].equation=l__;
                     draw();
                     break;
                 }

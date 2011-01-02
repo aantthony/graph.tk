@@ -346,7 +346,7 @@ function p(inp){
 	var eq=[];
 	e=inp.replace(/\s/g,"");
 	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
-	while(  (e.indexOf("(")!=-1) && (e.indexOf(")")!=-1) ){
+	while((e.indexOf("(")!=-1) && (e.indexOf(")")!=-1)){
 		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z]+\)/g,function(n){
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
@@ -377,6 +377,35 @@ function p(inp){
 		return simplify(terms);
 	}
 	
+}
+
+/*
+
+Random codes/gibberish to refer to the mathematics that I don't understand and have no-idea what to call.
+
+
+[finding the inverse of a function, solving a relation]
+  Interoperability of the x's:
+    #zD-0 - One x
+        * treat the function as a string of operations.
+        * Just go backwards
+    #zD-1 - x's of only hyper-[1] (+)
+        * Collect terms
+        * go to #zd-0
+    #zD-2 - x's of only hyper-[1,2] (+ *)
+        * Factorise
+        * go to #zd-1
+    #zD-3 - x's of only hyper-[1,2,3] (+ * ^)
+        * Product log
+        * go to #zd-2
+    #zD-4 - x's of only hyper-[1,2,3,4] (+ * ^ ....)  (TODO)
+        * run away fast!
+        * go to #zd-3
+
+
+*/
+function inverse(f){
+    //
 }
 function clean(n){
     for(i in latexchars){
