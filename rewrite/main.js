@@ -112,6 +112,7 @@ app.remove=function(n){
     }
     for(var i=0;i<graphs.length;i++){
         if(graphs[i].gid==n){
+            app.ui.colors.free.push(graphs[i].color);
             graphs.splice(i,1);
         }
     }
