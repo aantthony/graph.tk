@@ -435,22 +435,32 @@ app.ui=(function(){
 	
 	
 	var ui={
+    "remove":function(n){
+        if(!ul){
+			ul=document.getElementById("graphs");
+		}
+        ul.removeChild(n);
+    },
 	"add":function(n){
 		var li=proto.cloneNode(true);
-		
+		li.id="eq-"+n.gid;
 		if(!ul){
 			ul=document.getElementById("graphs");
 		}
 		ul.appendChild(li);
 		var inputbox = li.getElementsByClassName("matheditor")[0];
-		console.log(generateJSON(n));
+        var b_=li.getElementsByClassName("b")[0];
+        var delete_=li.getElementsByClassName("delete")[0];
 		inputbox.appendChild(document.createTextNode(n.equation||""));
 		inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
-		li.addEventListener("mouseup",function(e){
+		b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
+        delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
+        li.addEventListener("mouseup",function(e){
 			$(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
 			$(inputbox).trigger({ type: "keydown", which: 39 });
 			inputbox.getElementsByTagName("textarea")[0].focus();
 		},false);
+        
 		$(inputbox).mathquill("editable");
 		$(inputbox).mathquill("redraw");
 		if(!n.auto){
@@ -529,11 +539,7 @@ app.ui=(function(){
 		_proto_math.className="matheditor";
 		var _proto_del=document.createElement("span");
 		_proto_del.className="delete";
-		_proto_del.onclick=function(e){
-			console.log(["del",e.target]);
-		};
-		
-		_proto.appendChild(_proto_div);
+        _proto.appendChild(_proto_div);
 		_proto.appendChild(_proto_math);
 		_proto.appendChild(_proto_del);
 		

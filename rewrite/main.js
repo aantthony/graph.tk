@@ -89,6 +89,7 @@ var graph=function(n){
 		auto=true;
 	}else{
 		latex=randfunc();
+        latex="3";
 	}
 	var t=compile(latex);
 	t.equation=latex;
@@ -102,6 +103,18 @@ var graph=function(n){
 app.version="GIT_VERSION";
 app.add=function(n){
 	graphs.push(new graph(n));
+}
+app.remove=function(n){
+    if(typeof n !="string"){
+        var id = n.id.substring(3);
+        app.ui.remove(n);
+        n=id;
+    }
+    for(var i=0;i<graphs.length;i++){
+        if(graphs[i].gid==n){
+            graphs.splice(i,1);
+        }
+    }
 }
 app.init=function (){
 	app.ui.init();

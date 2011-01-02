@@ -6,7 +6,6 @@
     
     nospamant[/at/ ]gmail[ /dot/ ]com
     
-    
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -142,17 +141,17 @@ function sinc(x) {
     }
     return sin(pi * x) / (pi * x);
 }
-function sec(x) {return 1 / (cos(x));}
-function csc(x) {return 1 / (sin(x));}
-function cosec(x) {return 1 / (sin(x));}
-function cot(x) {return 1 / (tan(x));}
+function sec(x){return 1 / (cos(x));}
+function csc(x){return 1 / (sin(x));}
+function cot(x){return 1 / (tan(x));}
 var ctg = cot;
 var ctn = cot;
+var cosec=csc;
 
 //Not so basic math
 
 //Bell numbers
-var blln = [1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, 115975, 678570, 4213597, 27644437, 190899322, 1382958545, 10480142147, 82864869804, 682076806159, 5832742205057, 51724158235372, 474869816156751, 4506715738447323];
+var blln = [1,1,2,5,15,52,203,877,4140,21147,115975,678570,4213597,27644437,190899322,1382958545,10480142147,82864869804,682076806159,5832742205057,51724158235372,474869816156751,4506715738447323];
 
 //Riemann zeta function
 function zeta(x) {
@@ -217,17 +216,6 @@ function bellb(x) {
 }
 
 
-
-//Draw a dot instead of a line.
-function pt(vx, vy) {
-    if (vy === undefined) {
-        return vx;
-    }
-    return {
-        "x": vx,
-        "y": vy
-    };
-}
 
 // 'lvl'th derivative of g[ia](x) when x = 'x'
 
@@ -403,13 +391,26 @@ function compile(n){
 	
 	*/
 	//parse
-	var eq=p(n);
+	var eq=n.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
+	
+	if(eq.length>2){
+		throw("Invalid. '=' can only be used once per equation.");
+		return;
+	}
+	var lhs,rhs;
+	if(eq.length==2){
+		lhs=p(eq[0]);
+		rhs=p(eq[1]);
+	}else{
+		lhs=p("y"); //This behaviour should be discouraged implicitly.
+		rhs=p(eq[0]);
+	}
 	//compile
-	return function(ctx){
-		
-		
-		
-	};
+	var func=function(){throw("Not a function");};
+	//if it is a function
+	func=eval("("+"function(x){return "+eq[0]+";})");
+	func.plot=function(ctx){};
+	return func;
 	
 	
 }

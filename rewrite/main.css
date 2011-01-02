@@ -218,3 +218,8 @@ ul.json{
 .mathquill-editable{
 	border:none !important;
 }
+
+
+.mathquill-editable .selection.blur, .mathquill-editable .selection.blur .mathquill-rendered-math, .mathquill-editable .selection.blur sup, .mathquill-editable .selection.blur sub{
+	background:none !important;
+}
