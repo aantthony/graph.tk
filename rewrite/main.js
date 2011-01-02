@@ -90,7 +90,10 @@ var graph=function(n){
 	}else{
 		latex=randfunc();
 	}
-	var t=compile(latex);
+	var t=function(x){return this.f(x);}
+    var c=compile(latex);
+    t.f=c.f;
+    t.plot=c.plot;
 	t.equation=latex;
 	t.gid=random_hash();
 	t.color=app.ui.colors.free.pop();
@@ -113,6 +116,7 @@ app.remove=function(n){
         if(graphs[i].gid==n){
             app.ui.colors.free.push(graphs[i].color);
             graphs.splice(i,1);
+            break;
         }
     }
 }

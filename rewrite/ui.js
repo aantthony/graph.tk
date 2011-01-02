@@ -468,6 +468,17 @@ app.ui=(function(){
         
 		$(inputbox).mathquill("editable");
 		$(inputbox).mathquill("redraw");
+        inputbox.onchange=function(){
+            for(var i=0;i<graphs.length;i++){
+                if(graphs[i].gid==n.gid){
+                    var c=compile($(inputbox).mathquill("latex"));
+                    graphs[i].f=c.f;
+                    graphs[i].plot=c.plot;
+                    draw();
+                    break;
+                }
+            }
+        };
 		if(!n.auto){
             $(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
 			inputbox.getElementsByTagName("textarea")[0].focus();

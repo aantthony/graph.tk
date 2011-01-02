@@ -326,7 +326,7 @@ var latexchars={
 "integral":"∫"
 };
 
-//Compile: returns a function of ctx that plots the graph to ctx.
+//Compile: returns an object with a function of ctx that plots the graph to ctx.
 var obj={};
 function simplify(e){
 	var terms=[];
@@ -378,7 +378,16 @@ function p(inp){
 	}
 	
 }
+function clean(n){
+    for(i in latexchars){
+        while(i.length>1 && n.indexOf("\\"+i)!=-1){
+            n=n.replace("\\"+i,latexchars[i]);
+        }
+  	}
+    return n;
+}
 function compile(n){
+n=clean(n);
 	obj={};
 	/*
 	
@@ -406,11 +415,12 @@ function compile(n){
 		rhs=p(eq[0]);
 	}
 	//compile
-	var func=function(){throw("Not a function");};
+	var ret={"f":function(){throw("Not a function");}};
+    
 	//if it is a function
-	func=eval("("+"function(x){return "+eq[0]+";})");
-	func.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+eq[0]+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+eq[0]+");}ctx.stroke();})");
-	return func;
+	ret.f=eval("("+"function(x){return "+eq[0]+";})");
+	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+eq[0]+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+eq[0]+");}ctx.stroke();})");
+	return ret;
 	
 	
 }
