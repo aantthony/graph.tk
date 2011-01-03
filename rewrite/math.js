@@ -444,13 +444,9 @@ function p(inp){
         
     
     }
-    console.log("a");
-    window.pre_replace=terms;
-    console.log("p="+JSON.stringify(window.pre_replace));
     terms=terms.replace(/^hash[a-z\d]{20}hash$/,function(e){
         return obj[e.substring(4,24)];
     });
-    console.log("b");
     /*
 	for(var i=0;i<terms.length;i++){
 		if(/^hash[a-z\d]{20}hash$/.test(terms[i])){
