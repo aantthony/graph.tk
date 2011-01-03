@@ -353,6 +353,11 @@ function __debug(x){
 var spaces="                     ";
 var level=0;
 function p(inp){
+    if(typeof inp=="number"){
+        return Num(inp);
+    }else if(typeof inp=="object"){
+        return inp;
+    }
 //parses brackets recursively and returns a sum of terms.
     
     level++;
@@ -505,18 +510,50 @@ Array.prototype.replace=function(a,b){
     this.forEach(function(i){
         cp.push(i.replace(a,b));
     });
+    cp.type=this.type;
     return cp;
 };
-Array.prototype.multiply=function(o){
+Array.prototype.divide=function(o){
     var product=[this,o];
     product.type=eqtype.product;
     this=product;
     return this;
-};
-Array.prototype.add=function(o){
+}
+Array.prototype.multiply=function(o){
+    if(this.type==eqtype.product){
+        this.push(p(o));
+        return this;
+    }
     var sum=[this,o];
+    var oldtype=this.type;
+    this.push(this.splice(0,this.length))
+    this[0].type=oldtype;
+    this.push(p(o));
+    this.type=eqtype.product;
+    return this;
+};
+
+Number.prototype.add=function(o){
+    var sum=[p(this),p(o)];
     sum.type=eqtype.sum;
-    this=sum;
+    return sum;
+}
+Number.prototype.multiply=String.prototype.multiply=function(o){
+    var sum=[p(this),p(o)];
+    sum.type=eqtype.product;
+    return sum;
+}
+Array.prototype.add=function(o){
+    if(this.type==eqtype.sum){
+        this.push(p(o));
+        return this;
+    }
+    var sum=[this,o];
+    var oldtype=this.type;
+    this.push(this.splice(0,this.length))
+    this[0].type=oldtype;
+    this.push(p(o));
+    this.type=eqtype.sum;
     return this;
 };
 Array.prototype.size=function(){
@@ -533,13 +570,30 @@ Array.prototype.size=function(){
     return _size;
 };
 function Num(x){
+    return x;
     var ar=[x];
     ar.type=eqtype.number;
     return ar;
 }
-
+String.prototype.invert=function(operation){
+    if(operation==eqtype.sum){
+        return "-"+this;
+    }else if(operation==eqtype.sum){
+        return Num(1).divide(this);
+    }else if(operation===undefined){
+        throw ("Operation not specified");
+    }
+};
 Array.prototype.invert=function(operation){
-
+    var inv=[];
+    
+    inv.type=this.type;
+    this.forEach(function(e){
+        if(!e.invert){
+            throw ("Could not invert: "+e);
+        }
+        inv.push(e.invert(operation));
+    });
 
 };
 Number.prototype.invert=function(operation){
@@ -548,16 +602,19 @@ Number.prototype.invert=function(operation){
         return -this;
     }else if(operation==eqtype.product){
         return 1/this;
+    }else{
+        throw ("Unknown Operation: "+operation);
     }
 };
 Array.prototype.inverse=function(){
     if(!this.search("x")){return;}
     var right=this.replace("x","y");
+    
     var left=p("x");
     left.type=eqtype.sum;
     for(var i=0;i<right.length;i++){
         if(!right[i].search("x")){
-            left.push(right.splice(i,1).invert(this.eqtype));
+            left.push(right.splice(i,1).invert(right.replace));
         }
     }
     console.log(right);
