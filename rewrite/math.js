@@ -356,7 +356,7 @@ function simplify(e){
 	}
 	return e;
 }
-var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10};
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12};
 var __debug_parser=0;
 function __debug(x){
     if(app.version.length!=11){
@@ -832,6 +832,9 @@ Array.prototype.integrate=function(times){
     });
     return m;
 }
+String.prototype.inverse=function(){
+    return this;
+}
 Array.prototype.inverse=function(){
     __debug_iterations++;
     if(this.type==eqtype.constant || this.type==eqtype.number){
@@ -908,7 +911,10 @@ function compile(n){
 	var lhs,rhs;
 	if(eq.length==2){
 		lhs=p(eq[0]);
-		rhs=p(eq[1]);
+        console.log(lhs);
+        var inverselhs=(lhs.replace(/y/g,"x")).inverse();
+        
+		rhs=(inverselhs.replace(/x/g,p(eq[1])));
 	}else{
 		lhs=p("y"); //This behaviour should be discouraged implicitly.
 		rhs=p(eq[0]);
