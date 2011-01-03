@@ -1,15 +1,10 @@
 /*
- Todo: use a function object array instead of just an array/object model.
 
-*/
 
-//math globals
-/*
-
-    Copyright © Anthony 2010
+    Copyright (c) Anthony, Graph.tk and its Collaborators 2010
     http://graph.tk/
     
-    nospamant[/at/ ]gmail[ /dot/ ]com
+    graph.tk[/at/ ]gmail[ /dot/ ]com
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -24,6 +19,19 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
+    
+    
+Todo: use a function object array instead of just an array/object model.
+
+Notes: addition/summation and multiplication should be considered an operation that takes 0 or more aguments.
+There is no division. 
+
+Subtractional shall be replaced with unary negation.
+Divion should be replaced with multiplication by the reciprocal.
+    i.e. x/y = x*y^(-1) , or prod{[x,pow{[y,-1]}]}
+ - should it?
+
+
     */
 
 function format(num, digits) {
