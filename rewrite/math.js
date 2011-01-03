@@ -356,7 +356,7 @@ function simplify(e){
 	}
 	return e;
 }
-var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9};
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10};
 var __debug_parser=0;
 function __debug(x){
     if(app.version.length!=11){
@@ -422,21 +422,44 @@ function p(inp){
     }else if((e.indexOf("*")!=-1) || (e.indexOf("/")!=-1)){
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"*>: "+e);
         terms.type=eqtype.product;
+        var denom=[];
+        denom.type=eqtype.product;
+        var nextisdenom=false;
         for(var i=0;i<e.length;i++){
             if(prod_op.indexOf(e[i])!=-1){
                 var s;
                 if(e[i]=="/"){
                     //Turn division into a unary option.
                     //TODO, this should change the FOLLOWING term
+                    
                     s=e.substring(last,i);
+                    if(nextisdenom){
+                        denom.push(p(s));
+                    }else{
+                        terms.push(p(s));
+                        nextisdenom=true;
+                    }
                 }else{
                     s=e.substring(last,i);
+                    if(nextisdenom){
+                        denom.push(p(s));
+                        nextisdenom=false;
+                    }else{
+                        terms.push(p(s));
+                    }
                 }
-                terms.push(p(s));
                 last=i+1;
             }
         }
-        terms.push(p(e.substring(last,e.length)));
+        if(nextisdenom){
+            denom.push(p(e.substring(last,e.length)));
+        }else{
+            terms.push(p(e.substring(last,e.length)));
+        }
+        if(denom.length){
+            terms=[terms,denom];
+            terms.type=eqtype.fraction;
+        }
     }else if(e.indexOf("^")!=-1){
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"^>: "+e);
         terms.type=eqtype.power;
@@ -482,7 +505,7 @@ function p(inp){
 	}*/
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
-	if(terms.length==1 && __debug(0,1)){
+	if(terms.length==1 && __debug(1,1)){
 		//it's too simple. It could (and most likely is), the argument to a function.
 		return terms[0];
 	}else{
@@ -937,12 +960,18 @@ Array.prototype.toString=function(braces,javascript){
             __exp_count++;
         }else if(self.type==eqtype.power){
             s+="^";
+        }else if(self.type==eqtype.fraction){
+            s+="/";
+        }else if(self.type==eqtype.fn){
+            s+="(";
+            __exp_count++;
         }else{
             s+="@";
         }
         s+=e.toString(10,javascript);
         if(javascript && !_first && __exp_count){
             s+=")";
+            __exp_count--;
         }
     });
     if(braces){
