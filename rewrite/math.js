@@ -273,6 +273,7 @@ var latexchars={
 "infty":"∞",
 "cdot":"*",
 "frac":"",
+"backslash":"\\",
 "alpha":"α",
 "beta":"β",
 'gamma':"γ",
@@ -355,7 +356,7 @@ function simplify(e){
 	}
 	return e;
 }
-var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7};
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8};
 var __debug_parser=0;
 function __debug(x){
     if(app.version.length!=11){
@@ -393,7 +394,6 @@ function p(inp){
             break;
         }
 	}
-	var op="+-/*^:";
 	var terms=[];
 	var last=0;
     //---Sum parse
@@ -437,6 +437,18 @@ function p(inp){
             }
         }
         terms.push(p(e.substring(last,e.length)));
+    }else if((e.indexOf("^")!=-1)){
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"^>: "+e);
+        terms.type=eqtype.power;
+        var be=e.split("^");
+        //^ is an operator that goes from right to left.
+        // i.e., 1^2^3 = 1^(2^(3))
+        /*if(be.length!=2){
+            throw ("^ is a binary operator");
+            return;
+        }*/
+        terms.push(p(be[0]));
+        terms.push(p(be[1]));
     }else{
         var parsednumber=NaN;
         if(!isNaN(parsednumber=Number(e))){
@@ -464,7 +476,7 @@ function p(inp){
 	}*/
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
-	if(terms.length==1 && __debug(1,1)){
+	if(terms.length==1 && __debug(0,1)){
 		//it's too simple. It could (and most likely is), the argument to a function.
 		return terms[0];
 	}else{
@@ -565,12 +577,12 @@ Array.prototype.conjg=function(){
     return this;
     return this.replace(/i/g,p("-i"));
 };
-Array.prototype.search=function(x){
-    return this==x;
-};
 Number.prototype.search=function(x){
     return this==x;
 };
+String.prototype.search=function (x){
+    return this==x;
+}
 Array.prototype.search=function (x){
     var found=false;
     for(var i=0;i<this.length;i++){
@@ -651,7 +663,7 @@ Number.prototype.multiply=String.prototype.multiply=function(o){
     var sum=[p(this),p(o)];
     sum.type=eqtype.product;
     return sum;
-}
+};
 
 Array.prototype._push=function(o){
     //Adds extras to the operation, whatever it is.
@@ -802,10 +814,10 @@ Array.prototype.inverse=function(){
         __debug_iterations--;
         return this;
     }
-    if(!this.search("x")){return;}
+    if(!this.search("x")){throw("No 'x' found!");return;}
     var right=this.replace(/x/g,"y");
     
-    var left=p("x");
+    var left=[p("x")];
     left.type=right.type;
     if(right.type==eqtype.product || right.type==eqtype.sum){
         for(var i=0;i<right.length;i++){
@@ -839,7 +851,7 @@ function clean(n){
             n=n.replace("\\"+i,latexchars[i]);
         }
   	}
-    return n.replace(/\}\{/g,")/(").replace(/\}/g,")").replace(/\{/g,"(");
+    return n.replace(/\}\{/g,")/(").replace(/\}/g,")").replace(/\{/g,"(").replace(/\\/g,"");;
 }
 function p_latex(n){
     return p(clean(n));
@@ -909,6 +921,8 @@ Array.prototype.toString=function(braces){
             s+="+";
         }else if(self.type==eqtype.product){
             s+="*";
+        }else if(self.type==eqtype.power){
+            s+="^";
         }else{
             s+="@";
         }
@@ -917,7 +931,7 @@ Array.prototype.toString=function(braces){
     if(braces){
         s+=")";
     }
-    return s;
+    return (s.replace(/(\-\-)+/g,"+").replace(/\+\++/g,"+").replace(/\-\+/g,"-").replace(/\+\-/g,"-"));
 };
 
 
