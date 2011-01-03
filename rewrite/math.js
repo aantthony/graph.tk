@@ -383,7 +383,7 @@ function p(inp){
     //---Recursive Parentheses parse
 	while((e.indexOf("(")!=-1) && (e.indexOf(")")!=-1)){
         var fail=true;
-		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z]+\)/g,function(n){
+		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z]*\)/g,function(n){
             fail=false;
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
