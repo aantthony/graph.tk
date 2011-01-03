@@ -889,7 +889,7 @@ function compile(n){
     
 	//if it is a function
 	ret.f=eval("("+"function(x){return "+eq[0]+";})");
-	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+eq[0]+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+eq[0]+");}ctx.stroke();})");
+	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+eq[0]+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+rhs.toString(0,true)+");}ctx.stroke();})");
 	return ret;
 	
 	
@@ -910,23 +910,33 @@ Array.prototype.markup=function(){
     return e;
 
 };
-Array.prototype.toString=function(braces){
+Array.prototype.toString=function(braces,javascript){
     var s=braces?"(":"";
     var self=this;
     var _first=true;
+    var __exp_count=0;
     this.forEach(function(e){
         if(_first){
+            if(javascript && self.type==eqtype.power){
+                s+="pow(";
+            }
             _first=false;
         }else if(self.type==eqtype.sum){
             s+="+";
         }else if(self.type==eqtype.product){
             s+="*";
+        }else if(javascript && self.type==eqtype.power){
+            s+=",";
+            __exp_count++;
         }else if(self.type==eqtype.power){
             s+="^";
         }else{
             s+="@";
         }
-        s+=e.toString(10);
+        s+=e.toString(10,javascript);
+        if(javascript && !_first && __exp_count){
+            s+=")";
+        }
     });
     if(braces){
         s+=")";
