@@ -1,3 +1,8 @@
+/*
+ Todo: use a function object array instead of just an array/object model.
+
+*/
+
 //math globals
 /*
 
@@ -544,6 +549,7 @@ Number.prototype.multiply=String.prototype.multiply=function(o){
     return sum;
 }
 Array.prototype.add=function(o){
+    console.log(["will add",this,o]);
     if(this.type==eqtype.sum){
         this.push(p(o));
         return this;
@@ -594,9 +600,10 @@ Array.prototype.invert=function(operation){
         }
         inv.push(e.invert(operation));
     });
-
+    return inv;
 };
 Number.prototype.invert=function(operation){
+    console.log(["invert: "+operation,this]);
     //unary opertation inversion
     if(operation==eqtype.sum){
         return -this;
@@ -613,8 +620,8 @@ Array.prototype.inverse=function(){
     var left=p("x");
     left.type=eqtype.sum;
     for(var i=0;i<right.length;i++){
-        if(!right[i].search("x")){
-            left.push(right.splice(i,1).invert(right.replace));
+        if(!right[i].search("y")){
+            left.add(right.splice(i,1).invert(right.type));
         }
     }
     console.log(right);
