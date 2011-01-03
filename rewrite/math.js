@@ -444,6 +444,13 @@ function p(inp){
         
     
     }
+    console.log("a");
+    window.pre_replace=terms;
+    console.log("p="+JSON.stringify(window.pre_replace));
+    terms=terms.replace(/^hash[a-z\d]{20}hash$/,function(e){
+        return obj[e.substring(4,24)];
+    });
+    console.log("b");
     /*
 	for(var i=0;i<terms.length;i++){
 		if(/^hash[a-z\d]{20}hash$/.test(terms[i])){
@@ -470,21 +477,29 @@ Random codes/gibberish to refer to the mathematics that I don't understand and h
 [finding the inverse of a function, solving a relation]
   Interoperability of the x's:
     #zD-0 - One x
-        * treat the function as a string of operations.
+        * Pop off parts from the right, (pushing to the left) until we have the identity on the right, (and the inverse on  the left), or treat the function as a string of operations.
         * Just go backwards
     #zD-1 - x's of only hyper-[1] (+)
         * Collect terms
         * go to #zd-0
     #zD-2 - x's of only hyper-[1,2] (+ *)
-        * Factorise
+        * Factorise, or expand?. or expand then factorise?
+        * Use formula for ax+bx^2+cx^3+dx^4
+        * Attempt to solve quintics with
+           * guessing
+           * A 4th/5th/3rd order Newton's method
         * go to #zd-1
     #zD-3 - x's of only hyper-[1,2,3] (+ * ^)
-        * Product log
+        * Product log   for x*e^x
+        * Product log   for x+e^x
+        * Something     for x+x*e^x
         * go to #zd-2
     #zD-4 - x's of only hyper-[1,2,3,4] (+ * ^ ....)  (TODO)
         * run away fast!
         * go to #zd-3
 
+
+Current status: not even #zD-0  - Jan 3 aanthony
 
 */
 String.prototype.search=function(x){
@@ -513,7 +528,25 @@ Number.prototype.replace=function(a,b){
 Array.prototype.replace=function(a,b){
     var cp=[];
     this.forEach(function(i){
-        cp.push(i.replace(a,b));
+        if(typeof i=="string"){
+            if(a.test){
+                if(a.test(i)){
+                    if(typeof b=="function"){
+                        cp.push(b(i));
+                    }else{
+                        cp.push(b.replace(a,b));
+                    }
+                }else{
+                    cp.push(i);
+                }
+            }else{
+                if(typeof a=="string"){
+                    cp.push(i.replace(a,b));
+                }
+            }
+        }else{
+            cp.push(i.replace(a,b));
+        }
     });
     cp.type=this.type;
     return cp;
@@ -526,7 +559,8 @@ Array.prototype.divide=function(o){
 }
 Array.prototype.multiply=function(o){
     if(this.type==eqtype.product){
-        this.push(p(o));
+        var self=this;
+        p(o).forEach(function(e){self.push(e)});
         return this;
     }
     var sum=[this,o];
@@ -537,7 +571,12 @@ Array.prototype.multiply=function(o){
     this.type=eqtype.product;
     return this;
 };
-
+String.prototype.forEach=function(e){
+    e(this);
+};
+Number.prototype.forEach=function(e){
+    e(this);
+};
 Number.prototype.add=function(o){
     var sum=[p(this),p(o)];
     sum.type=eqtype.sum;
@@ -548,10 +587,23 @@ Number.prototype.multiply=String.prototype.multiply=function(o){
     sum.type=eqtype.product;
     return sum;
 }
+
+Array.prototype._push=function(o){
+    //Adds extras to the operation, whatever it is.
+    var oe=p(o);
+    oe.type=oe.type || this.type;
+    if(oe.type==this.type){
+        var self=this;
+        oe.forEach(function(e){self.push(e)});
+        return this;
+    }else{
+        throw("Operations do not match: "+this.type+" and "+oe.type);
+    }
+}
 Array.prototype.add=function(o){
-    console.log(["will add",this,o]);
     if(this.type==eqtype.sum){
-        this.push(p(o));
+        var self=this;
+        p(o).forEach(function(e){self.push(e)});
         return this;
     }
     var sum=[this,o];
@@ -592,18 +644,27 @@ String.prototype.invert=function(operation){
 };
 Array.prototype.invert=function(operation){
     var inv=[];
-    
-    inv.type=this.type;
-    this.forEach(function(e){
-        if(!e.invert){
-            throw ("Could not invert: "+e);
+    var _commute=false;
+    inv.type=this.type || eqtype.sum;
+    if(operation==eqtype.sum){
+        if(inv.type==eqtype.sum){
+            _commute=true;
+        }else if(inv.type==eqtype.product){
+            _commute-false;
         }
-        inv.push(e.invert(operation));
+    }
+    var first=true;
+    this.forEach(function(e){
+        if(_commute || first){
+            inv.push(e.invert(operation));
+            first=false;
+        }else{
+            inv.push(operation);
+        }
     });
     return inv;
 };
 Number.prototype.invert=function(operation){
-    console.log(["invert: "+operation,this]);
     //unary opertation inversion
     if(operation==eqtype.sum){
         return -this;
@@ -613,23 +674,57 @@ Number.prototype.invert=function(operation){
         throw ("Unknown Operation: "+operation);
     }
 };
+Array.prototype.setType=function(e){
+    this.type=e;
+    return this;
+
+};
+
+var __debug_iterations=0;
 Array.prototype.inverse=function(){
+    __debug_iterations++;
+    if(this.type==eqtype.constant || this.type==eqtype.number){
+        __debug_iterations--;
+        return;
+    }
+    else if(this.type==eqtype.variable){
+        //a variable is its own inverse with respect to itself.
+        __debug_iterations--;
+        return this;
+    }
     if(!this.search("x")){return;}
-    var right=this.replace("x","y");
+    var right=this.replace(/x/g,"y");
     
     var left=p("x");
-    left.type=eqtype.sum;
-    for(var i=0;i<right.length;i++){
-        if(!right[i].search("y")){
-            left.add(right.splice(i,1).invert(right.type));
+    left.type=right.type;
+    if(right.type==eqtype.product || right.type==eqtype.sum){
+        for(var i=0;i<right.length;i++){
+            if(!right[i].search("y")){
+                left._push(right.splice(i,1).setType(right.type).invert(right.type));
+                i--;
+            }
         }
+    }else{
+        __debug_iterations--;
+        return "right.type is someting else: "+right.type;
     }
-    console.log(right);
+    if(right.length==1 && right[0]=="y"){
+        __debug_iterations--;
+        return left;
+    }
+    if(__debug_iterations>2){
+        throw ("Could not solve. Got as far as "+left.toString()+"="+right.toString());
+    }
+    window.r=right;
+    console.log(left.toString()+"="+right.toString());
+    right_i=right.inverse();
+    console.log(right_i);
+    console.log(left.toString()+"="+right_i.toString());
     return left;
     
 }
 function clean(n){
-    for(i in latexchars){
+    for(var i in latexchars){
         while(i.length>1 && n.indexOf("\\"+i)!=-1){
             n=n.replace("\\"+i,latexchars[i]);
         }
@@ -637,7 +732,7 @@ function clean(n){
     return n;
 }
 function compile(n){
-n=clean(n);
+    n=clean(n);
 	obj={};
 	/*
 	
@@ -677,3 +772,25 @@ n=clean(n);
 
 if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,replacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=replacer;if(replacer&&typeof replacer!=='function'&&(typeof replacer!=='object'||typeof replacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
 
+
+
+
+Array.prototype.toString=function(){
+    var s="(";
+    var self=this;
+    var _first=true;
+    this.forEach(function(e){
+        if(_first){
+            _first=false;
+        }else if(self.type==eqtype.sum){
+            s+="+";
+        }else if(self.type==eqtype.product){
+            s+="*";
+        }else{
+            s+="@";
+        }
+        s+=e.toString();
+    });
+    s+=")";
+    return s;
+};
