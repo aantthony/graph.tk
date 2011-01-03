@@ -479,7 +479,10 @@ Random codes/gibberish to refer to the mathematics that I don't understand and h
 */
 String.prototype.search=function(x){
     return this==x;
-}
+};
+Number.prototype.search=function(x){
+    return this==x;
+};
 Array.prototype.search=function (x){
     var found=false;
     for(var i=0;i<this.length;i++){
@@ -490,28 +493,75 @@ Array.prototype.search=function (x){
 //        }
     }
     return false;
-}
+};
+Number.prototype.replace=function(a,b){
+    if(this===a){
+        return b;
+    }
+    return this;
+};
+Array.prototype.replace=function(a,b){
+    var cp=[];
+    this.forEach(function(i){
+        cp.push(i.replace(a,b));
+    });
+    return cp;
+};
 Array.prototype.multiply=function(o){
     var product=[this,o];
     product.type=eqtype.product;
     this=product;
     return this;
-}
+};
 Array.prototype.add=function(o){
     var sum=[this,o];
     sum.type=eqtype.sum;
     this=sum;
     return this;
-}
-function inverse(f){
-    //
-    var left=[0];
-    for(var i=0;i<f.length;i++){
-        if(!f[i].search("x")){
-            
+};
+Array.prototype.size=function(){
+    var _size=0;
+    for(var i=0;i<this.length;i++){
+        if(typeof this[i]=="string"){
+            _size+=this[i].length+6;
+        }else if(typeof this[i]=="number"){
+            _size+=5;
+        }else{
+            _size+=this[i].size?4+this[i].size():this[i].length;
         }
     }
-    return o;
+    return _size;
+};
+function Num(x){
+    var ar=[x];
+    ar.type=eqtype.number;
+    return ar;
+}
+
+Array.prototype.invert=function(operation){
+
+
+};
+Number.prototype.invert=function(operation){
+    //unary opertation inversion
+    if(operation==eqtype.sum){
+        return -this;
+    }else if(operation==eqtype.product){
+        return 1/this;
+    }
+};
+Array.prototype.inverse=function(){
+    if(!this.search("x")){return;}
+    var right=this.replace("x","y");
+    var left=p("x");
+    left.type=eqtype.sum;
+    for(var i=0;i<right.length;i++){
+        if(!right[i].search("x")){
+            left.push(right.splice(i,1).invert(this.eqtype));
+        }
+    }
+    console.log(right);
+    return left;
     
 }
 function clean(n){
