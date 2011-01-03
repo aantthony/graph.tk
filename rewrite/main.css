@@ -61,6 +61,7 @@ input[type=button]{
 	margin-top:3px;
 	margin-bottom:4px;
 }
+h3{text-align:center}
 .buttons{
 	border-top:1px solid #ececec;
 	background-image: -webkit-gradient(
@@ -77,7 +78,7 @@ input[type=button]{
 	);
 	
 }
-input[value="?"]{
+input[value=""]{
 	background-position:0px 21px;
 	margin-right:6px;
 }

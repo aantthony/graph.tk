@@ -265,8 +265,8 @@ function djkb(ia, lvl, x) {
 
 var latexchars={
 'gt':">",
-"left":"",
-"right":"",
+"left(":"(",
+"right)":")",
 'ge':">=",
 'lt':"<",
 'le':"<=",
@@ -355,7 +355,7 @@ function simplify(e){
 	}
 	return e;
 }
-var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5};
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7};
 var __debug_parser=0;
 function __debug(x){
     if(app.version.length!=11){
@@ -464,7 +464,7 @@ function p(inp){
 	}*/
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
-	if(terms.length==1 && __debug(0,1)){
+	if(terms.length==1 && __debug(1,1)){
 		//it's too simple. It could (and most likely is), the argument to a function.
 		return terms[0];
 	}else{
@@ -506,7 +506,66 @@ Random codes/gibberish to refer to the mathematics that I don't understand and h
 Current status: not even #zD-0  - Jan 3 aanthony
 
 */
-String.prototype.search=function(x){
+
+
+
+
+
+//Vectors:
+function Vector(fn){
+    if((fn!==undefined) && (typeof fn == "function")){
+        var self=function(x){return this;};
+        self.type=eqtype.continuousvector;
+        self.f=fn;
+        return self;
+    }else{
+        var self=[];
+        self.type=eqtype.discretevector;
+        for(var i=0;i<arguments.length;i++){
+            self.push(p(arguments[i]));
+        }
+        return self;
+    }
+    
+};
+
+Array.prototype.re=function(){
+
+};
+Array.prototype.im=function(){
+
+};
+
+Array.prototype.cross=function(o){
+    if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
+        throw ("I or it is not a vector!");
+    }
+}
+Array.prototype.dot=function(o){
+    if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
+        throw ("I or it is not a vector!");
+    }
+    var s=[];
+    s.type=eqtype.sum;
+    var lowest=min(o.length,this.length);
+    
+    for(var i=0;i<lowest;i++){
+        s.add(this[i].multiply(o[i]));
+    }
+    return s;
+};
+Array.prototype.mag=function(){
+    if(this.type==eqtype.discretevector){
+        return this.dot(this.conjg()).pow(Num(0.5));
+    }else{
+        return this.multiply(this.conjg()).pow(Num(0.5));
+    }
+}
+Array.prototype.conjg=function(){
+    return this;
+    return this.replace(/i/g,p("-i"));
+};
+Array.prototype.search=function(x){
     return this==x;
 };
 Number.prototype.search=function(x){
@@ -566,6 +625,8 @@ Array.prototype.multiply=function(o){
         var self=this;
         p(o).forEach(function(e){self.push(e)});
         return this;
+    }else if(this.type==eqtype.discretevector || this.type==eqtype.continuousvector){
+        return self.dot(o);//or cross
     }
     var sum=[this,o];
     var oldtype=this.type;
@@ -694,7 +755,7 @@ Array.prototype.differentiate=function(times){
     itg.type=sum;
     var m;
     if(this.type!=eqtype.sum){
-        m=p(0);
+        m=[];
         m.type=eqtype.sum;
         m.add(this);
     }else if(this.type==eqtype.sum){
@@ -824,8 +885,8 @@ if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typ
 
 
 
-Array.prototype.toString=function(){
-    var s="(";
+Array.prototype.toString=function(braces){
+    var s=braces?"(":"";
     var self=this;
     var _first=true;
     this.forEach(function(e){
@@ -838,8 +899,10 @@ Array.prototype.toString=function(){
         }else{
             s+="@";
         }
-        s+=e.toString();
+        s+=e.toString(10);
     });
-    s+=")";
+    if(braces){
+        s+=")";
+    }
     return s;
 };

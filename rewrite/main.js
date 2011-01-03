@@ -123,15 +123,6 @@ app.remove=function(n){
 app.init=function (){
 	app.ui.init();
 	app.add("x+3");
-	if (window.location.hash != "") {
-		//index.html#y=x^2+2
-		window.shouldload = false;
-		if (window.location.hash[2] == "=") {
-			window.jsonfunc = window.location.hash.substring(3);
-		}else{
-			window.jsondata = unescape(window.location.hash.substring(6));
-		}
-	}
 };
 
 app.init();

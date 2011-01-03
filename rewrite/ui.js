@@ -90,11 +90,6 @@ app.ui=(function(){
 		ctx.lineWidth=2;
 	
 	
-	
-		ctx.beginPath();
-		ctx.move(0,0);
-		ctx.line(1,1);
-		ctx.stroke();
 		
 		
 					
@@ -141,10 +136,6 @@ app.ui=(function(){
 			ctx.line(overright, y);
 			ctx.stroke();
 		}
-		ctx.beginPath();
-		ctx.move(0,0);
-		ctx.line(100,100);
-		ctx.stroke();
         
         ctx.lineWidth=app.config.lineWidth;
         graphs.forEach(function(e){ctx.strokeStyle=ctx.fillStyle=e.color;e.plot(ctx);});
@@ -522,7 +513,14 @@ app.ui=(function(){
 		con.id="con";
 		con.className="overlay";
 		con.style.display="none";
-		con.innerHTML="<div id=\"logt\" class=\"monospace\"><div>graph.tk v1.2 (<a href=\"https://github.com/aantthony/graph.tk/commit/"+app.version+"\">"+app.version+"</a>) &copy; 2010 Anthony<br /><br />License: <a href=\"http://www.gnu.org/licenses/lgpl.html\" title=\"GNU Lesser General Public License\" target=\"_blank\">GNU LGPL</a><br />Source code: <a href=\"http://github.com/aantthony/graph.tk\" target=\"_blank\">graph.tk on GitHub</a><br /><div style=\"font-family:sans-serif;font-size:x-small\">This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.<br /><br>Notes:<br>Sometimes x^n will not be x to the power of n, but x XOR n, which is the normal javascript meaning. I have made modifications that allow some easier equations. A dot after the expression means it was evaluated in a non-javascript-standard way. Use size() to change size.<br></div><br>Some cool things to type:<br> Fe, m:H_2O, g(0), g[1](0), en[26], M[26], symbol[26]</div></div><br><input type=\"text\" id=\"conin\" \">";
+        var logt=document.createElement("div");
+        logt.id="logt";
+        logt.className="monospace";
+        var conin_=document.createElement("input");
+        conin_.id="conin";
+        
+        con.appendChild(logt);
+        con.appendChild(conin_);
 		document.body.appendChild(con);
 		//Todo, change the console to look like kingsql.
 		var conin=document.getElementById("conin");
@@ -562,9 +560,39 @@ app.ui=(function(){
 		
 		var buttons=document.createElement("div");
 		buttons.className="buttons";
-		buttons.innerHTML+="<input type=\"button\" value=\"+\" onclick=\"app.add()\"><input type=\"button\" value=\"&gt;_\" onclick=\"app.console()\"><input type=\"button\" value=\".png\" onclick=\"app.png()\"><small id=\"nosave\"></small><div style=\"float:right\"><a href=\"http://graph.tk/about\" target=\"_blank\"><input type=\"button\" value=\"?\" /></a>";
-		
-		funcs.appendChild(buttons);
+        var newfuncbtn=document.createElement("input");
+        newfuncbtn.value="+";
+        newfuncbtn.type="button";
+        newfuncbtn.onclick=function(){app.add()};
+        buttons.appendChild(newfuncbtn);
+        
+        var newfuncbtn=document.createElement("input");
+        newfuncbtn.value=">_";
+        newfuncbtn.type="button";
+        newfuncbtn.onclick=function(){app.console()};
+        buttons.appendChild(newfuncbtn);
+        
+        var newfuncbtn=document.createElement("input");
+        newfuncbtn.value=".png";
+        newfuncbtn.type="button";
+        newfuncbtn.onclick=function(){app.png()};
+        buttons.appendChild(newfuncbtn);
+        
+        var alink=document.createElement("a");
+        alink.href="http://graph.tk/about/";
+        alink.target="_blank";
+        
+        var newfuncbtn=document.createElement("input");
+        newfuncbtn.value="";
+        newfuncbtn.style.float="right";
+        newfuncbtn.style.textDecoration="none";
+        newfuncbtn.type="button";
+        
+        
+        alink.appendChild(newfuncbtn);
+        buttons.appendChild(alink);
+        
+        funcs.appendChild(buttons);
 		document.body.appendChild(funcs);
 		proto = _proto.cloneNode(true);
 		proto.removeAttribute("id");
