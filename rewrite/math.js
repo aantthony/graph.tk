@@ -356,7 +356,7 @@ function simplify(e){
 	}
 	return e;
 }
-var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8};
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9};
 var __debug_parser=0;
 function __debug(x){
     if(app.version.length!=11){
@@ -437,7 +437,7 @@ function p(inp){
             }
         }
         terms.push(p(e.substring(last,e.length)));
-    }else if((e.indexOf("^")!=-1)){
+    }else if(e.indexOf("^")!=-1){
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"^>: "+e);
         terms.type=eqtype.power;
         var be=e.split("^");
@@ -447,6 +447,12 @@ function p(inp){
             throw ("^ is a binary operator");
             return;
         }*/
+        terms.push(p(be[0]));
+        terms.push(p(be[1]));
+    }else if(e.indexOf(":")!=-1){
+     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
+        terms.type=eqtype.fn;
+        var be=e.split(":");
         terms.push(p(be[0]));
         terms.push(p(be[1]));
     }else{

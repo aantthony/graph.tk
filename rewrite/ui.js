@@ -57,7 +57,7 @@ app.ui=(function(){
 	
 	//camera
 	var cx = (window.innerWidth || document.body.clientWidth  || 640)/-3;
-	var cy = (window.innerHeight|| document.body.clientHeight || 120)/2;
+	var cy = (window.innerHeight|| document.body.clientHeight || 120)*2/3;
 	var cz = 10000;
 
 
@@ -634,6 +634,8 @@ app.ui=(function(){
 
 		window.onresize=resize;
 		canvas.onmousedown=mousedown;
+        document.body.addEventListener("mouseover",function(e){if(e.button){console.log(e)}},false);
+		
 		document.body.addEventListener("mouseup",function(){drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
 		document.body.addEventListener("mousemove",mousemove,false);
 		   	   window.addEventListener("mousewheel",mousewheel,false);
