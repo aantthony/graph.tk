@@ -26,8 +26,8 @@ Todo: use a function object array instead of just an array/object model.
 Notes: addition/summation and multiplication should be considered an operation that takes 0 or more aguments.
 There is no division. 
 
-Subtractional shall be replaced with unary negation.
-Divion should be replaced with multiplication by the reciprocal.
+Subtractional shall be dreplaced with unary negation.
+Divion should be dreplaced with multiplication by the reciprocal.
     i.e. x/y = x*y^(-1) , or prod{[x,pow{[y,-1]}]}
  - should it?
 
@@ -375,15 +375,16 @@ function p(inp){
 //parses brackets recursively and returns a sum of terms.
     
     level++;
+    if(level>15){throw("too recursive for debugging");return;}
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"p: "+inp);
 	var eq=[];
-	var e=inp.replace(/\s/g,"");
-	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
+	var e=inp.dreplace(/\s/g,"");
+	e=e.dreplace(/([a-zA-Z])\(/g,"$1:(");
     
     //---Recursive Parentheses parse
 	while((e.indexOf("(")!=-1) && (e.indexOf(")")!=-1)){
         var fail=true;
-		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z]*\)/g,function(n){
+		e=e.dreplace(/\([\d\:\-\+\/\*\^a-zA-Z]*\)/g,function(n){
             fail=false;
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
@@ -403,55 +404,51 @@ function p(inp){
     if((e.indexOf("+")!=-1) || (e.indexOf("-")!=-1)){
     __debug(!__debug_parser,0) ||console.log(spaces.substring(0,level)+"+>: "+e);
         terms.type=eqtype.sum;
+        var nextisinverse=false;
+        //TODO: Turn subtraction into a unary option.
+
         for(var i=0;i<e.length;i++){
             if(term_op.indexOf(e[i])!=-1){
-                var s;
-                if(e[i]=="-"){
-                    //Turn subtraction into a unary option.
-                    //TODO, this should change the FOLLOWING term
-                    s=(("-"+e.substring(last,i)).replace(/(\-\-)+/g,"+").replace(/\+\++/g,"+"));
+                var s=e.substring(last,i);
+                if(nextisinverse){
+                    terms.push(p(s).multiply(-1));
                 }else{
-                    s=(e.substring(last,i));
+                    terms.push(p(s));
                 }
-                terms.push(p(s));
+                if(e[i]=="-"){
+                    nextisinverse=true;
+                }
                 last=i+1;
             }
         }
-        terms.push(p(e.substring(last,e.length)));
+        if(nextisinverse){
+            terms.push(p(e.substring(last,e.length)).multiply(-1));
+        }else{
+            terms.push(p(e.substring(last,e.length)));
+        }
+        
         
     }else if((e.indexOf("*")!=-1) || (e.indexOf("/")!=-1)){
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"*>: "+e);
         terms.type=eqtype.product;
         var denom=[];
         denom.type=eqtype.product;
-        var nextisdenom=false;
+        var nextisinverse=false;
         for(var i=0;i<e.length;i++){
             if(prod_op.indexOf(e[i])!=-1){
-                var s;
+                var s=e.substring(last,i);
+                if(nextisinverse){
+                        denom.push(p(s));
+                    }else{
+                        terms.push(p(s));
+                    }
                 if(e[i]=="/"){
-                    //Turn division into a unary option.
-                    //TODO, this should change the FOLLOWING term
-                    
-                    s=e.substring(last,i);
-                    if(nextisdenom){
-                        denom.push(p(s));
-                    }else{
-                        terms.push(p(s));
-                        nextisdenom=true;
-                    }
-                }else{
-                    s=e.substring(last,i);
-                    if(nextisdenom){
-                        denom.push(p(s));
-                        nextisdenom=false;
-                    }else{
-                        terms.push(p(s));
-                    }
+                    nextisinverse=true;
                 }
                 last=i+1;
             }
         }
-        if(nextisdenom){
+        if(nextisinverse){
             denom.push(p(e.substring(last,e.length)));
         }else{
             terms.push(p(e.substring(last,e.length)));
@@ -493,7 +490,7 @@ function p(inp){
         
     
     }
-    terms=terms.replace(/^hash[a-z\d]{20}hash$/,function(e){
+    terms=terms.dreplace(/^hash[a-z\d]{20}hash$/,function(e){
         return obj[e.substring(4,24)];
     });
     /*
@@ -604,7 +601,7 @@ Array.prototype.mag=function(){
 }
 Array.prototype.conjg=function(){
     return this;
-    return this.replace(/i/g,p("-i"));
+    return this.dreplace(/i/g,p("-i"));
 };
 Number.prototype.search=function(x){
     return this==x;
@@ -623,13 +620,23 @@ Array.prototype.search=function (x){
     }
     return false;
 };
-Number.prototype.replace=function(a,b){
+String.prototype.dreplace=function(a,b){
+    if(a.test && a.test(this.toString())){
+        return b;
+    }
+    if(this.toString()===a){
+        return b;
+    }
+    return this.toString();
+
+};
+Number.prototype.dreplace=function(a,b){
     if(this===a){
         return b;
     }
     return this;
 };
-Array.prototype.replace=function(a,b){
+Array.prototype.dreplace=function(a,b){
     var cp=[];
     this.forEach(function(i){
         if(typeof i=="string"){
@@ -638,30 +645,49 @@ Array.prototype.replace=function(a,b){
                     if(typeof b=="function"){
                         cp.push(b(i));
                     }else{
-                        cp.push(b.replace(a,b));
+                        cp.push(b.dreplace(a,b));
                     }
                 }else{
                     cp.push(i);
                 }
             }else{
                 if(typeof a=="string"){
-                    cp.push(i.replace(a,b));
+                    cp.push(i.dreplace(a,b));
                 }
             }
         }else{
-            cp.push(i.replace(a,b));
+            cp.push(i.dreplace(a,b));
         }
     });
     cp.type=this.type;
     return cp;
 };
+
+Number.prototype.divide=function(o){
+    var product=[this,p(o)];
+    product.type=eqtype.fraction;
+    return product;
+}
+String.prototype.divide=function(o){
+    var product=[];
+    product.type=eqtype.fraction;
+    product.push(this.toString());
+    product.push(p(o));
+    return product;
+}
 Array.prototype.divide=function(o){
-    var product=[this,o];
-    product.type=eqtype.product;
-    this=product;
-    return this;
+    if(this.type==eqtype.fraction){
+        this[1].multiply(p(o));
+        return this;
+    }
+    var product=[this,p(o)];
+    product.type=eqtype.fraction;
+    return product;
 }
 Array.prototype.multiply=function(o){
+    if(this.type==eqtype.fraction){
+        this[0].multiply(p(o));
+    }
     if(this.type==eqtype.product){
         var self=this;
         p(o).forEach(function(e){self.push(e)});
@@ -707,7 +733,7 @@ Array.prototype._push=function(o){
     }
 }
 Array.prototype.add=function(o){
-    if(this.type==eqtype.sum){
+    if(this.type==eqtype.sum && o.type==eqtype.sum){
         var self=this;
         p(o).forEach(function(e){self.push(e)});
         return this;
@@ -786,7 +812,6 @@ Array.prototype.setType=function(e){
 
 };
 
-var __debug_iterations=0;
 Array.prototype.differentiate=function(times){
     times=times||1;//double derivative etc. (1/2th derivative even)
     if(times<0){
@@ -832,58 +857,72 @@ Array.prototype.integrate=function(times){
     });
     return m;
 }
+//mabye it should be reverse?
 String.prototype.inverse=function(){
-    return this;
+    return this.toString();
 }
 Array.prototype.inverse=function(){
-    __debug_iterations++;
+    var __debug_iterations=0;
     if(this.type==eqtype.constant || this.type==eqtype.number){
-        __debug_iterations--;
         return;
     }
+    //eqtype.variable is deprecated
     else if(this.type==eqtype.variable){
         //a variable is its own inverse with respect to itself.
-        __debug_iterations--;
         return this;
     }
-    if(!this.search("x")){throw("No 'x' found!");return;}
-    var right=this.replace(/x/g,"y");
     
+    if(!this.search("x")){
+        throw("No 'x' found in "+this);return;
+    }
+    var right=[];
+    if(this.type==eqtype.fraction){
+        right.type=eqtype.product;
+        right.push(this[0].dreplace(/x/g,"y"));
+        right.push(p(1).divide(this[1].dreplace(/x/g,"y")));
+    }else{
+        right=this.dreplace(/x/g,"y");
+    }
     var left=[p("x")];
     left.type=right.type;
-    if(right.type==eqtype.product || right.type==eqtype.sum){
+    
+    while(__debug_iterations<10){
+    __debug_iterations++;
+    if(right.type==eqtype.product){
         for(var i=0;i<right.length;i++){
             if(!right[i].search("y")){
-                left._push(right.splice(i,1).setType(right.type).invert(right.type));
+                left=left.divide(right.splice(i,1).setType(eqtype.product));
+                i--;
+            }
+        }
+    }else if(right.type==eqtype.sum){
+        for(var i=0;i<right.length;i++){
+            if(!right[i].search("y")){
+                left=left.add(right.splice(i,1).setType(eqtype.sum).multiply(-1));
                 i--;
             }
         }
     }else{
-        __debug_iterations--;
         return "right.type is someting else: "+right.type;
     }
-    if(right.length==1 && right[0]=="y"){
-        __debug_iterations--;
-        return left;
+    
+    if(right.length==1){
+        if(right[0]=="y"){
+            return left;
+        }
+        right=right[0];
     }
-    if(__debug_iterations>2){
-        throw ("Could not solve. Got as far as "+left.toString()+"="+right.toString());
     }
-    window.r=right;
-    console.log(left.toString()+"="+right.toString());
-    right_i=right.inverse();
-    console.log(right_i);
-    console.log(left.toString()+"="+right_i.toString());
     return left;
     
 }
 function clean(n){
     for(var i in latexchars){
         while(i.length>1 && n.indexOf("\\"+i)!=-1){
-            n=n.replace("\\"+i,latexchars[i]);
+            n=n.dreplace("\\"+i,latexchars[i]);
         }
   	}
-    return n.replace(/\}\{/g,")/(").replace(/\}/g,")").replace(/\{/g,"(").replace(/\\/g,"");;
+    return n.dreplace(/\}\{/g,")/(").dreplace(/\}/g,")").dreplace(/\{/g,"(").dreplace(/\\/g,"");;
 }
 function p_latex(n){
     return p(clean(n));
@@ -902,7 +941,7 @@ function compile(n){
 	
 	*/
 	//parse
-	var eq=n.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
+	var eq=n.dreplace("==","[equals][equals]").split("=").map(function(e){return e.dreplace("[equals][equals]","==");});
 	
 	if(eq.length>2){
 		throw("Invalid. '=' can only be used once per equation.");
@@ -911,10 +950,9 @@ function compile(n){
 	var lhs,rhs;
 	if(eq.length==2){
 		lhs=p(eq[0]);
-        console.log(lhs);
-        var inverselhs=(lhs.replace(/y/g,"x")).inverse();
+        var inverselhs=(lhs.dreplace(/y/g,"x")).inverse();
         
-		rhs=(inverselhs.replace(/x/g,p(eq[1])));
+		rhs=(inverselhs.dreplace(/x/g,p(eq[1])));
 	}else{
 		lhs=p("y"); //This behaviour should be discouraged implicitly.
 		rhs=p(eq[0]);
@@ -924,7 +962,7 @@ function compile(n){
     
 	//if it is a function
     var jsc=rhs.toString(0,true);
-	ret.f=eval("("+"function(x){return "+eq[0]+";})");
+	ret.f=eval("("+"function(x){return "+jsc+";})");
 	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();})");
 	return ret;
 	
@@ -975,7 +1013,7 @@ Array.prototype.toString=function(braces,javascript){
             s+="@";
         }
         s+=e.toString(10,javascript);
-        if(javascript && !_first && __exp_count){
+        if(__exp_count){
             s+=")";
             __exp_count--;
         }
@@ -983,10 +1021,10 @@ Array.prototype.toString=function(braces,javascript){
     if(braces){
         s+=")";
     }
-    return (s.replace(/(\-\-)+/g,"+").replace(/\+\++/g,"+").replace(/\-\+/g,"-").replace(/\+\-/g,"-"));
+    return (s.dreplace(/(\-\-)+/g,"+").dreplace(/\+\++/g,"+").dreplace(/\-\+/g,"-").dreplace(/\+\-/g,"-"));
 };
 
 
-if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,replacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=replacer;if(replacer&&typeof replacer!=='function'&&(typeof replacer!=='object'||typeof replacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
+if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.dreplace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.dreplace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.dreplace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').dreplace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').dreplace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
 
 
