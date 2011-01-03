@@ -332,7 +332,7 @@ function simplify(e){
 	var terms=[];
 	for(var i=0;i<e.length;i++){
 		if(((typeof e[i]) == "object") && e[i].length==1){
-			alert("this code shouldn't be reached I think");
+			(__debug(1,0) || alert("this code shouldn't be reached I think"));
 			e[i]=e[i][0];
 		}
 		if(e[i]=="+" || e[i]=="-"){
@@ -342,39 +342,112 @@ function simplify(e){
 	}
 	return e;
 }
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5};
+var __debug_parser=0;
+function __debug(x){
+    if(app.version.length!=11){
+        alert("Using debug code in release build: "+x.toString());
+    }
+    return x;
+}
+var spaces="                     ";
+var level=0;
 function p(inp){
+//parses brackets recursively and returns a sum of terms.
+    
+    level++;
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"p: "+inp);
 	var eq=[];
-	e=inp.replace(/\s/g,"");
+	var e=inp.replace(/\s/g,"");
 	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
+    
+    //---Recursive Parentheses parse
 	while((e.indexOf("(")!=-1) && (e.indexOf(")")!=-1)){
+        var fail=true;
 		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z]+\)/g,function(n){
+            fail=false;
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
 			return "hash"+h+"hash";
 		});
+        if(fail){
+            throw ("Could not parse parentheses");
+            break;
+        }
 	}
 	var op="+-/*^:";
 	var terms=[];
 	var last=0;
-	for(var i=0;i<e.length;i++){
-		if(op.indexOf(e[i])!=-1){
-			terms.push(e.substring(last,i));
-			terms.push(e[i]);
-			last=i+1;
-		}
-	}
-	terms.push(e.substring(last,e.length));
+    //---Sum parse
+    var term_op="+-";
+    var prod_op="*/";
+    
+    if((e.indexOf("+")!=-1) || (e.indexOf("-")!=-1)){
+    __debug(!__debug_parser,0) ||console.log(spaces.substring(0,level)+"+>: "+e);
+        terms.type=eqtype.sum;
+        for(var i=0;i<e.length;i++){
+            if(term_op.indexOf(e[i])!=-1){
+                var s;
+                if(e[i]=="-"){
+                    //Turn subtraction into a unary option.
+                    //TODO, this should change the FOLLOWING term
+                    s=(("-"+e.substring(last,i)).replace(/(\-\-)+/g,"+").replace(/\+\++/g,"+"));
+                }else{
+                    s=(e.substring(last,i));
+                }
+                terms.push(p(s));
+                last=i+1;
+            }
+        }
+        terms.push(p(e.substring(last,e.length)));
+        
+    }else if((e.indexOf("*")!=-1) || (e.indexOf("/")!=-1)){
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"*>: "+e);
+        terms.type=eqtype.product;
+        for(var i=0;i<e.length;i++){
+            if(prod_op.indexOf(e[i])!=-1){
+                var s;
+                if(e[i]=="/"){
+                    //Turn division into a unary option.
+                    //TODO, this should change the FOLLOWING term
+                    s=e.substring(last,i);
+                }else{
+                    s=e.substring(last,i);
+                }
+                terms.push(p(s));
+                last=i+1;
+            }
+        }
+        terms.push(p(e.substring(last,e.length)));
+    }else{
+        var parsednumber=NaN;
+        if(!isNaN(parsednumber=Number(e))){
+            terms.type=eqtype.number;
+            terms.push(parsednumber);
+        }else if(0){
+            terms.type=eqtype.constant;
+            terms.push(e);
+        }else{
+            terms.type=eqtype.variable;
+            terms.push(e);
+        }
+        
+    
+    }
+    /*
 	for(var i=0;i<terms.length;i++){
 		if(/^hash[a-z\d]{20}hash$/.test(terms[i])){
 			terms[i]=obj[terms[i].substring(4,24)];
 			//terms[i]="e";
 		}
-	}
-	if(terms.length==1){
+	}*/
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
+    level--;
+	if(terms.length==1 && __debug(0,1)){
 		//it's too simple. It could (and most likely is), the argument to a function.
 		return terms[0];
 	}else{
-		return simplify(terms);
+		return __debug(terms,simplify(terms));
 	}
 	
 }
@@ -404,8 +477,42 @@ Random codes/gibberish to refer to the mathematics that I don't understand and h
 
 
 */
+String.prototype.search=function(x){
+    return this==x;
+}
+Array.prototype.search=function (x){
+    var found=false;
+    for(var i=0;i<this.length;i++){
+//        if(this[i].search){
+            if(this[i].search(x)){
+                return true;
+            }
+//        }
+    }
+    return false;
+}
+Array.prototype.multiply=function(o){
+    var product=[this,o];
+    product.type=eqtype.product;
+    this=product;
+    return this;
+}
+Array.prototype.add=function(o){
+    var sum=[this,o];
+    sum.type=eqtype.sum;
+    this=sum;
+    return this;
+}
 function inverse(f){
     //
+    var left=[0];
+    for(var i=0;i<f.length;i++){
+        if(!f[i].search("x")){
+            
+        }
+    }
+    return o;
+    
 }
 function clean(n){
     for(i in latexchars){
