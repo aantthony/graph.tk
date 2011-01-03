@@ -15,6 +15,9 @@ var boundright = 10;
 var boundtop = 10;
 var boundbottom = -10;
 var width,height;
+
+
+
 app.config={"lineWidth":1.5};
 app.ui=(function(){
 	
@@ -435,8 +438,9 @@ app.ui=(function(){
 			ul=document.getElementById("graphs");
 		}
         ul.removeChild(n);
-    },
-	"add":function(n){
+    },"png":function(){
+        window.location=canvas.toDataURL("image/png");
+    },"add":function(n){
 		var li=proto.cloneNode(true);
 		li.id="eq-"+n.gid;
 		if(!ul){
@@ -516,7 +520,8 @@ app.ui=(function(){
         var logt=document.createElement("div");
         logt.id="logt";
         logt.className="monospace";
-        var conin_=document.createElement("input");
+        var conin_=document.createElement("span");
+        
         conin_.id="conin";
         
         con.appendChild(logt);
@@ -524,14 +529,25 @@ app.ui=(function(){
 		document.body.appendChild(con);
 		//Todo, change the console to look like kingsql.
 		var conin=document.getElementById("conin");
-		conin.onkeydown=function(event){
+        $(conin).mathquill("editable");
+		$(conin).mathquill("redraw");
+        
+		conin.addEventListener("keydown",function(event){
 			if(event.which==13){
-				alert(conin.value);
+                if(conin.value=="clear"){
+                    app.ui.console.clear();
+                }else{
+                    logt.appendChild((p_latex($(conin).mathquill("latex")).markup()));
+                
+                //logt.appendChild(generateJSON(usr.eval(conin.value)));
+                }
+                last=conin.value;
+                $(conin).mathquill("latex","");
 			}
-			if(event.which==38){
+			else if(event.which==38){
 				conin.value=last;
 			}
-		};
+		});
 
 		var funcs=document.createElement("div");
 		funcs.className="overlay";
@@ -643,10 +659,22 @@ app.ui=(function(){
 	
 	var _console=false;
 	ui.console={"show":function(){
-		if(!_console){
-			
+        con.style.display="block";
+        _console=true;
+    },"clear":function(){
+        while(logt.firstChild){
+            logt.removeChild(logt.firstChild);
+        }
+	},"hide":function(){
+        con.style.display="none";
+        _console=false;
+	},"toggle":function(){
+        if(!_console){
+			return app.ui.console.show();
 		}
-	},"log":function(){
+        app.ui.console.hide();
+    
+    },"log":function(){
 		
 		
 	}};

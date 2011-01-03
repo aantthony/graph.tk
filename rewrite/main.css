@@ -43,8 +43,10 @@ li:hover .delete{visibility:visible}
 #con{
     top:0;
     left:0;
+    background:white;
     font-size:small;
     padding:8px;
+    border:8px solid #eee;
     opacity:0.97;
 }
 input[type=button]:hover{
@@ -147,7 +149,12 @@ input[value=">_"]{
 }
 
 #conin{
+    background:url(buttons.png) -54px -21px no-repeat;
+    border:none;
+    padding:0;
+    outline:none;
     width:100%;
+    padding-left:10px
 }
 .monospace{
     font-family:'Menlo','Andale Mono', Consolas, 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Monaco, monofur, monospace;
@@ -157,9 +164,6 @@ input[value=">_"]{
 #logt{
     background:white;
     width:300px;
-    resize:both;
-    height:100px;
-    overflow:auto;
     padding:2px;
     -webkit-user-select:text;
     -moz-user-select:text;

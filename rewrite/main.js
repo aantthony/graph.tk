@@ -1,3 +1,10 @@
+var usr=(function(){
+var usr={"eval":function(d){
+    return eval(d);
+},"clear":function(){app.ui.console.clear();}};
+
+return usr;
+})();
 
 var graphs=[];
 function getlatexpart(match, submatch)
@@ -106,6 +113,12 @@ app.version="GIT_VERSION";
 app.add=function(n){
 	graphs.push(new graph(n));
 }
+app.png=function(){
+    app.ui.png();
+};
+app.console=function(){
+    app.ui.console.toggle();
+};
 app.remove=function(n){
     if(typeof n !="string"){
         var id = n.id.substring(3);
