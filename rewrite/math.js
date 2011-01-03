@@ -685,6 +685,51 @@ Array.prototype.setType=function(e){
 };
 
 var __debug_iterations=0;
+Array.prototype.differentiate=function(times){
+    times=times||1;//double derivative etc. (1/2th derivative even)
+    if(times<0){
+        return this.integrate(-times);
+    }
+    var itg=[];//itf so it's similar to the integrate function
+    itg.type=sum;
+    var m;
+    if(this.type!=eqtype.sum){
+        m=p(0);
+        m.type=eqtype.sum;
+        m.add(this);
+    }else if(this.type==eqtype.sum){
+        m=this;
+    }else{
+        throw ("Invalid Expression Type: "+this.type);
+    }
+    m.forEach(function(e){
+        m.push(e.integrate(times));
+    });
+    return m;
+
+}
+Array.prototype.integrate=function(times){
+    times=times||1;//double integral etc. (1/2th integral even)
+    if(times<0){
+        return this.differentiate(-times);
+    }
+    var itg=[];
+    itg.type=sum;
+    var m;
+    if(this.type!=eqtype.sum){
+        m=p(0);
+        m.type=eqtype.sum;
+        m.add(this);
+    }else if(this.type==eqtype.sum){
+        m=this;
+    }else{
+        throw ("Invalid Expression Type: "+this.type);
+    }
+    m.forEach(function(e){
+        m.push(e.integrate(times));
+    });
+    return m;
+}
 Array.prototype.inverse=function(){
     __debug_iterations++;
     if(this.type==eqtype.constant || this.type==eqtype.number){
