@@ -112,6 +112,7 @@ var graph=function(n){
 app.version="GIT_VERSION";
 app.add=function(n){
 	graphs.push(new graph(n));
+    app.ui.refresh();
 }
 app.png=function(){
     app.ui.png();

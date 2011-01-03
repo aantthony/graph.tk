@@ -888,8 +888,9 @@ function compile(n){
 	var ret={"f":function(){throw("Not a function");}};
     
 	//if it is a function
+    var jsc=rhs.toString(0,true);
 	ret.f=eval("("+"function(x){return "+eq[0]+";})");
-	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+eq[0]+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+rhs.toString(0,true)+");}ctx.stroke();})");
+	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();})");
 	return ret;
 	
 	

@@ -44,7 +44,7 @@ app.ui=(function(){
 
 	var drag;
 
-	var scalex = 128;
+	var scalex = 64;
 	var scaley = scalex;//not always
 
 
@@ -56,8 +56,8 @@ app.ui=(function(){
 	var _cy = 0;
 	
 	//camera
-	var cx = 0;
-	var cy = 0;
+	var cx = (window.innerWidth || document.body.clientWidth  || 640)/-3;
+	var cy = (window.innerHeight|| document.body.clientHeight || 120)/2;
 	var cz = 10000;
 
 
@@ -141,7 +141,12 @@ app.ui=(function(){
 		}
         
         ctx.lineWidth=app.config.lineWidth;
-        graphs.forEach(function(e){ctx.strokeStyle=ctx.fillStyle=e.color;e.plot(ctx);});
+        graphs.forEach(function(e){
+            if(!e.disabled){
+                ctx.strokeStyle=ctx.fillStyle=e.color;
+                e.plot(ctx);
+            }
+        });
 	    //}catch(ex){}
 
 
@@ -448,9 +453,19 @@ app.ui=(function(){
 		}
 		ul.appendChild(li);
 		var inputbox = li.getElementsByClassName("matheditor")[0];
-        var b_=li.getElementsByClassName("b")[0];
+        var b_=li.firstChild;
+        var check_=li.firstChild.firstChild;
         var delete_=li.getElementsByClassName("delete")[0];
 		inputbox.appendChild(document.createTextNode(n.equation||""));
+        check_.addEventListener("change",function(e){
+            for(var i=0;i<graphs.length;i++){
+                if(graphs[i].gid==n.gid){
+                    graphs[i].disabled=!check_.checked;
+                    draw();
+                    break;
+                }
+            }
+        });
 		inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
 		b_.style.backgroundColor=n.color;
         b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
@@ -486,8 +501,11 @@ app.ui=(function(){
 	"colors":{
 		"free":("#f08,#8f0,#80f,#f08,#880,#088,#808,#0ff,#f80,#f0f,#04f,#0a0,#f00,#07c".split(",")),
 	},
-	
-	"init":function(){
+	"refresh":function(){
+        if(draw){
+            draw();
+        }
+    },"init":function(){
 		var fullscreen=window.parent.length?false:true;
 		(new Image()).src="grabbing.gif";
 		canvas=document.createElement("canvas");
