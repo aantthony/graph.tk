@@ -1,11 +1,10 @@
-//math globals
 /*
 
-    Copyright © Anthony 2010
+
+    Copyright (c) Anthony, Graph.tk and its Collaborators 2010
     http://graph.tk/
     
-    nospamant[/at/ ]gmail[ /dot/ ]com
-    
+    graph.tk[/at/ ]gmail[ /dot/ ]com
     
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -20,6 +19,19 @@
     You should have received a copy of the GNU Lesser General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
+    
+    
+Todo: use a function object array instead of just an array/object model.
+
+Notes: addition/summation and multiplication should be considered an operation that takes 0 or more aguments.
+There is no division. 
+
+Subtractional shall be dreplaced with unary negation.
+Divion should be dreplaced with multiplication by the reciprocal.
+    i.e. x/y = x*y^(-1) , or prod{[x,pow{[y,-1]}]}
+ - should it?
+
+
     */
 
 function format(num, digits) {
@@ -83,7 +95,7 @@ for (var index = 0; index < symbol.length; index++) {
 }
 
 
-//Basic math functions
+//Basic math functions -> window (global)
 
 var sin = Math.sin;
 var cos = Math.cos;
@@ -142,17 +154,17 @@ function sinc(x) {
     }
     return sin(pi * x) / (pi * x);
 }
-function sec(x) {return 1 / (cos(x));}
-function csc(x) {return 1 / (sin(x));}
-function cosec(x) {return 1 / (sin(x));}
-function cot(x) {return 1 / (tan(x));}
+function sec(x){return 1 / (cos(x));}
+function csc(x){return 1 / (sin(x));}
+function cot(x){return 1 / (tan(x));}
 var ctg = cot;
 var ctn = cot;
+var cosec=csc;
 
 //Not so basic math
 
 //Bell numbers
-var blln = [1, 1, 2, 5, 15, 52, 203, 877, 4140, 21147, 115975, 678570, 4213597, 27644437, 190899322, 1382958545, 10480142147, 82864869804, 682076806159, 5832742205057, 51724158235372, 474869816156751, 4506715738447323];
+var blln = [1,1,2,5,15,52,203,877,4140,21147,115975,678570,4213597,27644437,190899322,1382958545,10480142147,82864869804,682076806159,5832742205057,51724158235372,474869816156751,4506715738447323];
 
 //Riemann zeta function
 function zeta(x) {
@@ -218,17 +230,6 @@ function bellb(x) {
 
 
 
-//Draw a dot instead of a line.
-function pt(vx, vy) {
-    if (vy === undefined) {
-        return vx;
-    }
-    return {
-        "x": vx,
-        "y": vy
-    };
-}
-
 // 'lvl'th derivative of g[ia](x) when x = 'x'
 
 var difflevel = 0; //Used to prevent massive stacks in the recursive djkb()
@@ -264,14 +265,17 @@ function djkb(ia, lvl, x) {
 
 var latexchars={
 'gt':">",
-"left":"",
-"right":"",
+"left(":"(",
+"right)":")",
+"left[":"[",
+"right]":"]",
 'ge':">=",
 'lt':"<",
 'le':"<=",
 "infty":"∞",
 "cdot":"*",
 "frac":"",
+"backslash":"\\",
 "alpha":"α",
 "beta":"β",
 'gamma':"γ",
@@ -337,4 +341,875 @@ var latexchars={
 "int":"∫",
 "integral":"∫"
 };
+
+//Compile: returns an object with a function of ctx that plots the graph to ctx.
+var obj={};
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13};
+var __debug_parser=0;
+function __debug(x){
+    if(app.version.length!=11){
+        alert("Using debug code in release build: "+x.toString());
+    }
+    return x;
+}
+var spaces="                     ";
+var level=0;
+function p(inp){
+    if(typeof inp=="number"){
+        return Num(inp);
+    }else if(typeof inp=="object"){
+        return inp;
+    }
+//parses brackets recursively and returns a sum of terms.
+    
+    level++;
+    if(level>15){throw("too recursive for debugging");return;}
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"p: "+inp);
+	var eq=[];
+	var e=inp.replace(/\s/g,"").replace(/\]/g,")").replace(/\[/g,"(").replace(/\)\(/g,")*(");
+    
+    //TODO: known functions only
+	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
+    
+    if(e.indexOf("=")!=-1){
+        var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
+        if(eq.length==2){
+            return [p(eq[0]),p(eq[1])].setType(eqtype.equality);
+        }
+        throw("Invalid. '=' can only be used once per equation.");
+        return;
+    }
+    //---Recursive Parentheses parse
+	while((e.indexOf("(")!=-1) && (e.indexOf(")")!=-1)){
+        var fail=true;
+		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z\,]*\)/g,function(n){
+            fail=false;
+			var h=random_hash();
+			obj[h]=p(n.substring(1,n.length-1));
+			return "hash"+h+"hash";
+		});
+        if(fail){
+            throw ("Could not parse parentheses");
+            break;
+        }
+	}
+	var terms=[];
+	var last=0;
+    //---Sum parse
+    var term_op="+-";
+    var prod_op="*/";
+    
+    if(e.indexOf(",")!=-1){
+        __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
+        terms.type=eqtype.discretevector;
+        var be=e.split(",");
+        be.forEach(function(zz){
+            terms.push(p(zz));
+        });
+    
+    }else if((e.indexOf("+")!=-1) || (e.indexOf("-")!=-1)){
+    __debug(!__debug_parser,0) ||console.log(spaces.substring(0,level)+"+>: "+e);
+        terms.type=eqtype.sum;
+        var nextisinverse=false;
+        //TODO: Turn subtraction into a unary option.
+
+        for(var i=0;i<e.length;i++){
+            if(term_op.indexOf(e[i])!=-1){
+                var s=e.substring(last,i);
+                if(nextisinverse){
+                    terms.push(p(s).multiply(-1));
+                }else{
+                    terms.push(p(s));
+                }
+                if(e[i]=="-"){
+                    nextisinverse=true;
+                }
+                last=i+1;
+            }
+        }
+        if(nextisinverse){
+            terms.push(p(e.substring(last,e.length)).multiply(-1));
+        }else{
+            terms.push(p(e.substring(last,e.length)));
+        }
+        
+        
+    }else if((e.indexOf("*")!=-1) || (e.indexOf("/")!=-1)){
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"*>: "+e);
+        terms.type=eqtype.product;
+        var denom=[];
+        denom.type=eqtype.product;
+        var nextisinverse=false;
+        for(var i=0;i<e.length;i++){
+            if(prod_op.indexOf(e[i])!=-1){
+                var s=e.substring(last,i);
+                if(nextisinverse){
+                        denom.push(p(s));
+                    }else{
+                        terms.push(p(s));
+                    }
+                if(e[i]=="/"){
+                    nextisinverse=true;
+                }
+                last=i+1;
+            }
+        }
+        if(nextisinverse){
+            denom.push(p(e.substring(last,e.length)));
+        }else{
+            terms.push(p(e.substring(last,e.length)));
+        }
+        if(denom.length){
+            terms=[terms,denom];
+            terms.type=eqtype.fraction;
+        }
+    }else if(e.indexOf("^")!=-1){
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"^>: "+e);
+        terms.type=eqtype.power;
+        var be=e.split("^");
+        //^ is an operator that goes from right to left.
+        // i.e., 1^2^3 = 1^(2^(3))
+        /*if(be.length!=2){
+            throw ("^ is a binary operator");
+            return;
+        }*/
+        terms.push(p(be[0]));
+        terms.push(p(be[1]));
+    }else if(e.indexOf(":")!=-1){
+     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
+        terms.type=eqtype.fn;
+        var be=e.split(":");
+        terms.push(p(be[0]));
+        terms.push(p(be[1]));
+    }else{
+        var parsednumber=NaN;
+        if(!isNaN(parsednumber=Number(e))){
+            terms.type=eqtype.number;
+            terms.push(parsednumber);
+        }else if(0){
+            terms.type=eqtype.constant;
+            terms.push(e);
+        }else{
+            terms.type=eqtype.variable;
+            terms.push(e);
+        }
+        
+    
+    }
+    terms=terms.dreplace(/^hash[a-z\d]{20}hash$/,function(e){
+        return obj[e.substring(4,24)];
+    });
+    /*
+	for(var i=0;i<terms.length;i++){
+		if(/^hash[a-z\d]{20}hash$/.test(terms[i])){
+			terms[i]=obj[terms[i].substring(4,24)];
+			//terms[i]="e";
+		}
+	}*/
+    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
+    level--;
+	while(typeof terms=="object" && terms.length==1){
+		terms=terms[0];
+	}
+    return terms.simplify();
+	
+}
+
+/*
+
+Random codes/gibberish to refer to the mathematics that I don't understand and have no-idea what to call.
+
+
+[finding the inverse of a function, solving a relation]
+  Interoperability of the x's:
+    #zD-0 - One x
+        * Pop off parts from the right, (pushing to the left) until we have the identity on the right, (and the inverse on  the left), or treat the function as a string of operations.
+        * Just go backwards
+    #zD-1 - x's of only hyper-[1] (+)
+        * Collect terms
+        * go to #zd-0
+    #zD-2 - x's of only hyper-[1,2] (+ *)
+        * Factorise, or expand?. or expand then factorise?
+        * Use formula for ax+bx^2+cx^3+dx^4
+        * Attempt to solve quintics with
+           * guessing
+           * A 4th/5th/3rd order Newton's method
+        * go to #zd-1
+    #zD-3 - x's of only hyper-[1,2,3] (+ * ^)
+        * Product log   for x*e^x
+        * Product log   for x+e^x
+        * Something     for x+x*e^x
+        * go to #zd-2
+    #zD-4 - x's of only hyper-[1,2,3,4] (+ * ^ ....)  (TODO)
+        * run away fast!
+        * go to #zd-3
+
+
+Current status: not even #zD-0  - Jan 3 aanthony
+
+*/
+
+
+
+
+
+//Vectors:
+function Vector(fn){
+    if((fn!==undefined) && (typeof fn == "function")){
+        var self=function(x){return this;};
+        self.type=eqtype.continuousvector;
+        self.f=fn;
+        return self;
+    }else{
+        var self=[];
+        self.type=eqtype.discretevector;
+        for(var i=0;i<arguments.length;i++){
+            self.push(p(arguments[i]));
+        }
+        return self;
+    }
+    
+};
+
+Array.prototype.re=function(){
+
+};
+Array.prototype.im=function(){
+
+};
+
+Array.prototype.cross=function(o){
+    if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
+        throw ("I or it is not a vector!");
+    }
+}
+Array.prototype.dot=function(o){
+    if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
+        throw ("I or it is not a vector!");
+    }
+    var s=[];
+    s.type=eqtype.sum;
+    var lowest=min(o.length,this.length);
+    
+    for(var i=0;i<lowest;i++){
+        s.add(this[i].multiply(o[i]));
+    }
+    return s;
+};
+Array.prototype.mag=function(){
+    if(this.type==eqtype.discretevector){
+        return this.dot(this.conjg()).pow(Num(0.5));
+    }else{
+        return this.multiply(this.conjg()).pow(Num(0.5));
+    }
+}
+Array.prototype.conjg=function(){
+    return this;
+    return this.dreplace(/i/g,p("-i"));
+};
+Number.prototype.search=function(x){
+    return this==x;
+};
+String.prototype.search=function (x){
+    return this==x;
+}
+Array.prototype.search=function (x){
+    var found=false;
+    for(var i=0;i<this.length;i++){
+//        if(this[i].search){
+            if(this[i].search(x)){
+                return true;
+            }
+//        }
+    }
+    return false;
+};
+String.prototype.dreplace=function(a,b){
+    if(a.test && a.test(this.toString())){
+        return b;
+    }
+    if(this.toString()===a){
+        return b;
+    }
+    return this.toString();
+
+};
+Number.prototype.dreplace=function(a,b){
+    if(this===a){
+        return b;
+    }
+    return this;
+};
+Array.prototype.dreplace=function(a,b){
+    var cp=[];
+    this.forEach(function(i){
+        if(typeof i=="string"){
+            if(a.test){
+                if(a.test(i)){
+                    if(typeof b=="function"){
+                        cp.push(b(i));
+                    }else{
+                        cp.push(b.dreplace(a,b));
+                    }
+                }else{
+                    cp.push(i);
+                }
+            }else{
+                if(typeof a=="string"){
+                    cp.push(i.dreplace(a,b));
+                }
+            }
+        }else{
+            cp.push(i.dreplace(a,b));
+        }
+    });
+    cp.type=this.type;
+    return cp;
+};
+
+Number.prototype.divide=function(o){
+    var product=[this,p(o)];
+    product.type=eqtype.fraction;
+    return product;
+}
+String.prototype.divide=function(o){
+    var product=[];
+    product.type=eqtype.fraction;
+    product.push(this.toString());
+    product.push(p(o));
+    return product;
+}
+Array.prototype.divide=function(o){
+    if(this.type==eqtype.fraction){
+        this[1].multiply(p(o));
+        return this;
+    }
+    var product=[this,p(o)];
+    product.type=eqtype.fraction;
+    return product;
+}
+Array.prototype.multiply=function(o){
+    if(this.type==eqtype.fraction){
+        this[0].multiply(p(o));
+    }
+    if(this.type==eqtype.product){
+        var self=this;
+        p(o).forEach(function(e){self.push(e)});
+        return this;
+    }else if(this.type==eqtype.discretevector || this.type==eqtype.continuousvector){
+        return self.dot(o);//or cross
+    }
+    var sum=[this,o];
+    var oldtype=this.type;
+    this.push(this.splice(0,this.length))
+    this[0].type=oldtype;
+    this.push(p(o));
+    this.type=eqtype.product;
+    return this;
+};
+String.prototype.forEach=function(e){
+    e(this);
+};
+Number.prototype.forEach=function(e){
+    e(this);
+};
+Number.prototype.add=function(o){
+    var sum=[p(this),p(o)];
+    sum.type=eqtype.sum;
+    return sum;
+}
+Number.prototype.multiply=String.prototype.multiply=function(o){
+    var sum=[p(this),p(o)];
+    sum.type=eqtype.product;
+    return sum;
+};
+
+Array.prototype._push=function(o){
+    //Adds extras to the operation, whatever it is.
+    var oe=p(o);
+    oe.type=oe.type || this.type;
+    if(oe.type==this.type){
+        var self=this;
+        oe.forEach(function(e){self.push(e)});
+        return this;
+    }else{
+        throw("Operations do not match: "+this.type+" and "+oe.type);
+    }
+}
+Array.prototype.add=function(o){
+    if(this.type==eqtype.sum && o.type==eqtype.sum){
+        var self=this;
+        p(o).forEach(function(e){self.push(e)});
+        return this;
+    }
+    if(this.type==eqtype.sum){
+        this.push(p(o));
+        return this;
+    }
+    var sum=[this,o];
+    var oldtype=this.type;
+    this.push(this.splice(0,this.length))
+    this[0].type=oldtype;
+    this.push(p(o));
+    this.type=eqtype.sum;
+    return this;
+};
+Array.prototype.size=function(){
+    var _size=0;
+    for(var i=0;i<this.length;i++){
+        if(typeof this[i]=="string"){
+            _size+=this[i].length+6;
+        }else if(typeof this[i]=="number"){
+            _size+=5;
+        }else{
+            _size+=this[i].size?4+this[i].size():this[i].length;
+        }
+    }
+    return _size;
+};
+function Num(x){
+    return x;
+    var ar=[x];
+    ar.type=eqtype.number;
+    return ar;
+}
+String.prototype.invert=function(operation){
+    if(operation==eqtype.sum){
+        return "-"+this;
+    }else if(operation==eqtype.sum){
+        return Num(1).divide(this);
+    }else if(operation===undefined){
+        throw ("Operation not specified");
+    }
+};
+Array.prototype.invert=function(operation){
+    var inv=[];
+    var _commute=false;
+    inv.type=this.type || eqtype.sum;
+    if(operation==eqtype.sum){
+        if(inv.type==eqtype.sum){
+            _commute=true;
+        }else if(inv.type==eqtype.product){
+            _commute-false;
+        }
+    }
+    var first=true;
+    this.forEach(function(e){
+        if(_commute || first){
+            inv.push(e.invert(operation));
+            first=false;
+        }else{
+            inv.push(operation);
+        }
+    });
+    return inv;
+};
+Number.prototype.invert=function(operation){
+    //unary opertation inversion
+    if(operation==eqtype.sum){
+        return -this;
+    }else if(operation==eqtype.product){
+        return 1/this;
+    }else{
+        throw ("Unknown Operation: "+operation);
+    }
+};
+Array.prototype.setType=function(e){
+    this.type=e;
+    return this;
+
+};
+
+Array.prototype.differentiate=function(times){
+    times=times||1;//double derivative etc. (1/2th derivative even)
+    if(times<0){
+        return this.integrate(-times);
+    }
+    var itg=[];//itf so it's similar to the integrate function
+    itg.type=sum;
+    var m;
+    if(this.type!=eqtype.sum){
+        m=[];
+        m.type=eqtype.sum;
+        m.add(this);
+    }else if(this.type==eqtype.sum){
+        m=this;
+    }else{
+        throw ("Invalid Expression Type: "+this.type);
+    }
+    m.forEach(function(e){
+        m.push(e.integrate(times));
+    });
+    return m;
+
+}
+Array.prototype.integrate=function(times){
+    times=times||1;//double integral etc. (1/2th integral even)
+    if(times<0){
+        return this.differentiate(-times);
+    }
+    var itg=[];
+    itg.type=sum;
+    var m;
+    if(this.type!=eqtype.sum){
+        m=p(0);
+        m.type=eqtype.sum;
+        m.add(this);
+    }else if(this.type==eqtype.sum){
+        m=this;
+    }else{
+        throw ("Invalid Expression Type: "+this.type);
+    }
+    m.forEach(function(e){
+        m.push(e.integrate(times));
+    });
+    return m;
+}
+//mabye it should be reverse?
+String.prototype.inverse=function(){
+    return this.toString();
+}
+Array.prototype.inverse=function(){
+    var __debug_iterations=0;
+    if(this.type==eqtype.constant || this.type==eqtype.number){
+        return;
+    }
+    //eqtype.variable is deprecated
+    else if(this.type==eqtype.variable){
+        //a variable is its own inverse with respect to itself.
+        return this;
+    }
+    
+    if(!this.search("x")){
+        throw("No 'x' found in "+this);return;
+    }
+    var right=[];
+    if(this.type==eqtype.fraction){
+        right.type=eqtype.product;
+        right.push(this[0].dreplace(/x/g,"y"));
+        right.push(p(1).divide(this[1].dreplace(/x/g,"y")));
+    }else{
+        right=this.dreplace(/x/g,"y");
+    }
+    var left=[p("x")];
+    left.type=right.type;
+    
+    while(1){
+    __debug_iterations++;
+    
+        console.log(right.type+": "+left+"="+right);
+    if(right.type==eqtype.product){
+        var moved=false;
+        for(var i=0;i<right.length;i++){
+            if(!right[i].search("y")){
+                moved=true;
+                left=left.divide(right.splice(i,1).setType(eqtype.product));
+                i--;
+            }
+        }
+        if(!moved){
+            //add powers
+            right=right.expand("x");
+        
+        }
+    }else if(right.type==eqtype.sum){
+        var moved=false;
+        for(var i=0;i<right.length;i++){
+            if(!right[i].search("y")){
+                moved=true;
+                left=left.add(right.splice(i,1).setType(eqtype.sum).multiply(-1));
+                i--;
+            }
+        }
+        if(!moved){
+            //factorise!!!!!
+            
+            //expand THEN factorise
+            var _n=[];
+            var nr=[];
+            nr.type=eqtype.sum;
+            var _multi=[];
+            for(var i=0;i<right.length;i++){
+                var fou_c=0;
+                var fou_i;
+                for(var b=0;b<_n.length;b++){
+                    if(_n[b].getString()==right[i].getString()){
+                        fou_i=b;
+                        fou_c=1;
+                        break;
+                    }else if(right[i].type=eqtype.product && right[i].length==2){
+                        if(right[i][0]==_n[b]){
+                            fou_i=b;
+                            fou_c=right[i][1];
+                            break;
+                        }else if(right[i][1]==_n[b]){
+                            fou_i=b;
+                            fou_c=right[i][0];
+                            break;
+                        }
+                    }
+                }
+                if(fou_c!==0){
+                    _multi[fou_i].add(fou_c);
+                }else{
+                    _multi.push([1].setType(eqtype.sum));
+                    _n.push(right[i]);
+                }
+            }
+            console.log("_n="+_n.getString());
+            for(var i=0;i<_n.length;i++){
+                if(_multi[i]==1){
+                    nr.add(_n[i]);
+                }else{
+                    nr.add(_n[i].multiply(_multi[i]));
+                }
+            }
+            right=nr;
+        }
+    }else if(right.type==eqtype.power){
+        //l=a^b
+        //l^(1/b)=a
+        //l=e^(log(a)*b)
+        //log(l)=log(a)*b
+        //exp(log(l)/b)=(a)
+        
+        if(right[0].search("y")){
+            //a has the x
+            left=p("l^(1/b)").dreplace(/l/g,left).dreplace(/b/g,right[1]);
+            right=right[0];
+        }else{
+            alert(right[0]);
+            //b has the x
+            left=p("log(x)").dreplace(/x/g,left);
+            left=left.divide(p("log(x)").dreplace(/x/g,right[0]));
+            right=right[1];
+        }
+    }else{
+        return "right.type is someting else: "+right.type+": "+right;
+    }
+    
+    while(right.length==1){
+        if(right[0]=="y"){
+            return left;
+        }
+        right=right[0];
+    }
+    if(__debug_iterations>10){
+        throw("Could not solve for y: "+left+"="+right);
+        return;
+    }
+    }
+    return left;
+    
+}
+function clean(n){
+    for(var i in latexchars){
+        while(i.length>1 && n.indexOf("\\"+i)!=-1){
+            n=n.replace("\\"+i,latexchars[i]);
+        }
+  	}
+    return n.replace(/\}\{/g,")/(").replace(/\}/g,")").replace(/\{/g,"(").replace(/\\/g,"");;
+}
+function p_latex(n){
+    return p(clean(n));
+}
+function compile(n){
+    n=clean(n);
+	obj={};
+	/*
+	
+	operator precedence:
+	 ()
+	 ^
+	 * /
+	 + -
+	  
+	
+	*/
+	//parse
+	var eq=n.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
+	
+	if(eq.length>2){
+		throw("Invalid. '=' can only be used once per equation.");
+		return;
+	}
+	var lhs,rhs;
+	if(eq.length==2){
+		lhs=p(eq[0]);
+        var inverselhs=(lhs.dreplace(/y/g,"x")).inverse();
+        rhs=(inverselhs.dreplace(/x/g,p(eq[1])));
+	}else{
+		lhs=p("y"); //This behaviour should be discouraged implicitly.
+		rhs=p(eq[0]);
+	}
+	//compile
+	var ret={"f":function(){throw("Not a function");}};
+    
+	//if it is a function
+    var jsc=rhs.getString(0,true);
+	ret.f=eval("("+"function(x){return "+jsc+";})");
+	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();})");
+	return ret;
+	
+	
+}
+String.prototype.markup=function(){
+    var e=document.createElement("div");
+    e.appendChild(document.createTextNode(this.toString()));
+    return e;
+};
+Number.prototype.markup=function(){
+    var e=document.createElement("div");
+    e.appendChild(document.createTextNode(this.toString()));
+    return e;
+};
+Array.prototype.markup=function(){
+    var e=document.createElement("div");
+    e.appendChild(document.createTextNode(this.getString()));
+    return e;
+
+};
+String.prototype.canEval=function(){
+    if(this[0]=="\"" && this[this.length-1]=="\""){
+        return true;
+    }
+    var isnum=/^[\d\.]+(e[\+\-][\d]+)?$/.test(this.toString());
+    if(!isnum){
+        if(!window[this.toString()]){
+            return false;
+        }
+    }
+    return true;
+};
+Array.prototype.canEval=function(){
+    for(var i=0;i<this.length;i++){
+        if(this[i].canEval){
+            if(!this[i].canEval()){
+                return false;
+            }
+        }else if(typeof this[i] == "object"){
+            //why object instead of number?
+            if(!this[i]==NaN && isNaN(this[i])){
+                return false;
+            }
+        }
+    }
+    return true;
+};
+
+Function.prototype.simplify=function (){
+    return this;
+}
+String.prototype.simplify=function (){
+    return this.toString();
+}
+Number.prototype.simplify=function (){
+    return this.toString();
+}
+Array.prototype.simplify=function (){
+    if(this.type==eqtype.fn){
+        this[1]=this[1].simplify();
+        return this;
+    }
+	for(var i=0;i<this.length;i++){
+		while(((typeof e[i]) == "object") && this[i].length==1){
+			this[i]=this[i][0];
+		}
+        if(this[i].canEval && this[i].canEval()){
+            this[i]=usr.eval(this[i].getString(0,1));
+        }else if(this[i].canEval && this[i].canEval()){
+            this[i]=this[i].simplify();
+        }
+		
+	}
+    var z=this;
+    while(typeof z=="object" && z.length==1){
+        z=z[0];
+    }
+	return z;
+};
+
+String.prototype.getString=function(){
+    return this.toString();
+}
+Number.prototype.getString=function(){
+    return this.toString();
+}
+
+function text(e){return e.toString()}
+var functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text".split(",");
+Array.prototype.getString=function(braces,javascript){
+    var s=braces?"(":"";
+    var self=this;
+    var _first=true;
+    var endchar="";
+    var afterme="";
+    var second=true;
+    this.forEach(function(e){
+        if(!_first){
+            second=false;
+        }
+        if(_first){
+            if(javascript && self.type==eqtype.power){
+                s+="pow(";
+                endchar=")";
+            }
+            else if(braces && self.type==eqtype.discretevector){
+                s+="[";
+                endchar="]";
+            }
+            else if(self.type==eqtype.fn){
+                if(typeof e !="string" && typeof e!="function"){
+                    throw("function name is not a string!");
+                    return "ERROR";
+                }
+                if(functions.indexOf(e)==-1){
+                
+                    //multiply instead;
+                    throw("Unknown function: "+e);
+                    return "ERROR";
+                }
+                afterme="(";
+                endchar=")";
+            }
+            _first=false;
+        }else if(self.type==eqtype.sum){
+            s+="+";
+        }else if(self.type==eqtype.product){
+            s+="*";
+        }else if(javascript && self.type==eqtype.power){
+            s+=",";
+        }else if(self.type==eqtype.equality){
+            s+="=";
+        }else if(self.type==eqtype.power){
+            s+="^";
+        }else if(self.type==eqtype.fraction){
+            s+="/";
+        }else if(self.type==eqtype.fn){
+            if(second){
+                s+=",";
+            }
+        }else{
+            s+=",";
+        }
+        if(e.type==eqtype.discretevector){
+            s+=e.getString(0,javascript);
+        }else{
+            s+=e.getString(10,javascript);
+        }
+        
+        s+=afterme;
+        afterme="";
+    });
+    s+=endchar;
+    endchar="";
+    if(braces){
+        s+=")";
+    }
+    return (s.replace(/(\-\-)+/g,"+").replace(/\+\++/g,"+").replace(/\-\+/g,"-").replace(/\+\-/g,"-"));
+};
+
+
+if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
+
 
