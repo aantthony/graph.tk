@@ -25,11 +25,11 @@ app.ui=(function(){
 	var draw;
 	var ctx;
 	var ptd,con,proto;
-
+    var logt;
 	function resize(){
 	    width=window.innerWidth  || document.body.clientWidth;
 	    height=window.innerHeight|| document.body.clientHeight || 120;//120 for iframe
-
+        logt.style.maxHeight=~~(height-85)+"px";
 	    canvas.width = width;
 	    canvas.height= height;
 	    ctx && draw();
@@ -537,7 +537,7 @@ app.ui=(function(){
 		con.id="con";
 		con.className="overlay";
 		con.style.display="none";
-        var logt=document.createElement("div");
+        logt=document.createElement("div");
         logt.id="logt";
         logt.className="monospace";
         var conin_=document.createElement("span");
