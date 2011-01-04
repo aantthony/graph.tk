@@ -356,7 +356,6 @@ var latexchars={
 "integral":"∫"
 };
 
-//Compile: returns an object with a function of ctx that plots the graph to ctx.
 var obj={};
 var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14};
 var __debug_parser=0;
@@ -374,7 +373,7 @@ function p(inp){
     if(inp=="" || inp===undefined){
         return 0;
     }
-//parses brackets recursively and returns a sum of terms.
+//parses brackets recursively and returns an expression
     
     level++;
     if(level>15){throw("too recursive for debugging");return;}
@@ -382,7 +381,8 @@ function p(inp){
 	var eq=[];
 	var e=inp.replace(/\s/g,"").replace(/\]/g,")").replace(/\[/g,"(").replace(/\)\(/g,")*(");
     
-    //TODO: known functions only
+    //TODO: known functions only, otherwise make it a product
+    //TODO: allow things like 2x
 	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
     
     if(e.indexOf("=")!=-1){
@@ -425,8 +425,6 @@ function p(inp){
     __debug(!__debug_parser,0) ||console.log(spaces.substring(0,level)+"+>: "+e);
         terms.type=eqtype.sum;
         var nextisinverse=false;
-        //TODO: Turn subtraction into a unary option.
-
         for(var i=0;i<e.length;i++){
             if(term_op.indexOf(e[i])!=-1){
                 var s=e.substring(last,i);
@@ -481,12 +479,13 @@ function p(inp){
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"^>: "+e);
         terms.type=eqtype.power;
         var be=e.split("^");
-        //^ is an operator that goes from right to left.
-        // i.e., 1^2^3 = 1^(2^(3))
-        /*if(be.length!=2){
+        //NOTE: for now
+        //^ is a BINARY operator that goes from right to left.
+        //  1^2^3 = 1^(2^(3))
+        if(be.length!=2){
             throw ("^ is a binary operator");
             return;
-        }*/
+        }
         terms.push(p(be[0]));
         terms.push(p(be[1]));
     }else if(e.indexOf(":")!=-1){
@@ -819,18 +818,6 @@ Number.prototype.multiply=String.prototype.multiply=function(o){
     return sum;
 };
 
-Array.prototype._push=function(o){
-    //Adds extras to the operation, whatever it is.
-    var oe=p(o);
-    oe.type=oe.type || this.type;
-    if(oe.type==this.type){
-        var self=this;
-        oe.forEach(function(e){self.push(e)});
-        return this;
-    }else{
-        throw("Operations do not match: "+this.type+" and "+oe.type);
-    }
-};
 Array.prototype.add=function(o){
     if(this.type==eqtype.sum && o.type==eqtype.sum){
         var self=this;
@@ -1002,7 +989,6 @@ Array.prototype.integrate=function(times){
     });
     return m;
 };
-//mabye it should be reverse?
 String.prototype.inverse=function(){
     return this.toString();
 };
@@ -1425,7 +1411,7 @@ var known_derivatives={
     "sqrt":p("(x^(-1/2))*0.5"),
     "asin":p("1/sqrt(1-x^2)"),
     "acos":p("-1/sqrt(1-x^2)"),
-    "random":p("random(x)*Infinity")
+    "random":p("(random(x)-0.5)*Infinity")
 };
 
 
