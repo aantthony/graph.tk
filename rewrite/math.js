@@ -378,13 +378,13 @@ function p(inp){
     if(level>15){throw("too recursive for debugging");return;}
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"p: "+inp);
 	var eq=[];
-	var e=inp.dreplace(/\s/g,"");
-	e=e.dreplace(/([a-zA-Z])\(/g,"$1:(");
+	var e=inp.replace(/\s/g,"");
+	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
     
     //---Recursive Parentheses parse
 	while((e.indexOf("(")!=-1) && (e.indexOf(")")!=-1)){
         var fail=true;
-		e=e.dreplace(/\([\d\:\-\+\/\*\^a-zA-Z]*\)/g,function(n){
+		e=e.replace(/\([\d\:\-\+\/\*\^a-zA-Z]*\)/g,function(n){
             fail=false;
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
@@ -502,12 +502,11 @@ function p(inp){
 	}*/
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
-	if(terms.length==1 && __debug(1,1)){
+	while(typeof terms=="array" && terms.length==1){
 		//it's too simple. It could (and most likely is), the argument to a function.
-		return terms[0];
-	}else{
-		return __debug(terms,simplify(terms));
+		terms=terms[0];
 	}
+    return __debug(terms,simplify(terms));
 	
 }
 
@@ -738,6 +737,10 @@ Array.prototype.add=function(o){
         p(o).forEach(function(e){self.push(e)});
         return this;
     }
+    if(this.type==eqtype.sum){
+        this.push(p(o));
+        return this;
+    }
     var sum=[this,o];
     var oldtype=this.type;
     this.push(this.splice(0,this.length))
@@ -886,31 +889,109 @@ Array.prototype.inverse=function(){
     var left=[p("x")];
     left.type=right.type;
     
-    while(__debug_iterations<10){
+    while(1){
     __debug_iterations++;
+    
+        console.log(right.type+": "+left+"="+right);
     if(right.type==eqtype.product){
+        var moved=false;
         for(var i=0;i<right.length;i++){
             if(!right[i].search("y")){
+                moved=true;
                 left=left.divide(right.splice(i,1).setType(eqtype.product));
                 i--;
             }
         }
+        if(!moved){
+            //add powers
+            right=right.expand("x");
+        
+        }
     }else if(right.type==eqtype.sum){
+        var moved=false;
         for(var i=0;i<right.length;i++){
             if(!right[i].search("y")){
+                moved=true;
                 left=left.add(right.splice(i,1).setType(eqtype.sum).multiply(-1));
                 i--;
             }
         }
+        if(!moved){
+            //factorise!!!!!
+            
+            //expand THEN factorise
+            var _n=[];
+            var nr=[];
+            nr.type=eqtype.sum;
+            var _multi=[];
+            for(var i=0;i<right.length;i++){
+                var fou_c=0;
+                var fou_i;
+                for(var b=0;b<_n.length;b++){
+                    if(_n[b].toString()==right[i].toString()){
+                        fou_i=b;
+                        fou_c=1;
+                        break;
+                    }else if(right[i].type=eqtype.product && right[i].length==2){
+                        if(right[i][0]==_n[b]){
+                            fou_i=b;
+                            fou_c=right[i][1];
+                            break;
+                        }else if(right[i][1]==_n[b]){
+                            fou_i=b;
+                            fou_c=right[i][0];
+                            break;
+                        }
+                    }
+                }
+                if(fou_c!==0){
+                    _multi[fou_i].add(fou_c);
+                }else{
+                    _multi.push([1].setType(eqtype.sum));
+                    _n.push(right[i]);
+                }
+            }
+            console.log("_n="+_n.toString());
+            for(var i=0;i<_n.length;i++){
+                if(_multi[i]==1){
+                    nr.add(_n[i]);
+                }else{
+                    nr.add(_n[i].multiply(_multi[i]));
+                }
+            }
+            right=nr;
+        }
+    }else if(right.type==eqtype.power){
+        //l=a^b
+        //l^(1/b)=a
+        //l=e^(log(a)*b)
+        //log(l)=log(a)*b
+        //exp(log(l)/b)=(a)
+        
+        if(right[0].search("y")){
+            //a has the x
+            left=p("l^(1/b)").dreplace(/l/g,left).dreplace(/b/g,right[1]);
+            right=right[0];
+        }else{
+            alert(right[0]);
+            //b has the x
+            left=p("log(x)").dreplace(/x/g,left);
+            left=left.divide(p("log(x)").dreplace(/x/g,right[0]));
+            right=right[1];
+        }
     }else{
-        return "right.type is someting else: "+right.type;
+        return "right.type is someting else: "+right.type+": "+right;
     }
     
-    if(right.length==1){
+    while(right.length==1){
         if(right[0]=="y"){
             return left;
         }
         right=right[0];
+    }
+    if(__debug_iterations>10){
+        throw("Could not solve for y: "+left+"="+right);
+        return;
     }
     }
     return left;
@@ -919,10 +1000,10 @@ Array.prototype.inverse=function(){
 function clean(n){
     for(var i in latexchars){
         while(i.length>1 && n.indexOf("\\"+i)!=-1){
-            n=n.dreplace("\\"+i,latexchars[i]);
+            n=n.replace("\\"+i,latexchars[i]);
         }
   	}
-    return n.dreplace(/\}\{/g,")/(").dreplace(/\}/g,")").dreplace(/\{/g,"(").dreplace(/\\/g,"");;
+    return n.replace(/\}\{/g,")/(").replace(/\}/g,")").replace(/\{/g,"(").replace(/\\/g,"");;
 }
 function p_latex(n){
     return p(clean(n));
@@ -941,7 +1022,7 @@ function compile(n){
 	
 	*/
 	//parse
-	var eq=n.dreplace("==","[equals][equals]").split("=").map(function(e){return e.dreplace("[equals][equals]","==");});
+	var eq=n.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
 	
 	if(eq.length>2){
 		throw("Invalid. '=' can only be used once per equation.");
@@ -951,8 +1032,7 @@ function compile(n){
 	if(eq.length==2){
 		lhs=p(eq[0]);
         var inverselhs=(lhs.dreplace(/y/g,"x")).inverse();
-        
-		rhs=(inverselhs.dreplace(/x/g,p(eq[1])));
+        rhs=(inverselhs.dreplace(/x/g,p(eq[1])));
 	}else{
 		lhs=p("y"); //This behaviour should be discouraged implicitly.
 		rhs=p(eq[0]);
@@ -1010,7 +1090,7 @@ Array.prototype.toString=function(braces,javascript){
             s+="(";
             __exp_count++;
         }else{
-            s+="@";
+            s+=",";
         }
         s+=e.toString(10,javascript);
         if(__exp_count){
@@ -1021,10 +1101,10 @@ Array.prototype.toString=function(braces,javascript){
     if(braces){
         s+=")";
     }
-    return (s.dreplace(/(\-\-)+/g,"+").dreplace(/\+\++/g,"+").dreplace(/\-\+/g,"-").dreplace(/\+\-/g,"-"));
+    return (s.replace(/(\-\-)+/g,"+").replace(/\+\++/g,"+").replace(/\-\+/g,"-").replace(/\+\-/g,"-"));
 };
 
 
-if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.dreplace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.dreplace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.dreplace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').dreplace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').dreplace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
+if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
 
 
