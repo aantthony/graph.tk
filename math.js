@@ -348,7 +348,7 @@ var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discreteve
 var __debug_parser=0;
 function __debug(x){
     if(app.version.length!=11){
-        alert("Using debug code in release build: "+x.toString());
+        //alert("Using debug code in release build: "+x.toString());
     }
     return x;
 }
@@ -585,7 +585,7 @@ Array.prototype.cross=function(o){
     if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
         throw ("I or it is not a vector!");
     }
-}
+};
 Array.prototype.dot=function(o){
     if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
         throw ("I or it is not a vector!");
@@ -605,7 +605,7 @@ Array.prototype.mag=function(){
     }else{
         return this.multiply(this.conjg()).pow(Num(0.5));
     }
-}
+};
 Array.prototype.conjg=function(){
     return this;
     return this.dreplace(/i/g,p("-i"));
@@ -615,7 +615,7 @@ Number.prototype.search=function(x){
 };
 String.prototype.search=function (x){
     return this==x;
-}
+};
 Array.prototype.search=function (x){
     var found=false;
     for(var i=0;i<this.length;i++){
@@ -674,14 +674,14 @@ Number.prototype.divide=function(o){
     var product=[this,p(o)];
     product.type=eqtype.fraction;
     return product;
-}
+};
 String.prototype.divide=function(o){
     var product=[];
     product.type=eqtype.fraction;
     product.push(p(this.toString()));
     product.push(p(o));
     return product;
-}
+};
 Array.prototype.divide=function(o){
     if(this.type==eqtype.fraction){
         this[1].multiply(p(o));
@@ -690,7 +690,7 @@ Array.prototype.divide=function(o){
     var product=[this,p(o)];
     product.type=eqtype.fraction;
     return product;
-}
+};
 Array.prototype.multiply=function(o){
     if(this.type==eqtype.fraction){
         this[0].multiply(p(o));
@@ -700,11 +700,11 @@ Array.prototype.multiply=function(o){
         p(o).forEach(function(e){self.push(e)});
         return this;
     }else if(this.type==eqtype.discretevector || this.type==eqtype.continuousvector){
-        return self.dot(o);//or cross
+        return self.dot(o);
     }
     var sum=[this,o];
     var oldtype=this.type;
-    this.push(this.splice(0,this.length))
+    this.push(this.splice(0,this.length));
     this[0].type=oldtype;
     this.push(p(o));
     this.type=eqtype.product;
@@ -720,7 +720,7 @@ Number.prototype.add=function(o){
     var sum=[p(this),p(o)];
     sum.type=eqtype.sum;
     return sum;
-}
+};
 Number.prototype.multiply=String.prototype.multiply=function(o){
     var sum=[p(this),p(o)];
     sum.type=eqtype.product;
@@ -738,7 +738,7 @@ Array.prototype._push=function(o){
     }else{
         throw("Operations do not match: "+this.type+" and "+oe.type);
     }
-}
+};
 Array.prototype.add=function(o){
     if(this.type==eqtype.sum && o.type==eqtype.sum){
         var self=this;
@@ -751,7 +751,7 @@ Array.prototype.add=function(o){
     }
     var sum=[this,o];
     var oldtype=this.type;
-    this.push(this.splice(0,this.length))
+    this.push(this.splice(0,this.length));
     this[0].type=oldtype;
     this.push(p(o));
     this.type=eqtype.sum;
@@ -845,7 +845,7 @@ Array.prototype.differentiate=function(times){
     });
     return m;
 
-}
+};
 Array.prototype.integrate=function(times){
     times=times||1;//double integral etc. (1/2th integral even)
     if(times<0){
@@ -867,11 +867,18 @@ Array.prototype.integrate=function(times){
         m.push(e.integrate(times));
     });
     return m;
-}
+};
 //mabye it should be reverse?
 String.prototype.inverse=function(){
     return this.toString();
-}
+};
+String.prototype.factorise=function(){
+    return this.toString();
+};
+Number.prototype.factorise=function(){
+    return this;
+};
+
 Array.prototype.factorise=function(){
     return this;
     var right;
@@ -953,7 +960,6 @@ Array.prototype.inverse=function(){
     while(1){
     __debug_iterations++;
     
-        console.log(right.type+": "+left+"="+right);
     if(right.type==eqtype.product){
         var moved=false;
         for(var i=0;i<right.length;i++){
@@ -1016,7 +1022,7 @@ Array.prototype.inverse=function(){
     }
     return left;
     
-}
+};
 function clean(n){
     for(var i in latexchars){
         while(i.length>1 && n.indexOf("\\"+i)!=-1){
@@ -1099,7 +1105,7 @@ String.prototype.canEval=function(){
 
 Number.prototype.canEval=function(){
     return true;
-}
+};
 Array.prototype.canEval=function(){
     for(var i=0;i<this.length;i++){
         if(typeof this[i] == "number"){
@@ -1119,10 +1125,10 @@ Array.prototype.canEval=function(){
 
 String.prototype.simplify=function (){
     return this.toString();
-}
+};
 Number.prototype.simplify=function (){
     return this.toString();
-}
+};
 Array.prototype.simplify=function (){
     if(this.type==eqtype.fn){
         this[1]=this[1].simplify();
@@ -1148,10 +1154,10 @@ Array.prototype.simplify=function (){
 
 String.prototype.getString=function(){
     return this.toString();
-}
+};
 Number.prototype.getString=function(){
     return this.toString();
-}
+};
 
 function text(e){return e.toString()}
 var functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text".split(",");

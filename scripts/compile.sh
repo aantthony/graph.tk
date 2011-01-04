@@ -9,7 +9,7 @@ mkdir -p min
 
 VERSION_CODE=$(git rev-parse --short HEAD)
 
-sed s/GIT_VERSION/${VERSION_CODE}/ main.js >./tmp/main_modified.js
+cat math.js ui.js main.js | sed s/GIT_VERSION/${VERSION_CODE}/ >./tmp/main_modified.js
 cd ./scripts/packer
 perl ./jsPacker.pl -i ../../tmp/main_modified.js -e62 -q -s -f -o ../../tmp/main_packed.js
 cd ../../
@@ -28,7 +28,7 @@ echo "created: min/${TIME_CODE}.js"
 #cp main.css ./min/${TIME_CODE}.css
 
 #fixes /delete.png or css_dir/delete.png problem, by making all delete.png references go to /delete.png now
-sed s/delete\.png/\\/delete\.png/ main.css >./min/${TIME_CODE}.css
+cat mathquill.css main.css | sed s/buttons\.png/\\/buttons\.png/ | sed s/sw\.png/\\/sw\.png/ >./min/${TIME_CODE}.css
 echo "created: min/${TIME_CODE}.css"
 rm -rf ./tmp
 

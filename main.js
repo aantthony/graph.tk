@@ -97,7 +97,7 @@ var graph=function(n){
 	}else{
 		latex=randfunc();
 	}
-	var t=function(x){return this.f(x);}
+	var t=function(x){return this.f(x);};
     var c=compile(latex);
     t.f=c.f;
     t.plot=c.plot;
@@ -113,7 +113,7 @@ app.version="GIT_VERSION";
 app.add=function(n){
 	graphs.push(new graph(n));
     app.ui.refresh();
-}
+};
 app.png=function(){
     app.ui.png();
 };
@@ -133,7 +133,7 @@ app.remove=function(n){
             break;
         }
     }
-}
+};
 app.init=function (){
 	app.ui.init();
 	app.add("x+3");
