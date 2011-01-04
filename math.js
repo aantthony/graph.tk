@@ -347,9 +347,6 @@ var obj={};
 var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13};
 var __debug_parser=0;
 function __debug(x){
-    if(app.version.length!=11){
-        //alert("Using debug code in release build: "+x.toString());
-    }
     return x;
 }
 var spaces="                     ";
@@ -709,6 +706,9 @@ Array.prototype.multiply=function(o){
         this[0].multiply(p(o));
     }
     var other=p(o);
+    if(other.eval()===0){
+        return 0;
+    }
     if(this.type==eqtype.product && other.type==eqtype.product){
         var self=this;
         other.forEach(function(e){self.push(e)});
@@ -732,6 +732,12 @@ Number.prototype.forEach=function(e){
 };
 
 String.prototype.add=function(o){
+    if(o==0){
+        return this.toString();
+    }
+    if(this.toString()=="0"){
+        return p(o);
+    }
     return [p(this.toString())].setType(eqtype.sum).add(p(o));
 }
 Number.prototype.add=function(o){
@@ -764,7 +770,7 @@ Array.prototype.eval=function(){
 
 Number.prototype.multiply=String.prototype.multiply=function(o){
     if(this==0){
-        if(p(o).eval()==Infinity){
+        if(p(o)==Infinity){
             return undefined;
         }
         return 0;
@@ -900,19 +906,24 @@ Array.prototype.differentiate=function(times){
         this.forEach(function(e){
             itg.add(e.differentiate());
         });
+    }else if(this.type==eqtype.fraction){
+        var a=this[0];
+        var b=this[1];
+        
+        return [[[a.differentiate(),b].setType(eqtype.product),[-1,b.differentiate(),a].setType(eqtype.product)].setType(eqtype.sum),[b,b].setType(eqtype.product)].setType(eqtype.fraction);
+        //return a.differentiate().multiply(b).add(a.multiply(-1).multiply(b.differentiate())).divide(b.multiply(b));
+        
     }else if(this.type==eqtype.power){
-    //y=e^(loga . b)
-    //dy/dx = 
+        //y=e^(loga . b)
+        //dy/dx = 
     
     
-    //The errror comes from no power being outputed.
-    var a=this[0];
-    var b=this[1];
-    var d=a.differentiate();
-    var f=b.differentiate();
-    //itg.add(p("b*(a^(b-1))*d+f*log(b)*(a^b)").dreplace(/a/g,a).dreplace(/b/g,b).dreplace(/d/g,d).dreplace(/f/g,f));
+        //The errror comes from no power being outputed.
+        var a=this[0];
+        var b=this[1];
+        //itg.add(p("b*(a^(b-1))*d+f*log(b)*(a^b)").dreplace(/a/g,a).dreplace(/b/g,b).dreplace(/d/g,d).dreplace(/f/g,f));
     
-        itg.add([b].setType(eqtype.product)
+        return ([b].setType(eqtype.product)
         .multiply
          (
             
@@ -932,9 +943,9 @@ Array.prototype.differentiate=function(times){
         );
         
     }else if(this.type==eqtype.product){
-        
-        //d/dx uv = 
-        
+        var a=this[0];
+        var b=this.slice(1).setType(eqtype.product);
+        return [[a,b.differentiate()].setType(eqtype.product),[b,a.differentiate()].setType(eqtype.product)].setType(eqtype.sum);
         
     }else{
         throw ("Invalid Expression Type: "+this.type);
@@ -1253,7 +1264,14 @@ Array.prototype.simplify=function (){
                 i--;
             }
         }
-        this.push(_prod);
+        if(_prod!=1){
+            this.push(_prod);
+        }
+        if(_prod==0){
+            //Null factor law.
+            //Check for singularites
+            return 0;
+        }
     }else if(this.type==eqtype.sum){
         var _prod=0;
         for(var i=0;i<this.length;i++){
@@ -1357,6 +1375,10 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
+alert(p("1/x").differentiate().getString())
+
+
 if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
+
 
 
