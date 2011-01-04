@@ -82,13 +82,7 @@ function delfunc(delete_button_node){
 	save();
 };
 
-function random_hash(){
-    var s="";
-    for(var i=0;i<20;i++){
-        s+=(~~(Math.random()*16)).toString(16);
-    }
-    return s;
-}
+
 var graph=function(n){
 	var latex=n;
 	var auto=0;
