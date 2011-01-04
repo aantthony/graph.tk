@@ -678,7 +678,7 @@ Number.prototype.divide=function(o){
 String.prototype.divide=function(o){
     var product=[];
     product.type=eqtype.fraction;
-    product.push(this.toString());
+    product.push(p(this.toString()));
     product.push(p(o));
     return product;
 }
@@ -873,7 +873,14 @@ String.prototype.inverse=function(){
     return this.toString();
 }
 Array.prototype.factorise=function(){
-    var right=this;
+    return this;
+    var right;
+    if(this.type!=eqtype.sum){
+        alert("?");
+        right=[].setType(eqtype.sum).add(right)
+    }else{
+        right=this;
+    }
 //expand THEN factorise
     var _n=[];
     var nr=[];
@@ -905,8 +912,7 @@ Array.prototype.factorise=function(){
             _multi.push([1].setType(eqtype.sum));
             _n.push(right[i]);
         }
-            }
-    console.log("_n="+_n.getString());
+    }
     for(var i=0;i<_n.length;i++){
         if(_multi[i]==1){
             nr.add(_n[i]);
@@ -988,7 +994,6 @@ Array.prototype.inverse=function(){
             left=p("l^(1/b)").dreplace(/l/g,left).dreplace(/b/g,right[1]);
             right=right[0];
         }else{
-            alert(right[0]);
             //b has the x
             left=p("log(x)").dreplace(/x/g,left);
             left=left.divide(p("log(x)").dreplace(/x/g,right[0]));
@@ -1112,9 +1117,6 @@ Array.prototype.canEval=function(){
     return true;
 };
 
-Function.prototype.simplify=function (){
-    return this;
-}
 String.prototype.simplify=function (){
     return this.toString();
 }
