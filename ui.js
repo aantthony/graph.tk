@@ -557,7 +557,7 @@ app.ui=(function(){
                 
                     //logt.appendChild((p_latex($(conin).mathquill("latex")).markup()));
                 conin.last=$(conin).mathquill("latex");
-                var out=p_latex(conin.last);
+                var out=p_latex(conin.last).factorise();
                 if(!out.canEval()){
                     logt.appendChild(((out.getString().markup())));
                 }else{
@@ -645,6 +645,7 @@ app.ui=(function(){
 		document.body.addEventListener("mouseup",function(){drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
 		document.body.addEventListener("mousemove",mousemove,false);
 		   	   window.addEventListener("mousewheel",mousewheel,false);
+        con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
 		document.body.removeChild(document.body.firstChild);
 			
 		//we may have to implement scaling if browsers don't work properly

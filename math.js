@@ -360,6 +360,9 @@ function p(inp){
     }else if(typeof inp=="object"){
         return inp;
     }
+    if(inp=="" || inp===undefined){
+        return 0;
+    }
 //parses brackets recursively and returns a sum of terms.
     
     level++;
@@ -869,6 +872,53 @@ Array.prototype.integrate=function(times){
 String.prototype.inverse=function(){
     return this.toString();
 }
+Array.prototype.factorise=function(){
+    var right=this;
+//expand THEN factorise
+    var _n=[];
+    var nr=[];
+    nr.type=eqtype.sum;
+    var _multi=[];
+    for(var i=0;i<right.length;i++){
+        var fou_c=0;
+        var fou_i;
+        for(var b=0;b<_n.length;b++){
+            if(_n[b].getString()==right[i].getString()){
+                fou_i=b;
+                fou_c=1;
+                break;
+            }else if(right[i].type==eqtype.product && right[i].length==2){
+                if(right[i][0]==_n[b]){
+                    fou_i=b;
+                    fou_c=right[i][1];
+                    break;
+                }else if(right[i][1]==_n[b]){
+                    fou_i=b;
+                    fou_c=right[i][0];
+                    break;
+                }
+            }
+        }
+        if(fou_c!==0){
+            _multi[fou_i].add(fou_c);
+        }else{
+            _multi.push([1].setType(eqtype.sum));
+            _n.push(right[i]);
+        }
+            }
+    console.log("_n="+_n.getString());
+    for(var i=0;i<_n.length;i++){
+        if(_multi[i]==1){
+            nr.add(_n[i]);
+        }else{
+            nr.add(_n[i].multiply(_multi[i]));
+        }
+    }
+    return nr;
+};
+
+//American spelling
+Array.prototype.factorize=Array.prototype.factorise;
 Array.prototype.inverse=function(){
     var __debug_iterations=0;
     if(this.type==eqtype.constant || this.type==eqtype.number){
@@ -924,47 +974,7 @@ Array.prototype.inverse=function(){
         if(!moved){
             //factorise!!!!!
             
-            //expand THEN factorise
-            var _n=[];
-            var nr=[];
-            nr.type=eqtype.sum;
-            var _multi=[];
-            for(var i=0;i<right.length;i++){
-                var fou_c=0;
-                var fou_i;
-                for(var b=0;b<_n.length;b++){
-                    if(_n[b].getString()==right[i].getString()){
-                        fou_i=b;
-                        fou_c=1;
-                        break;
-                    }else if(right[i].type=eqtype.product && right[i].length==2){
-                        if(right[i][0]==_n[b]){
-                            fou_i=b;
-                            fou_c=right[i][1];
-                            break;
-                        }else if(right[i][1]==_n[b]){
-                            fou_i=b;
-                            fou_c=right[i][0];
-                            break;
-                        }
-                    }
-                }
-                if(fou_c!==0){
-                    _multi[fou_i].add(fou_c);
-                }else{
-                    _multi.push([1].setType(eqtype.sum));
-                    _n.push(right[i]);
-                }
-            }
-            console.log("_n="+_n.getString());
-            for(var i=0;i<_n.length;i++){
-                if(_multi[i]==1){
-                    nr.add(_n[i]);
-                }else{
-                    nr.add(_n[i].multiply(_multi[i]));
-                }
-            }
-            right=nr;
+            right=right.factorise();
         }
     }else if(right.type==eqtype.power){
         //l=a^b
@@ -1081,9 +1091,14 @@ String.prototype.canEval=function(){
     }
     return true;
 };
+
+Number.prototype.canEval=function(){
+    return true;
+}
 Array.prototype.canEval=function(){
     for(var i=0;i<this.length;i++){
-        if(this[i].canEval){
+        if(typeof this[i] == "number"){
+        }else if(this[i].canEval){
             if(!this[i].canEval()){
                 return false;
             }
