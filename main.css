@@ -65,6 +65,7 @@ input[type=button]{
 }
 h3{text-align:center}
 .buttons{
+    position:relative;
 	border-top:1px solid #ececec;
 	background-image: -webkit-gradient(
 	    linear,
@@ -79,6 +80,14 @@ h3{text-align:center}
 	    rgba(239,239,239,0.8) 100%
 	);
 	
+}
+.buttons a{
+    text-decoration:none;
+    display:block;
+    width:50px;
+    position:absolute;
+    top:0;
+    right:0;
 }
 input[value=""]{
 	background-position:0px 21px;

@@ -624,7 +624,6 @@ app.ui=(function(){
         
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value="";
-        newfuncbtn.style.float="right";
         newfuncbtn.style.textDecoration="none";
         newfuncbtn.type="button";
         
