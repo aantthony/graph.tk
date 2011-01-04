@@ -928,7 +928,7 @@ Array.prototype.inverse=function(){
                 var fou_c=0;
                 var fou_i;
                 for(var b=0;b<_n.length;b++){
-                    if(_n[b].toString()==right[i].toString()){
+                    if(_n[b].getString()==right[i].getString()){
                         fou_i=b;
                         fou_c=1;
                         break;
@@ -951,7 +951,7 @@ Array.prototype.inverse=function(){
                     _n.push(right[i]);
                 }
             }
-            console.log("_n="+_n.toString());
+            console.log("_n="+_n.getString());
             for(var i=0;i<_n.length;i++){
                 if(_multi[i]==1){
                     nr.add(_n[i]);
@@ -1041,7 +1041,7 @@ function compile(n){
 	var ret={"f":function(){throw("Not a function");}};
     
 	//if it is a function
-    var jsc=rhs.toString(0,true);
+    var jsc=rhs.getString(0,true);
 	ret.f=eval("("+"function(x){return "+jsc+";})");
 	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();})");
 	return ret;
@@ -1060,11 +1060,17 @@ Number.prototype.markup=function(){
 };
 Array.prototype.markup=function(){
     var e=document.createElement("div");
-    e.appendChild(document.createTextNode(this.toString()));
+    e.appendChild(document.createTextNode(this.getString()));
     return e;
 
 };
-Array.prototype.toString=function(braces,javascript){
+String.prototype.getString=function(){
+    return this.toString();
+}
+Number.prototype.getString=function(){
+    return this.toString();
+}
+Array.prototype.getString=function(braces,javascript){
     var s=braces?"(":"";
     var self=this;
     var _first=true;
@@ -1073,6 +1079,16 @@ Array.prototype.toString=function(braces,javascript){
         if(_first){
             if(javascript && self.type==eqtype.power){
                 s+="pow(";
+            }
+            if(self.type==eqtype.fn){
+                if(typeof e !="string" && typeof e!="function"){
+                    throw("function name is not a string!");
+                    return "ERROR";
+                }
+                if(!confirm(e)){
+                    throw("Unknown function: "+e);
+                    return "ERROR";
+                }
             }
             _first=false;
         }else if(self.type==eqtype.sum){
@@ -1092,7 +1108,7 @@ Array.prototype.toString=function(braces,javascript){
         }else{
             s+=",";
         }
-        s+=e.toString(10,javascript);
+        s+=e.getString(10,javascript);
         if(__exp_count){
             s+=")";
             __exp_count--;
