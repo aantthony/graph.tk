@@ -467,7 +467,7 @@ app.ui=(function(){
                     break;
                 }
             }
-        });
+        },false);
 		inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
 		b_.style.backgroundColor=n.color;
         b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
@@ -571,7 +571,7 @@ app.ui=(function(){
                 }
                 $(conin).mathquill("latex",conin.last);
 			}
-		});
+		},false);
 
 		var funcs=document.createElement("div");
 		funcs.className="overlay";
