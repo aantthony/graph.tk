@@ -378,7 +378,7 @@ function p(inp){
     if(level>15){throw("too recursive for debugging");return;}
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"p: "+inp);
 	var eq=[];
-	var e=inp.replace(/\s/g,"");
+	var e=inp.replace(/\s/g,"").replace(/\)\(/g,")*(");
 	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
     
     //---Recursive Parentheses parse
@@ -1070,6 +1070,7 @@ String.prototype.getString=function(){
 Number.prototype.getString=function(){
     return this.toString();
 }
+var functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc".split(",");
 Array.prototype.getString=function(braces,javascript){
     var s=braces?"(":"";
     var self=this;
@@ -1085,7 +1086,9 @@ Array.prototype.getString=function(braces,javascript){
                     throw("function name is not a string!");
                     return "ERROR";
                 }
-                if(!confirm(e)){
+                if(functions.indexOf(e)==-1){
+                
+                    //multiply instead;
                     throw("Unknown function: "+e);
                     return "ERROR";
                 }
