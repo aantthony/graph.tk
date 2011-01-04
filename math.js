@@ -691,13 +691,27 @@ Array.prototype.divide=function(o){
     product.type=eqtype.fraction;
     return product;
 };
+
+Array.prototype.power=function(o){
+    if(this.type==eqtype.power){
+        this[1]=this[1].multiply(p(o));
+    }
+    return [this,p(o)].setType(eqtype.power);
+}
+String.prototype.power=function(o){
+    return [p(this.toString()),p(o)].setType(eqtype.power);
+}
+Number.prototype.power=function(o){
+    return [this,p(o)].setType(eqtype.power);
+}
 Array.prototype.multiply=function(o){
     if(this.type==eqtype.fraction){
         this[0].multiply(p(o));
     }
-    if(this.type==eqtype.product){
+    var other=p(o);
+    if(this.type==eqtype.product && other.type==eqtype.product){
         var self=this;
-        p(o).forEach(function(e){self.push(e)});
+        other.forEach(function(e){self.push(e)});
         return this;
     }else if(this.type==eqtype.discretevector || this.type==eqtype.continuousvector){
         return self.dot(o);
@@ -716,12 +730,51 @@ String.prototype.forEach=function(e){
 Number.prototype.forEach=function(e){
     e(this);
 };
+
+String.prototype.add=function(o){
+    return [p(this.toString())].setType(eqtype.sum).add(p(o));
+}
 Number.prototype.add=function(o){
+    if(p(o).eval()==0){
+        return this;
+    }
     var sum=[p(this),p(o)];
     sum.type=eqtype.sum;
     return sum;
 };
+Number.prototype.eval=function(o){
+    return this;
+};
+String.prototype.eval=function(){
+    if(!isNaN(this.toString())){
+        return Number(this.toString());
+    }
+    if(window[this.toString()]){
+        return eval(this.toString());
+    }
+    return NaN;
+};
+Array.prototype.eval=function(){
+    if(this.canEval()){
+        return eval(this.getString(1,1));
+    }else{
+        return NaN;
+    }
+};
+
 Number.prototype.multiply=String.prototype.multiply=function(o){
+    if(this==0){
+        if(p(o).eval()==Infinity){
+            return undefined;
+        }
+        return 0;
+    }
+    if(o==1){
+        return this;
+    }
+    if(o==0){
+        return 0;
+    }
     var sum=[p(this),p(o)];
     sum.type=eqtype.product;
     return sum;
@@ -820,30 +873,75 @@ Number.prototype.invert=function(operation){
 Array.prototype.setType=function(e){
     this.type=e;
     return this;
-
 };
-
+Number.prototype.differentiate=function(){
+    if(this==Infinity || this==-Infinity){
+        return undefined;
+    }
+    return 0;
+};
+String.prototype.differentiate=function(){
+    return Number(this.toString()=="x");
+};
 Array.prototype.differentiate=function(times){
     times=times||1;//double derivative etc. (1/2th derivative even)
     if(times<0){
         return this.integrate(-times);
     }
-    var itg=[];//itf so it's similar to the integrate function
-    itg.type=sum;
-    var m;
-    if(this.type!=eqtype.sum){
-        m=[];
-        m.type=eqtype.sum;
-        m.add(this);
-    }else if(this.type==eqtype.sum){
-        m=this;
+    var itg=[];//itg so it's similar to the integrate function
+    itg.type=eqtype.sum;
+    
+    if(this.canEval && this.canEval()){
+        //I am not dependant on an independant variable.
+        return 0;
+    }
+    
+    if(this.type==eqtype.sum){
+        this.forEach(function(e){
+            itg.add(e.differentiate());
+        });
+    }else if(this.type==eqtype.power){
+    //y=e^(loga . b)
+    //dy/dx = 
+    
+    
+    //The errror comes from no power being outputed.
+    var a=this[0];
+    var b=this[1];
+    var d=a.differentiate();
+    var f=b.differentiate();
+    //itg.add(p("b*(a^(b-1))*d+f*log(b)*(a^b)").dreplace(/a/g,a).dreplace(/b/g,b).dreplace(/d/g,d).dreplace(/f/g,f));
+    
+        itg.add([b].setType(eqtype.product)
+        .multiply
+         (
+            
+                a
+                .power(b.add(-1))
+            
+            
+         )
+        .multiply(a.differentiate())
+        .add(
+            b.differentiate()
+            .multiply(p("log(x)").dreplace(/x/,this[1]))
+            .multiply([a,b].setType(eqtype.power))
+            )
+        
+        
+        );
+        
+    }else if(this.type==eqtype.product){
+        
+        //d/dx uv = 
+        
+        
     }else{
         throw ("Invalid Expression Type: "+this.type);
+        return;
     }
-    m.forEach(function(e){
-        m.push(e.integrate(times));
-    });
-    return m;
+    
+    return itg;
 
 };
 Array.prototype.integrate=function(times){
@@ -1130,6 +1228,7 @@ Number.prototype.simplify=function (){
     return this.toString();
 };
 Array.prototype.simplify=function (){
+
     if(this.type==eqtype.fn){
         this[1]=this[1].simplify();
         return this;
@@ -1139,12 +1238,37 @@ Array.prototype.simplify=function (){
 			this[i]=this[i][0];
 		}
         if(this[i].canEval && this[i].canEval()){
-            this[i]=usr.eval(this[i].getString(0,1));
-        }else if(this[i].canEval && this[i].canEval()){
+            this[i]=this[i].eval();
+        }else{
             this[i]=this[i].simplify();
         }
-		
 	}
+    if(this.type==eqtype.product){
+        var _prod=1;
+        for(var i=0;i<this.length;i++){
+            var N=this[i].eval();
+            if(!isNaN(N)){
+                _prod*=N;
+                this.splice(i,1);
+                i--;
+            }
+        }
+        this.push(_prod);
+    }else if(this.type==eqtype.sum){
+        var _prod=0;
+        for(var i=0;i<this.length;i++){
+            var N=this[i].eval();
+            if(!isNaN(N)){
+                _prod+=N;
+                this.splice(i,1);
+                i--;
+            }
+        }
+        if(_prod!==0){
+            this.push(_prod);
+        }
+    }
+    
     var z=this;
     while(typeof z=="object" && z.length==1){
         z=z[0];
