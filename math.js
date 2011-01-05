@@ -217,6 +217,12 @@ function Gamma(x) {
         return pow(x - 1, x - 1) * Math.sqrt(2 * Math.PI * (x - 1)) * exp(1 - x + 1 / (12 * (x - 1) + 2 / (5 * (x - 1) + 53 / (42 * (x - 1)))));
     }
 }
+
+function psi(x) {
+    return random();
+}
+Γ=Gamma;
+ψ=psi;
 function fact(ff) {
     if (ff === 0 || ff == 1) {
         return 1;
@@ -365,8 +371,8 @@ function __debug(x){
 var spaces="                     ";
 var level=0;
 function p(inp){
-    if(typeof inp=="number"){
-        return Num(inp);
+    if(typeof inp=="number" || !isNaN(inp)){
+        return Number(inp);
     }else if(typeof inp=="object"){
         return inp;
     }
@@ -375,16 +381,15 @@ function p(inp){
     }
 //parses brackets recursively and returns an expression
     
-    level++;
-    if(level>15){throw("too recursive for debugging");return;}
+    //level++;
+    //if(level>15){throw("too recursive for debugging");return;}
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"p: "+inp);
 	var eq=[];
 	var e=inp.replace(/\s/g,"").replace(/\]/g,")").replace(/\[/g,"(").replace(/\)\(/g,")*(");
     
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
-	e=e.replace(/([a-zA-Z])\(/g,"$1:(");
-    
+	e=e.replace(/([^\+\-\*\/\^\:\(\)])\(/g,"$1:(");
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
@@ -396,7 +401,7 @@ function p(inp){
     //---Recursive Parentheses parse
 	while((e.indexOf("(")!=-1) && (e.indexOf(")")!=-1)){
         var fail=true;
-		e=e.replace(/\([\d\:\-±\!\+\/\*\^a-zA-Z\,]*\)/g,function(n){
+		e=e.replace(/\([^\(\)]*\)/g,function(n){
             fail=false;
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
@@ -488,6 +493,7 @@ function p(inp){
         }
         terms.push(p(be[0]));
         terms.push(p(be[1]));
+        
     }else if(e.indexOf(":")!=-1){
      __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
         terms.type=eqtype.fn;
@@ -516,11 +522,32 @@ function p(inp){
     }else{
         var parsednumber=NaN;
         if(!isNaN(parsednumber=Number(e))){
-            terms.type=eqtype.number;
-            terms.push(parsednumber);
-        }else if(0){
-            terms.type=eqtype.constant;
-            terms.push(e);
+            return parsednumber;
+        }else if(!/^hash[a-z\d]{20}hash$/.test(e)){
+            var match=/^([\d](\.[\d])?)([^\d]+)$/(e);
+            if(match){
+                terms.type=eqtype.product;
+                terms.push(p(match[1]));
+                terms.push(match[3]);
+            }else{
+                var vars=e.split(".");
+                if(vars.length>1){
+                    terms.type=eqtype.product;
+                    vars.forEach(function(v){
+                        terms.push(p(v));
+                    });
+                }else{
+                    if(0 && e.length>1 && e[0]=="d"){
+                        terms.type=eqtype.product;
+                        terms.push("d");
+                        terms.push(p(e.substring(1)));
+                    }else{
+                    
+                        terms.type=eqtype.variable;
+                        terms.push(e);
+                    }
+                }
+            }
         }else{
             terms.type=eqtype.variable;
             terms.push(e);
@@ -630,9 +657,9 @@ Array.prototype.dot=function(o){
 };
 Array.prototype.mag=function(){
     if(this.type==eqtype.discretevector){
-        return this.dot(this.conjg()).pow(Num(0.5));
+        return this.dot(this.conjg()).pow((0.5));
     }else{
-        return this.multiply(this.conjg()).pow(Num(0.5));
+        return this.multiply(this.conjg()).pow((0.5));
     }
 };
 Array.prototype.conjg=function(){
@@ -849,17 +876,11 @@ Array.prototype.size=function(){
     }
     return _size;
 };
-function Num(x){
-    return x;
-    var ar=[x];
-    ar.type=eqtype.number;
-    return ar;
-}
 String.prototype.invert=function(operation){
     if(operation==eqtype.sum){
         return "-"+this;
     }else if(operation==eqtype.sum){
-        return Num(1).divide(this);
+        return (1).divide(this);
     }else if(operation===undefined){
         throw ("Operation not specified");
     }
@@ -1001,6 +1022,11 @@ Number.prototype.factorise=function(){
 
 Array.prototype.factorise=function(){
     return this;
+    
+    //partial fractions (in x)
+    
+    
+    
     var right;
     if(this.type!=eqtype.sum){
         alert("?");
@@ -1144,12 +1170,13 @@ Array.prototype.inverse=function(){
     
 };
 function clean(n){
+    // de-latexify a string.
     for(var i in latexchars){
         while(i.length>1 && n.indexOf("\\"+i)!=-1){
             n=n.replace("\\"+i,latexchars[i]);
         }
   	}
-    return n.replace(/\}\{/g,")/(").replace(/\}/g,")").replace(/\{/g,"(").replace(/\\/g,"");;
+    return n.replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
 }
 function p_latex(n){
     return p(clean(n));
@@ -1178,10 +1205,10 @@ function compile(n){
 	if(eq.length==2){
 		lhs=p(eq[0]);
         var inverselhs=(lhs.dreplace(/y/g,"x")).inverse();
-        rhs=(inverselhs.dreplace(/x/g,p(eq[1])));
+        rhs=(inverselhs.dreplace(/x/g,p(eq[1]))).go();
 	}else{
 		lhs=p("y"); //This behaviour should be discouraged implicitly.
-		rhs=p(eq[0]);
+		rhs=p(eq[0]).go();
 	}
 	//compile
 	var ret={"f":function(){throw("Not a function");}};
@@ -1217,11 +1244,14 @@ String.prototype.canEval=function(){
     if(this[0]=="\"" && this[this.length-1]=="\""){
         return true;
     }
-    var isnum=/^[\d\.]+(e[\+\-][\d]+)?$/.test(this.toString());
+    ///var isnum=/^[\d\.]+(e[\+\-][\d]+)?$/.test(this.toString());
+    var isnum=!isNaN(this.toString());
     if(!isnum){
         if(!window[this.toString()]){
             return false;
         }
+    }else{
+        console.warn("Number in string: "+this.toString());
     }
     return true;
 };
@@ -1251,16 +1281,114 @@ String.prototype.simplify=function (){
     return this.toString();
 };
 Number.prototype.simplify=function (){
-    return this.toString();
+    return this;
 };
-
+Number.prototype.go=function(){
+    return this;
+}
+String.prototype.go=function(){
+    return this.toString();
+}
+String.prototype.has=function(x){
+    return Number(this.toString()==x);
+}
+Number.prototype.has=function(x){
+    return false;
+}
+Array.prototype.has=function(x){
+    //has factor. Return +1 if it's there. Return -1 if its in the denomiator. Else return false;
+    
+    // I suppose we should also:
+    //return 0 if it is in both.
+    if(this.type==eqtype.fraction){
+        var res=0;
+        if(res=this[0].has(x)){
+            return res;
+        }else if(res=this[1].has(x)){
+            return -res;
+        }
+    }else{
+        var res=0
+        for(var i=0;i<this.length;i++){
+            if(res=this[i].has(x)){
+                return res;
+            }
+        }
+    }
+}
+Array.prototype.isDifferential=function(){
+    var self=this.simplify();
+    if(self.type==eqtype.fraction){
+        var res;
+        if( (res = (self[0].has("d") * (self[1].has("dx")))) && !self.search("x")){
+            return res;
+        }
+        if( (res = (self[0].has("dx") * (self[1].has("d")))) && !self.search("x")){
+            return -res;
+        }
+    }
+    return false;
+}
+Array.prototype.go=function(){
+    
+    //performs a mathematical operation, e.g. d/dx (x^2)
+    var self=this.simplify();
+    if(self.type==eqtype.product){
+        var foundit=false;
+        
+        for(var i=0;i<self.length;i++){
+            var res;
+            if(self[i].isDifferential && (res=self[i].isDifferential())){
+                foundit=res;
+                self.splice(i,1);
+                i--;
+                break;
+            }
+        }
+        if(foundit==1){
+        
+            return this.simplify().differentiate();
+        }else if(foundit==-1){
+            //we have dx/d (f(x)) whatever that means
+            return undefined;
+        }
+    
+    }
+    if(self.type==eqtype.fraction){
+        if(self[0].has("d")==1 && self[1].has("dx")==1){
+            return self.dreplace(/^d$/g,1).dreplace(/^dx$/g,1).simplify().differentiate();
+        }
+    }else{
+        for(var i=0;i<self.length;i++){
+            if(self[i].go){
+                self[i]=self[i].go();
+            }
+        }
+    }
+    return self;
+};
 Array.prototype.simplify=function (){
-
+    if(this.canEval && this.canEval()===true){
+            return this.eval();
+    }
     if(this.type==eqtype.fn){
         this[1]=this[1].simplify();
         if(this[0]=="log" && this[1]=="e"){
             return 1;
         }
+        return this;
+    }
+    if(this.type==eqtype.fraction){
+        this[0]=this[0].simplify();
+        this[1]=this[1].simplify();
+        
+    }
+    if(this.type==eqtype.power){
+        this[1]=this[1].simplify();
+        if(this[1].eval()===1){
+            return this[0];
+        }
+        this[0]=this[0].simplify();
         return this;
     }
 	for(var i=0;i<this.length;i++){
@@ -1290,6 +1418,32 @@ Array.prototype.simplify=function (){
             //Null factor law.
             //Check for singularites
             return 0;
+        }
+        var newproducts=[];
+        for(var i=0;i<this.length;i++){
+            if((typeof this[i]=="object") && this[i].type==eqtype.product){
+                newproducts.push(this.splice(i,1)[0]);
+                i--;
+            }
+        }
+        if(newproducts.length){
+            var self=this;
+            newproducts.forEach(function(ff){
+                while(typeof ff=="object" && ff.length==1){
+                    ff=ff[0];
+                }
+                
+                ff.forEach(function(gg){
+                    while(typeof gg=="object" && gg.length==1){
+                        ff=ff[0];
+                    }
+                    self.push(gg);
+                });
+                
+                
+                
+            });
+            return self;
         }
     
     }else if(this.type==eqtype.sum){
@@ -1347,7 +1501,7 @@ Array.prototype.getString=function(braces,javascript){
             }
             else if(self.type==eqtype.fn){
                 if(typeof e !="string" && typeof e!="function"){
-                    throw("function name is not a string!");
+                    throw("function name is not a string: "+e);
                     return "ERROR";
                 }
                 if(functions.indexOf(e)==-1){
@@ -1397,7 +1551,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta".split(",");
+functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ".split(",");
 
 
 var known_derivatives={
@@ -1411,9 +1565,12 @@ var known_derivatives={
     "sqrt":p("(x^(-1/2))*0.5"),
     "asin":p("1/sqrt(1-x^2)"),
     "acos":p("-1/sqrt(1-x^2)"),
-    "random":p("(random(x)-0.5)*Infinity")
+    "fact":p("Γ(x+1)*ψ(x+1)"),
+    "Gamma":p("Γ(x)*ψ(x)"),
+    "Γ":p("Γ(x)*ψ(x)")
 };
 
+p("(random(x)-0.5)");
 
 if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
 
