@@ -223,6 +223,7 @@ function psi(x) {
 }
 Γ=Gamma;
 ψ=psi;
+π=pi;
 function fact(ff) {
     if (ff === 0 || ff == 1) {
         return 1;
