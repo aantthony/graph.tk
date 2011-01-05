@@ -130,7 +130,7 @@ app.remove=function(n){
 };
 app.init=function (){
 	app.ui.init();
-	app.add("x+3");
+	app.add("\\frac{d}{dx}\\left(e^x+x^3\\right)");
 };
 
 app.init();

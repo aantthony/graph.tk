@@ -494,15 +494,30 @@ function p(inp){
             throw ("^ is a binary operator");
             return;
         }
-        terms.push(p(be[0]));
+        terms.push((be[0]));
         terms.push(p(be[1]));
+        
         
     }else if(e.indexOf(":")!=-1){
      __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
         terms.type=eqtype.fn;
         var be=e.split(":");
-        terms.push(p(be[0]));
-        terms.push(p(be[1]));
+        
+        if(be.length!=2){
+            throw ("Function composition is a binary operator");
+            return;
+        }
+        
+        var match=/^log_([\d\.\+\-e]+)$/(be[0]);
+        if(match){
+            var fn_=["log",p(be[1])].setType(eqtype.fn);
+            terms.type=eqtype.fraction;
+            terms.push(fn_);
+            terms.push(["log", p(match[1])].setType(eqtype.fn));
+        }else{
+            terms.push(p(be[0]));
+            terms.push(p(be[1]));
+        }
     }else if(e.indexOf("!")!=-1){
         terms.type=eqtype.product;
         var last=0;
@@ -814,6 +829,9 @@ Number.prototype.eval=function(o){
     return this;
 };
 String.prototype.eval=function(){
+    if(this.toString()=="i"){
+        return "i";
+    }
     if(!isNaN(this.toString())){
         return Number(this.toString());
     }
@@ -829,8 +847,22 @@ Array.prototype.eval=function(){
         return NaN;
     }
 };
+String.prototype.multiply=function(o){
+    if(this.toString=="i"){
+        return -1;
+    }
+    if(o==1){
+        return p(this.toString());
+    }
+    if(o==0){
+        return 0;
+    }
+    var sum=[p(this.toString()),p(o)];
+    sum.type=eqtype.product;
+    return sum;
+}
+Number.prototype.multiply=function(o){
 
-Number.prototype.multiply=String.prototype.multiply=function(o){
     if(this==0){
         if(p(o)==Infinity){
             return undefined;
@@ -1179,7 +1211,7 @@ function clean(n){
             n=n.replace("\\"+i,latexchars[i]);
         }
   	}
-    return n.replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
+    return n.replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
 }
 function p_latex(n){
     return p(clean(n));
@@ -1244,6 +1276,9 @@ String.prototype.canEval=function(){
     if(this.toString()=="e"){
         return 2;
     }
+    if(this.toString()=="π"){
+        return 2;
+    }
     if(this[0]=="\"" && this[this.length-1]=="\""){
         return true;
     }
@@ -1299,37 +1334,45 @@ Number.prototype.has=function(x){
     return false;
 };
 Array.prototype.has=function(x){
-    //has factor. Return +1 if it's there. Return -1 if its in the denomiator. Else return false;
+    //has factor. Return +exponent if it's there. Return -exponent if its in the denomiator. Else return false;
     
     // I suppose we should also:
     //return 0 if it is in both.
+    var res=[].setType(eqtype.sum);
     if(this.type==eqtype.fraction){
-        var res=0;
-        if(res=this[0].has(x)){
-            return res;
-        }else if(res=this[1].has(x)){
-            return -res;
+        res=res.add(this[0].has(x));
+        res=res.add(this[1].has(x));
+    }else if(this.type==eqtype.power){
+        res=res.add(this[0].has(x).multiply(this[1]));
+    }else if(this.type==eqtype.fn){
+        return NaN;
+    }else if(this.type==eqtype.product){
+        for(var i=0;i<this.length;i++){
+            res=res.add(this[i].has(x));
         }
     }else{
-        var res=0;
-        for(var i=0;i<this.length;i++){
-            if(res=this[i].has(x)){
-                return res;
-            }
-        }
+        return NaN;
     }
+    return res.eval() || res.simplify();
 };
 Array.prototype.isDifferential=function(){
     var self=this.simplify();
     
     if(this.type==eqtype.fraction){
-        if(self[0]=="d" && self[1]=="dx"){
-            return 1;
-        }
-        if(self[0]=="dx" && self[1]=="x"){
-            return -1;
+        var ds=0;
+        var dxs=0;
+        if(ds=self[0].has("d")){
+            if(dxs=self[1].has("dx")){
+                return (ds==dxs)?(dxs):NaN;
+            }
         }
         return false;
+    }else if(this.type==eqtype.product){
+        var count=[].setType(eqtype.sum);
+        this.forEach(function(f){
+            count.push(f.isDifferential());
+        });
+        return count.eval() || count.simplify();
     }
     
     return false;
@@ -1364,7 +1407,7 @@ Array.prototype.go=function(){
             }
         }
         if(foundit==1){
-        
+    
             return this.simplify().differentiate();
         }else if(foundit==-1){
             //we have dx/d (f(x)) whatever that means
@@ -1376,13 +1419,14 @@ Array.prototype.go=function(){
         if(self[0].has("d")==1 && self[1].has("dx")==1){
             return self.dreplace(/^d$/g,1).dreplace(/^dx$/g,1).simplify().differentiate();
         }
-    }else{
-        for(var i=0;i<self.length;i++){
-            if(self[i].go){
-                self[i]=self[i].go();
-            }
+    }
+    
+    for(var i=0;i<self.length;i++){
+        if(self[i].go){
+            self[i]=self[i].go();
         }
     }
+    
     return self;
 };
 Array.prototype.simplify=function (){
@@ -1571,7 +1615,7 @@ Array.prototype.getString=function(braces,javascript){
 
 functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ".split(",");
 
-
+window._i=33;
 var known_derivatives={
     "log":p("1/x"),
     "sin":p("cos(x)"),
@@ -1589,6 +1633,8 @@ var known_derivatives={
 };
 
 p("(random(x)-0.5)");
+
+//"i" can be changed between one and zero to get the real and imaginary part.
 
 if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
 
