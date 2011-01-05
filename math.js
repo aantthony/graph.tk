@@ -390,6 +390,8 @@ function p(inp){
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
 	e=e.replace(/([^\+\-\*\/\^\:\(\)])\(/g,"$1:(");
+    
+	e=e.replace(/\)([^\+\-\*\/\^\:\(\)])/g,")*$1");
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
@@ -1318,6 +1320,21 @@ Array.prototype.has=function(x){
 }
 Array.prototype.isDifferential=function(){
     var self=this.simplify();
+    
+    if(this.type==eqtype.fraction){
+        if(self[0]=="d" && self[1]=="dx"){
+            return 1;
+        }
+        if(self[0]=="dx" && self[1]=="x"){
+            return -1;
+        }
+        return false;
+    }
+    
+    return false;
+    
+    
+    //this would ignore the numbers in ((d*(2+3*2))/(dx/2))
     if(self.type==eqtype.fraction){
         var res;
         if( (res = (self[0].has("d") * (self[1].has("dx")))) && !self.search("x")){
