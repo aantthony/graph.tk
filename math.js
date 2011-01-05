@@ -860,7 +860,7 @@ String.prototype.multiply=function(o){
     var sum=[p(this.toString()),p(o)];
     sum.type=eqtype.product;
     return sum;
-}
+};
 Number.prototype.multiply=function(o){
 
     if(this==0){
