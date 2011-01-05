@@ -494,7 +494,7 @@ function p(inp){
             throw ("^ is a binary operator");
             return;
         }
-        terms.push((be[0]));
+        terms.push(p(be[0]));
         terms.push(p(be[1]));
         
         
@@ -986,7 +986,7 @@ Array.prototype.differentiate=function(times){
         //Chain rule!
         var fnd;
         if(fnd=known_derivatives[this[0]]){
-            return [fnd.dreplace(/x/g,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
+            return [fnd.dreplace(/^x$/g,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
         }else{
             throw("I don't know the derivative of the "+this[0]+" function!");
         }
@@ -1130,10 +1130,10 @@ Array.prototype.inverse=function(){
     var right=[];
     if(this.type==eqtype.fraction){
         right.type=eqtype.product;
-        right.push(this[0].dreplace(/x/g,"y"));
-        right.push(p(1).divide(this[1].dreplace(/x/g,"y")));
+        right.push(this[0].dreplace(/^x$/g,"y"));
+        right.push(p(1).divide(this[1].dreplace(/^x$/g,"y")));
     }else{
-        right=this.dreplace(/x/g,"y");
+        right=this.dreplace(/^x$/g,"y");
     }
     var left=[p("x")];
     left.type=right.type;
@@ -1182,8 +1182,8 @@ Array.prototype.inverse=function(){
             right=right[0];
         }else{
             //b has the x
-            left=p("log(x)").dreplace(/x/g,left);
-            left=left.divide(p("log(x)").dreplace(/x/g,right[0]));
+            left=p("log(x)").dreplace(/^x$/g,left);
+            left=left.divide(p("log(x)").dreplace(/^x$/g,right[0]));
             right=right[1];
         }
     }else{
@@ -1240,7 +1240,7 @@ function compile(n){
 	if(eq.length==2){
 		lhs=p(eq[0]);
         var inverselhs=(lhs.dreplace(/y/g,"x")).inverse();
-        rhs=(inverselhs.dreplace(/x/g,p(eq[1]))).go();
+        rhs=(inverselhs.dreplace(/^x$/g,p(eq[1]))).go();
 	}else{
 		lhs=p("y"); //This behaviour should be discouraged implicitly.
 		rhs=p(eq[0]).go();
