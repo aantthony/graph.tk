@@ -755,13 +755,13 @@ Array.prototype.power=function(o){
         this[1]=this[1].multiply(p(o));
     }
     return [this,p(o)].setType(eqtype.power);
-}
+};
 String.prototype.power=function(o){
     return [p(this.toString()),p(o)].setType(eqtype.power);
-}
+};
 Number.prototype.power=function(o){
     return [this,p(o)].setType(eqtype.power);
-}
+};
 Array.prototype.multiply=function(o){
     if(this.type==eqtype.fraction){
         this[0].multiply(p(o));
@@ -800,7 +800,7 @@ String.prototype.add=function(o){
         return p(o);
     }
     return [p(this.toString())].setType(eqtype.sum).add(p(o));
-}
+};
 Number.prototype.add=function(o){
     if(p(o).eval()==0){
         return this;
@@ -1287,16 +1287,16 @@ Number.prototype.simplify=function (){
 };
 Number.prototype.go=function(){
     return this;
-}
+};
 String.prototype.go=function(){
     return this.toString();
-}
+};
 String.prototype.has=function(x){
     return Number(this.toString()==x);
-}
+};
 Number.prototype.has=function(x){
     return false;
-}
+};
 Array.prototype.has=function(x){
     //has factor. Return +1 if it's there. Return -1 if its in the denomiator. Else return false;
     
@@ -1310,14 +1310,14 @@ Array.prototype.has=function(x){
             return -res;
         }
     }else{
-        var res=0
+        var res=0;
         for(var i=0;i<this.length;i++){
             if(res=this[i].has(x)){
                 return res;
             }
         }
     }
-}
+};
 Array.prototype.isDifferential=function(){
     var self=this.simplify();
     
@@ -1345,7 +1345,7 @@ Array.prototype.isDifferential=function(){
         }
     }
     return false;
-}
+};
 Array.prototype.go=function(){
     
     //performs a mathematical operation, e.g. d/dx (x^2)
