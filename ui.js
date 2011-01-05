@@ -557,7 +557,10 @@ app.ui=(function(){
                 
                     //logt.appendChild((p_latex($(conin).mathquill("latex")).markup()));
                 conin.last=$(conin).mathquill("latex");
-                var out=p_latex(conin.last).factorise();
+                var out=p_latex(conin.last).simplify();
+                if(out.go){
+                    out=out.go();
+                }
                 if(!out.canEval()){
                     logt.appendChild(((out.getString().markup())));
                 }else{
