@@ -485,7 +485,7 @@ function p(inp){
         }
     }else if(e.indexOf("^")!=-1){
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"^>: "+e);
-        terms.type=eqtype.power;
+        
         var be=e.split("^");
         //NOTE: for now
         //^ is a BINARY operator that goes from right to left.
@@ -494,9 +494,16 @@ function p(inp){
             throw ("^ is a binary operator");
             return;
         }
-        terms.push(p(be[0]));
-        terms.push(p(be[1]));
-        
+        var base=p(be[0]);
+        if(base.type==eqtype.product){
+            terms.type=eqtype.product;
+            base[base.length-1]=[base[base.length-1],p(be[1])].setType(eqtype.power);
+            terms.push(base);
+        }else{
+            terms.type=eqtype.power;
+            terms.push(base);
+            terms.push(p(be[1]));
+        }
         
     }else if(e.indexOf(":")!=-1){
      __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
@@ -560,7 +567,7 @@ function p(inp){
                         terms.push("d");
                         terms.push(p(e.substring(1)));
                     }else{
-                    
+                        return e;
                         terms.type=eqtype.variable;
                         terms.push(e);
                     }
@@ -574,7 +581,9 @@ function p(inp){
     
     }
     terms=terms.dreplace(/^hash[a-z\d]{20}hash$/,function(e){
-        return obj[e.substring(4,24)];
+        var to_ret=obj[e.substring(4,24)];
+        delete obj[e.substring(4,24)];
+        return to_ret;
     });
     /*
 	for(var i=0;i<terms.length;i++){
@@ -585,10 +594,10 @@ function p(inp){
 	}*/
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
-	while(typeof terms=="object" && terms.length==1){
-		terms=terms[0];
-	}
-    return terms.simplify();
+	//while(typeof terms=="object" && terms.length==1){
+	//	terms=terms[0];
+	//}
+    return terms;
 	
 }
 
@@ -1214,7 +1223,7 @@ function clean(n){
     return n.replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
 }
 function p_latex(n){
-    return p(clean(n));
+    return p(clean(n)).simplify();
 }
 function compile(n){
     n=clean(n);
