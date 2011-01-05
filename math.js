@@ -398,7 +398,7 @@ function p(inp){
         if(eq.length==2){
             return [p(eq[0]),p(eq[1])].setType(eqtype.equality);
         }
-        throw("Invalid. '=' can only be used once per equation.");
+        throw("Too many '='s");
         return;
     }
     //---Recursive Parentheses parse
@@ -1242,7 +1242,7 @@ function compile(n){
 	var eq=n.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
 	
 	if(eq.length>2){
-		throw("Invalid. '=' can only be used once per equation.");
+		throw("Too many '='s");
 		return;
 	}
 	var lhs,rhs;

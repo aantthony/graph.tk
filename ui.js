@@ -16,7 +16,7 @@ var boundtop = 10;
 var boundbottom = -10;
 var width,height;
 
-
+var LocalStrings=["Could not initalize"];
 
 app.config={"lineWidth":1.5};
 app.ui=(function(){
@@ -455,6 +455,7 @@ app.ui=(function(){
 		}
 		ul.appendChild(li);
 		var inputbox = li.getElementsByClassName("matheditor")[0];
+        var warn_ = li.getElementsByTagName("aside")[0];
         var b_=li.firstChild;
         var check_=li.firstChild.firstChild;
         var delete_=li.getElementsByClassName("delete")[0];
@@ -483,8 +484,24 @@ app.ui=(function(){
         inputbox.onchange=function(){
             for(var i=0;i<graphs.length;i++){
                 if(graphs[i].gid==n.gid){
+                    
+                    
+                    
+        
+                   
+        
                     var l__=$(inputbox).mathquill("latex");
-                    var c=compile(l__);
+                    try{
+                        var c=compile(l__);
+                    }catch(ex){
+                         
+                        warn_.firstChild.nodeValue="Error: "+ex.toString();
+                        warn_.style.display="block";
+                        return;
+                    }
+                    warn_.firstChild.nodeValue="";
+                    warn_.style.display="none";
+        
                     graphs[i].f=c.f;
                     graphs[i].plot=c.plot;
                     graphs[i].equation=l__;
@@ -498,6 +515,8 @@ app.ui=(function(){
 			inputbox.getElementsByTagName("textarea")[0].focus();
         }
 		
+        warn_.firstChild.nodeValue="";
+        warn_.style.display="none";
 		return li;
 	},
 	"colors":{
@@ -585,6 +604,9 @@ app.ui=(function(){
 		
 		var _proto=document.createElement("li");
 		var _proto_div=document.createElement("div");
+        var _proto_warn=document.createElement("aside");
+        _proto_warn.appendChild(document.createTextNode(LocalStrings[0]));
+        
 		_proto_div.className="b";
 		_proto_div.style.backgroundColor="#07c";
 		var _proto_input=document.createElement("input");
@@ -600,7 +622,7 @@ app.ui=(function(){
         _proto.appendChild(_proto_div);
 		_proto.appendChild(_proto_math);
 		_proto.appendChild(_proto_del);
-		
+		_proto.appendChild(_proto_warn);
 		var buttons=document.createElement("div");
 		buttons.className="buttons";
         var newfuncbtn=document.createElement("input");
