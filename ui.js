@@ -568,7 +568,7 @@ app.ui=(function(){
                 }
                 $(conin).mathquill("latex","");
 			}
-			else if(event.which==38){
+			else if(event.which==38 && event.shiftKey){
                 if(!/\\[a-z]*|[^\s]/ig.test(conin.last)){
                     conin.last=" ";
                 }
