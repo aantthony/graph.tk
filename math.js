@@ -396,10 +396,9 @@ function p(inp){
     
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
-	e=e.replace(/([^\+\-\*\/\^\:\(\)])\(/g,"$1:(");
-    
+	e=e.replace(/([^\+\-\*\/\^\:\(\)\d])\(/g,"$1:(");
+    e=e.replace(/([xe\d])\(/g,"$1*(");
 	e=e.replace(/\)([^\+\-\*\/\^\:\(\)])/g,")*$1");
-    console.log(e);
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
@@ -617,7 +616,6 @@ function p(inp){
     }
     if(terms.length==2){
         if(terms[0].length==1 && terms[0]=="d" && terms[1].length==1 && terms[1]=="dx"){
-            console.log(333)
             return ["diff"].setType(eqtype.operatorfactor);
         }
     }
@@ -626,7 +624,13 @@ function p(inp){
         for(var i=0;i<terms.length;i++){
             if(terms[i].type==eqtype.operatorfactor){
                 found++;
-                return [terms[i][0],terms.splice(i+1).setType(eqtype.product)].setType(eqtype.fn);
+                var operation=terms.splice(i,1)[0][0];
+                var subject=terms.splice(i).setType(eqtype.product);
+                if(terms.length){
+                    return [operation,subject].setType(eqtype.fn).multiply(terms);
+                }else{
+                    return [operation,subject].setType(eqtype.fn);
+                }
             }
         }
     }
@@ -1324,22 +1328,22 @@ Number.prototype.canEval=function(){
 Array.prototype.canEval=function(){
 //TODO: null factor law.
     if(this.type==eqtype.fn && window[this[0]] && typeof window[this[0]] =="function" ){
-        //Check if it can be represented as an absolute value.
+        //Check if it7 can be represented as an absolute value.
         if(this[0]=="diff"){
             return 4;
         }
         return this[1].canEval();
     }
+    var max=true;
     for(var i=0;i<this.length;i++){
         if(typeof this[i] == "number"){
         }else if(this[i].canEval){
             var res;
             if(!(res=this[i].canEval())){
-                return res;
-            }
-        }else if(typeof this[i] == "object"){
-            if(!this[i]==NaN && isNaN(this[i])){
                 return false;
+            }
+            if(res==4){
+                return 4;
             }
         }
     }
@@ -1428,6 +1432,9 @@ Array.prototype.simplify=function (onlyeval,___retry){
             return 1;
         }
         if(this[0]=="diff"){
+            if(this.length!=2){
+                throw("Differential operator alone");
+            }
             return this[1].differentiate();
         }
         return this;
@@ -1562,7 +1569,6 @@ Number.prototype.getString=function(){
     return this.toString();
 };
 function diff(x){
-    console.log(["diff_",x]);
     return p(x).differentiate();
 }
 function text(e){return e.toString()}

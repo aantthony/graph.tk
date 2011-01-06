@@ -127,6 +127,7 @@ app.remove=function(n){
             break;
         }
     }
+    draw();
 };
 app.init=function (){
 	app.ui.init();

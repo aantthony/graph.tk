@@ -113,7 +113,9 @@ input[value=">_"]{
 #funcs ul li:last-child .b{
 	border-bottom:none;
 }
-
+#funcs ul li:first-child .delete{
+    display:none;
+}
 
 #funcs ul aside{
     position:absolute;
