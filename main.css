@@ -203,7 +203,12 @@ input[value=">_"]{
     max-height:500px;
     overflow:auto;
 }
-
+#logt .warn{
+    background:url(buttons.png) -62px -21px no-repeat;
+    width:20px;
+    height:20px;
+    float:left;
+}
 
 
 ul.json li.end b:before{

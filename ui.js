@@ -18,9 +18,10 @@ var width,height;
 
 var LocalStrings=["Could not initalize"];
 
-app.config={"lineWidth":1.5};
+//NO xc until the CAS is ready, or newtons method coded
+app.config={"lineWidth":1.5,"yc":true,"xc":false};
 app.ui=(function(){
-	
+	var allowdrag=true;
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
 	var draw;
 	var ctx;
@@ -46,7 +47,7 @@ app.ui=(function(){
 
 	var scalex = 64;
 	var scaley = scalex;//not always
-
+    var scalez = scalex;//not always
 
 
 	var gridsize;
@@ -62,7 +63,6 @@ app.ui=(function(){
 
 
 	function draw(){
-	
 	    e = Math.E;//they can be accidentially changed
 	    pi = Math.PI;
 
@@ -91,7 +91,7 @@ app.ui=(function(){
 	
 		
 		ctx.lineWidth=2;
-	
+        ctx.font="10pt sans-serif";
 	
 		
 		
@@ -145,6 +145,22 @@ app.ui=(function(){
             if(!e.disabled){
                 ctx.strokeStyle=ctx.fillStyle=e.color;
                 e.plot(ctx);
+                if(app.config.yc && e.f){
+                    var yc=e.f(0);
+                    if(!isNaN(yc)){
+                        //scalex*px-cx,cy-scaley*py
+                        if(app.config.fillText){
+                            ctx.fillText(yc.format(),10-cx,cy-scaley*yc);
+                        }
+                    }
+                }
+                if(app.config.xc && e.xc){
+                    e.xc.forEach(function(xc){
+                        if(app.config.fillText){
+                            ctx.fillText(xc.getString(),scalex*xc-cx.eval(),cy-10);
+                        }
+                    });
+                }
             }
         });
 	    //}catch(ex){}
@@ -163,6 +179,7 @@ app.ui=(function(){
 
 	var drawwhiledrag_c=0;
 	function mousedown(e) {
+        if(!allowdrag){return;}
 	    lmx=mx=e.x || e.pageX;
 	    lmy=my=e.y || e.pageY;
 	    drag = true;
@@ -174,6 +191,7 @@ app.ui=(function(){
 	};
 
 	function mousemove(e) {
+        if(!allowdrag){return;}
 	    e = e || window.event;
 	    if (e.x !== undefined) {
 	        mx = e.x;
@@ -211,6 +229,7 @@ app.ui=(function(){
 	}
 
 	function mousewheel(e){
+        if(!allowdrag){return;}
 		e = e || window.event;
 	    if (e.x !== undefined) {
 	        mx = e.x;
@@ -246,6 +265,9 @@ app.ui=(function(){
 			cy+=my+ex*(cy-my)-cy;
 		}
 	    draw();
+        
+        e.preventDefault();
+        return false;
 	}
 	function perform_translation(){
 	    cx-=_cx;
@@ -506,6 +528,8 @@ app.ui=(function(){
         
                     graphs[i].f=c.f;
                     graphs[i].plot=c.plot;
+                    graphs[i].math=c.math;
+                    graphs[i].xc=c.xc;
                     draw();
                     break;
                 }
@@ -527,8 +551,26 @@ app.ui=(function(){
         if(draw){
             draw();
         }
-    },"init":function(){
-		var fullscreen=window.parent.length?false:true;
+    },"block":function(block_it){
+        allowdrag=block_it?false:true;
+    },"scale":function(x,y,z){
+        scalex*=x||1;
+        scaley*=y||x||1;
+        scalez*=y||x||1;
+        draw();
+    },"translate":function(x,y,z){
+        cx+=x||0;
+        cy+=y||0;
+        cz+=z||0;
+        draw();
+    },"center":function(x,y,z){
+    
+        cx=scalex*(x||0)-width/2;
+        cy=scaley*(y||0)+height/2;
+        cz=scalez*(z||0)-width/2;
+        draw();
+    
+    },"init":function(fullscreen){
 		(new Image()).src="grabbing.gif";
 		canvas=document.createElement("canvas");
 		if(fullscreen){
@@ -538,6 +580,9 @@ app.ui=(function(){
 		document.body.appendChild(canvas);
 		if(canvas.getContext){
 			ctx=canvas.getContext("2d");
+            if(!app.config.fillText){
+                app.config.fillText=ctx.fillText?true:false;
+            }
 		}else{
 			alert("Failed!");
 		}
@@ -549,6 +594,9 @@ app.ui=(function(){
 		
 		
 		ptd=document.createElement("div");
+        if(!fullscreen){
+            ptd.style.display="none";
+        }
 		ptd.id="ptd";
 		ptd.className="monospace";
 		ptd.appendChild(document.createTextNode("(0,0)"));
@@ -582,9 +630,9 @@ app.ui=(function(){
                     out=out.go();
                 }
                 if(!out.canEval()){
-                    logt.appendChild(((out.getString().markup())));
+                    app.ui.console.log(((out.getString().markup())));
                 }else{
-                    logt.appendChild(generateJSON(usr.eval(out.getString(0,1))));
+                    app.ui.console.log(generateJSON(usr.eval(out.getString(0,1))));
                 }
                 $(conin).mathquill("latex","");
 			}
@@ -599,6 +647,9 @@ app.ui=(function(){
 		var funcs=document.createElement("div");
 		funcs.className="overlay";
 		funcs.id="funcs";
+        if(!fullscreen){
+            funcs.style.display="none";
+        }
 		var _ul=document.createElement("ul");
 		_ul.id="graphs";
 		funcs.appendChild(_ul);
@@ -665,14 +716,12 @@ app.ui=(function(){
 
 		window.onresize=resize;
 		canvas.onmousedown=mousedown;
-        document.body.addEventListener("mouseover",function(e){if(e.button){console.log(e)}},false);
 		
-		document.body.addEventListener("mouseup",function(){drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
+		document.body.addEventListener("mouseup",function(){if(!allowdrag){return;}drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
 		document.body.addEventListener("mousemove",mousemove,false);
 		   	   window.addEventListener("mousewheel",mousewheel,false);
         con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
 		document.body.removeChild(document.body.firstChild);
-			
 		//we may have to implement scaling if browsers don't work properly
 		ctx.move=function(px,py,pz){
 			return ctx.moveTo(scalex*px-cx,cy-scaley*py);
@@ -726,10 +775,33 @@ app.ui=(function(){
 			return app.ui.console.show();
 		}
         app.ui.console.hide();
+    },"warn":function(x,noshow){
+        var div=document.createElement("div");
+            var warn=document.createElement("div");
+            warn.className="warn";
+            div.appendChild(warn);
+        if(typeof x !="object"){
+            div.appendChild(document.createTextNode(x));
+        }else{
+            div.appendChild(x);
+		}
+        logt.appendChild(div);
+        if(!noshow && !_console){
+			app.ui.console.show();
+		}
     
-    },"log":function(){
-		
-		
+    },"log":function(x,noshow){
+        if(typeof x !="object"){
+            var div=document.createElement("div");
+            div.appendChild(document.createTextNode(x));
+            logt.appendChild(div);
+        }else{
+            logt.appendChild(x);
+		}
+        if(!noshow && !_console){
+			app.ui.console.show();
+		}
+
 	}};
 	
 	return ui;

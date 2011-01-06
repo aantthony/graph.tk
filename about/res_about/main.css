@@ -54,5 +54,12 @@ img{border:none}
 
 code{border:1px solid #ccc;}
 input[type=text],textarea,input[type=email] {border: 1px solid #444; color:#444;font-size:medium; width: 100%;font-family:sans-serif;background: #f8f8f8;text-shadow:white 0px 1px 0px;padding:4px}
-code b{color:rgb(166,23,0);text-decoration:none;font-weight:normal}code i{color:rgb(0,119,119);font-style:normal}code strong{color:rgb(196,26,22);text-decoration:none;font-weight:normal}code span.u{color:rgb(127,18,178);}code{color:#333;display:block;margin-top:8px;margin-bottom:8px;background:#fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAIAAADwyuo0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACNJREFUeNpiOHLkyLt372bOnAkkmRgYGFavXh0aGgokAQIMANUHDq+pjDQJAAAAAElFTkSuQmCC') repeat-y;padding:8px}
+code b{color:rgb(166,23,0);text-decoration:none;font-weight:normal}
+code i{color:rgb(0,119,119);font-style:normal}
+code strong{color:rgb(196,26,22);text-decoration:none;font-weight:normal}
+code span.u{color:rgb(127,18,178);}
+code span.s{color:#a700c6;}
+code span.k{color:#c90000;}
+code span.c{color:#008727;}
+code{color:#333;display:block;margin-top:8px;margin-bottom:8px;background:#fff url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAIAAADwyuo0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAACNJREFUeNpiOHLkyLt372bOnAkkmRgYGFavXh0aGgokAQIMANUHDq+pjDQJAAAAAElFTkSuQmCC') repeat-y;padding:8px}
 

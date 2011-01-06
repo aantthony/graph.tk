@@ -36,7 +36,8 @@ Divion should be dreplaced with multiplication by the reciprocal.
 TODO: -frac does not work.
     */
 
-function format(num, digits) {
+Number.prototype.format=function(digits) {
+    var num=Number(this);
     e = Math.E;
     pi = Math.PI;
     if (!num) {
@@ -379,7 +380,7 @@ function p(inp){
         return Number(inp);
     }else if(__debug(1,0) && typeof inp=="object"){
         if(!isNaN(inp)){
-            console.warn("this is returned somewhere instead of Number(this)");
+            app.ui.console.warn("this is returned somewhere instead of Number(this)");
             return Number(inp);
         }
         return inp;
@@ -391,7 +392,7 @@ function p(inp){
     
     //level++;
     //if(level>15){throw("too recursive for debugging");return;}
-    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"p: "+inp);
+    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"p: "+inp);
 	var eq=[];
 	var e=inp.replace(/\s/g,"").replace(/\]/g,")").replace(/\[/g,"(").replace(/\)\(/g,")*(");
     
@@ -429,7 +430,7 @@ function p(inp){
     var prod_op="*/";
     
     if(e.indexOf(",")!=-1){
-        __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
+        __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
         terms.type=eqtype.discretevector;
         var be=e.split(",");
         be.forEach(function(zz){
@@ -437,7 +438,7 @@ function p(inp){
         });
     
     }else if((e.indexOf("+")!=-1) || (e.indexOf("-")!=-1)){
-    __debug(!__debug_parser,0) ||console.log(spaces.substring(0,level)+"+>: "+e);
+    __debug(!__debug_parser,0) ||app.ui.console.log(spaces.substring(0,level)+"+>: "+e);
         terms.type=eqtype.sum;
         var nextisinverse=false;
         for(var i=0;i<e.length;i++){
@@ -463,7 +464,7 @@ function p(inp){
         
         
     }else if((e.indexOf("*")!=-1) || (e.indexOf("/")!=-1)){
-    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"*>: "+e);
+    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"*>: "+e);
         terms.type=eqtype.product;
         var denom=[];
         denom.type=eqtype.product;
@@ -494,7 +495,7 @@ function p(inp){
             terms.type=eqtype.fraction;
         }
     }else if(e.indexOf("^")!=-1){
-    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"^>: "+e);
+    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"^>: "+e);
         
         var be=e.split("^");
         //NOTE: for now
@@ -516,7 +517,7 @@ function p(inp){
         }
         
     }else if(e.indexOf(":")!=-1){
-     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"f>: "+e);
+     __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
         terms.type=eqtype.fn;
         var be=e.split(":");
         
@@ -610,7 +611,7 @@ function p(inp){
 			//terms[i]="e";
 		}
 	}*/
-    __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
+    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
     while(typeof terms == "object" && terms.type==eqtype.variable){
         terms=terms[0];
@@ -899,7 +900,7 @@ String.prototype.eval=function(){
 };
 Array.prototype.eval=function(){
     if(!this.length){
-        console.warn("Empty: "+this.type);
+        app.ui.console.warn("Empty: "+this.type);
     }
     if(this.canEval()){
         return eval(this.getString(1,1));
@@ -1056,7 +1057,7 @@ Array.prototype.differentiate=function(times){
         }else if(this.length==1){
             return this[0].differentiate();
         }else{
-            console.warn("Tried to differentiate empty product");
+            app.ui.console.warn("Tried to differentiate empty product");
             return 0;
         }
     }else{
@@ -1287,21 +1288,27 @@ function compile(n){
 	var ret={"f":function(){throw("Not a function");}};
     //If fun is an array of inverses
     var builder="(function(ctx){";
+    ret.xc=[];
     if(funcs.length){
-        ret.f=eval("("+"function(x){return "+jsc+";})");
-        var jsc=funcs[0].simplify().getString(0,true);
         
+        var jsc=funcs[0].simplify().getString(0,true);
+        ret.f=eval("("+"function(x){return "+jsc+";})");
         builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
+        try{
+            //ret.xc.push(funcs[0].inverse().dreplace(/^x$/g,0).simplify().simplify());
+        }catch(ex){}
         for(var i=1;i<funcs.length;i++){
             var jsc=funcs[i].simplify().getString(0,true);
             builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
+            try{
+                //ret.xc.push(funcs[i].inverse().dreplace(/^x$/g,0).simplify().simplify());
+            }catch(ex){}
     
         }
     }
-        
-        
-    builder+="})";
     
+    builder+="})";
+    ret.math=funcs;
 	ret.plot=eval(builder);
 	return ret;
 	
@@ -1685,7 +1692,7 @@ var known_derivatives={
 
 //p("(random(x)-0.5)");
 if(p("(1/(1*x))*(2*1*1*1*2/3*3*0.5)").simplify().getString()!="2/x"){
-    console.warn("Simplifier improvements required");
+    app.ui.console.warn("Simplifier improvements required");
 }
 
 
