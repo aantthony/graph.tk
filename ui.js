@@ -25,7 +25,7 @@ app.ui=(function(){
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
 	var draw;
 	var ctx;
-	var ptd,con,proto;
+	var ptd,con,proto,conin;
     var logt;
 	function resize(){
 	    width=window.innerWidth  || document.body.clientWidth;
@@ -616,7 +616,7 @@ app.ui=(function(){
         con.appendChild(conin_);
 		document.body.appendChild(con);
 		//Todo, change the console to look like kingsql.
-		var conin=document.getElementById("conin");
+		conin=document.getElementById("conin");
         $(conin).mathquill("editable");
 		$(conin).mathquill("redraw");
         
@@ -772,7 +772,9 @@ app.ui=(function(){
         _console=false;
 	},"toggle":function(){
         if(!_console){
-			return app.ui.console.show();
+            app.ui.console.show();
+            conin.getElementsByTagName("textarea")[0].focus();
+            return;
 		}
         app.ui.console.hide();
     },"warn":function(x,noshow){

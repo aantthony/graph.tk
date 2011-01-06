@@ -767,6 +767,30 @@ Number.prototype.dreplace=function(a,b){
 };
 Array.prototype.dreplace=function(a,b){
     var cp=[];
+    cp.type=this.type;
+    for(var i=0;i<this.length;i++){
+        if(typeof this[i]=="string"){
+            if(a.test){
+                if(a.test(this[i])){
+                    if(typeof b=="function"){
+                        cp.push(b(this[i]));
+                    }else{
+                        cp.push(b);
+                    }
+                }else{
+                    cp.push(this[i]);
+                }
+            }else{
+                app.ui.console.warn("Use regex for .dreplace()");
+            }
+        }else if(typeof this[i]=="object"){
+            cp.push(this[i].dreplace(a,b));
+        }else{
+            cp.push(this[i]);
+        }
+    
+    }
+    return cp;
     this.forEach(function(i){
         if(typeof i=="string"){
             if(a.test){
@@ -900,7 +924,7 @@ String.prototype.eval=function(){
 };
 Array.prototype.eval=function(){
     if(!this.length){
-        app.ui.console.warn("Empty: "+this.type);
+        console.error("Empty: "+this.type);
     }
     if(this.canEval()){
         return eval(this.getString(1,1));
@@ -1259,7 +1283,7 @@ function clean(n){
             n=n.replace("\\"+i,latexchars[i]);
         }
   	}
-    return n.replace(/\*\(\)/g,"*(1)").replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
+    return n.replace(/\*\(\)/g,"*(1)").replace(/\{ \}/g,"{1}").replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
 }
 function p_latex(n){
     return p(clean(n)).simplify();
@@ -1290,7 +1314,7 @@ function compile(n){
     var builder="(function(ctx){";
     ret.xc=[];
     if(funcs.length){
-        
+        console.log(funcs);
         var jsc=funcs[0].simplify().getString(0,true);
         ret.f=eval("("+"function(x){return "+jsc+";})");
         builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
@@ -1475,7 +1499,7 @@ Array.prototype.simplify=function (onlyeval,___retry){
                 return -0;
             }
             if(denomc!=1){
-                this[0]=this[0].multiply(denomc);
+                this[0]=this[0].multiply(1/denomc);
             }
             return this[0].simplify();
         }
