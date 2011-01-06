@@ -1243,7 +1243,7 @@ Array.prototype.inverse=function(){
         right=right[0];
     }
     if(__debug_iterations>3){
-        throw("Could not solve for y: "+left+"="+right);
+        throw("solve for y: "+left.getString()+"="+right.getString());
         return;
     }
     }
@@ -1266,26 +1266,44 @@ function compile(n){
     n=clean(n);
     	
 	var eq=p(n);
-    var fun;
+    var funcs=[];
     if(eq.type==eqtype.equality){
         if(eq[0]=="y"){
             fun=eq[1];
         }else{
-            throw("Could not solve");
+        
+            try{
+                funcs.push(eq[0].dreplace(/^y$/g,"x").simplify().inverse().simplify().dreplace(/x/g,eq[1].simplify()));
+            }catch(ex){
+                throw("CAS: "+ex);
+            }
         }
     }else{
-        fun=eq;
+        if(eq.simplify){
+            eq=eq.simplify();
+        }
+        funcs.push(eq);
     }
 	//compile
 	var ret={"f":function(){throw("Not a function");}};
+    //If fun is an array of inverses
+    var builder="(function(ctx){";
+    if(funcs.length){
+        ret.f=eval("("+"function(x){return "+jsc+";})");
+        var jsc=funcs[0].simplify().getString(0,true);
+        
+        builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
+        for(var i=1;i<funcs.length;i++){
+            var jsc=funcs[i].simplify().getString(0,true);
+            builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
     
-	//if it is a function
-    if(fun.simplify){
-        fun=fun.simplify();
+        }
     }
-    var jsc=fun.simplify().getString(0,true);
-	ret.f=eval("("+"function(x){return "+jsc+";})");
-	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();})");
+        
+        
+    builder+="})";
+    
+	ret.plot=eval(builder);
 	return ret;
 	
 }
