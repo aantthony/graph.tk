@@ -491,11 +491,13 @@ app.ui=(function(){
                    
         
                     var l__=$(inputbox).mathquill("latex");
+					
+                    graphs[i].equation=l__;
                     try{
                         var c=compile(l__);
                     }catch(ex){
                          
-                        warn_.firstChild.nodeValue="Error: "+ex.toString();
+                        warn_.firstChild.nodeValue="Error: "+JSON.stringify(ex).toString();
                         warn_.style.display="block";
                         return;
                     }
@@ -504,7 +506,6 @@ app.ui=(function(){
         
                     graphs[i].f=c.f;
                     graphs[i].plot=c.plot;
-                    graphs[i].equation=l__;
                     draw();
                     break;
                 }

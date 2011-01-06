@@ -32,6 +32,8 @@ Divion should be dreplaced with multiplication by the reciprocal.
  - should it?
 
 
+
+TODO: -frac does not work.
     */
 
 function format(num, digits) {
@@ -364,7 +366,7 @@ var latexchars={
 };
 
 var obj={};
-var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14};
+var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15};
 var __debug_parser=0;
 function __debug(x){
     return x;
@@ -374,7 +376,11 @@ var level=0;
 function p(inp){
     if(typeof inp=="number" || !isNaN(inp)){
         return Number(inp);
-    }else if(typeof inp=="object"){
+    }else if(__debug(1,0) && typeof inp=="object"){
+        if(!isNaN(inp)){
+            console.warn("this is returned somewhere instead of Number(this)");
+            return Number(inp);
+        }
         return inp;
     }
     if(inp=="" || inp===undefined){
@@ -393,6 +399,7 @@ function p(inp){
 	e=e.replace(/([^\+\-\*\/\^\:\(\)])\(/g,"$1:(");
     
 	e=e.replace(/\)([^\+\-\*\/\^\:\(\)])/g,")*$1");
+    console.log(e);
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
@@ -438,6 +445,7 @@ function p(inp){
                 var s=e.substring(last,i);
                 if(nextisinverse){
                     terms.push(p(s).multiply(-1));
+                    nextisinverse=false;
                 }else{
                     terms.push(p(s));
                 }
@@ -460,14 +468,16 @@ function p(inp){
         var denom=[];
         denom.type=eqtype.product;
         var nextisinverse=false;
+        //check for d/dx
         for(var i=0;i<e.length;i++){
             if(prod_op.indexOf(e[i])!=-1){
                 var s=e.substring(last,i);
                 if(nextisinverse){
-                        denom.push(p(s));
-                    }else{
-                        terms.push(p(s));
-                    }
+                    denom.push(p(s));
+                    nextisinverse=false;
+                }else{
+                    terms.push(p(s));
+                }
                 if(e[i]=="/"){
                     nextisinverse=true;
                 }
@@ -522,8 +532,15 @@ function p(inp){
             terms.push(fn_);
             terms.push(["log", p(match[1])].setType(eqtype.fn));
         }else{
-            terms.push(p(be[0]));
-            terms.push(p(be[1]));
+            var fname=p(be[0]);
+            if(typeof fname!="string"){
+                terms.type=eqtype.product;
+                terms.push(fname);
+                terms.push(p(be[1]));
+            }else{
+                terms.push(fname);
+                terms.push(p(be[1]));
+            }
         }
     }else if(e.indexOf("!")!=-1){
         terms.type=eqtype.product;
@@ -580,6 +597,7 @@ function p(inp){
         
     
     }
+    
     terms=terms.dreplace(/^hash[a-z\d]{20}hash$/,function(e){
         var to_ret=obj[e.substring(4,24)];
         delete obj[e.substring(4,24)];
@@ -594,6 +612,24 @@ function p(inp){
 	}*/
     __debug(!__debug_parser,0) || console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
+    while(typeof terms == "object" && terms.type==eqtype.variable){
+        terms=terms[0];
+    }
+    if(terms.length==2){
+        if(terms[0].length==1 && terms[0]=="d" && terms[1].length==1 && terms[1]=="dx"){
+            console.log(333)
+            return ["diff"].setType(eqtype.operatorfactor);
+        }
+    }
+    if(terms.type==eqtype.product){
+        var found=0;
+        for(var i=0;i<terms.length;i++){
+            if(terms[i].type==eqtype.operatorfactor){
+                found++;
+                return [terms[i][0],terms.splice(i+1).setType(eqtype.product)].setType(eqtype.fn);
+            }
+        }
+    }
 	//while(typeof terms=="object" && terms.length==1){
 	//	terms=terms[0];
 	//}
@@ -721,10 +757,7 @@ String.prototype.dreplace=function(a,b){
 
 };
 Number.prototype.dreplace=function(a,b){
-    if(this===a){
-        return b;
-    }
-    return this;
+    return Number(this);
 };
 Array.prototype.dreplace=function(a,b){
     var cp=[];
@@ -754,7 +787,7 @@ Array.prototype.dreplace=function(a,b){
 };
 
 Number.prototype.divide=function(o){
-    var product=[this,p(o)];
+    var product=[Number(this),p(o)];
     product.type=eqtype.fraction;
     return product;
 };
@@ -785,15 +818,20 @@ String.prototype.power=function(o){
     return [p(this.toString()),p(o)].setType(eqtype.power);
 };
 Number.prototype.power=function(o){
-    return [this,p(o)].setType(eqtype.power);
+    return [Number(this),p(o)].setType(eqtype.power);
 };
-Array.prototype.multiply=function(o){
+Array.prototype.multiply=function(o){	
     if(this.type==eqtype.fraction){
-        this[0].multiply(p(o));
+        this[0]=this[0].multiply(p(o));
+        return this;
     }
     var other=p(o);
-    if(other.eval()===0){
+	var oe=other.eval();
+    if(oe===0){
         return 0;
+    }
+	else if(oe===1){
+        return this;
     }
     if(this.type==eqtype.product && other.type==eqtype.product){
         var self=this;
@@ -811,10 +849,10 @@ Array.prototype.multiply=function(o){
     return this;
 };
 String.prototype.forEach=function(e){
-    e(this);
+    e(this.toString());
 };
 Number.prototype.forEach=function(e){
-    e(this);
+    e(Number(this));
 };
 
 String.prototype.add=function(o){
@@ -827,15 +865,16 @@ String.prototype.add=function(o){
     return [p(this.toString())].setType(eqtype.sum).add(p(o));
 };
 Number.prototype.add=function(o){
-    if(p(o).eval()==0){
-        return this;
+    var po=p(o);
+    if(po.eval()==0){
+        return Number(this);
     }
-    var sum=[p(this),p(o)];
+    var sum=[p(Number(this)),po];
     sum.type=eqtype.sum;
     return sum;
 };
 Number.prototype.eval=function(o){
-    return this;
+    return Number(this);
 };
 String.prototype.eval=function(){
     if(this.toString()=="i"){
@@ -845,11 +884,18 @@ String.prototype.eval=function(){
         return Number(this.toString());
     }
     if(window[this.toString()]){
-        return eval(this.toString());
+		if(typeof window[this.toString()]!="function"){
+			return eval(this.toString());
+		}else{
+			return NaN;
+		}
     }
     return NaN;
 };
 Array.prototype.eval=function(){
+    if(!this.length){
+        console.warn("Empty: "+this.type);
+    }
     if(this.canEval()){
         return eval(this.getString(1,1));
     }else{
@@ -879,12 +925,12 @@ Number.prototype.multiply=function(o){
         return 0;
     }
     if(o==1){
-        return this;
+        return Number(this);
     }
     if(o==0){
         return 0;
     }
-    var sum=[p(this),p(o)];
+    var sum=[Number(this),p(o)];
     sum.type=eqtype.product;
     return sum;
 };
@@ -920,47 +966,7 @@ Array.prototype.size=function(){
     }
     return _size;
 };
-String.prototype.invert=function(operation){
-    if(operation==eqtype.sum){
-        return "-"+this;
-    }else if(operation==eqtype.sum){
-        return (1).divide(this);
-    }else if(operation===undefined){
-        throw ("Operation not specified");
-    }
-};
-Array.prototype.invert=function(operation){
-    var inv=[];
-    var _commute=false;
-    inv.type=this.type || eqtype.sum;
-    if(operation==eqtype.sum){
-        if(inv.type==eqtype.sum){
-            _commute=true;
-        }else if(inv.type==eqtype.product){
-            _commute-false;
-        }
-    }
-    var first=true;
-    this.forEach(function(e){
-        if(_commute || first){
-            inv.push(e.invert(operation));
-            first=false;
-        }else{
-            inv.push(operation);
-        }
-    });
-    return inv;
-};
-Number.prototype.invert=function(operation){
-    //unary opertation inversion
-    if(operation==eqtype.sum){
-        return -this;
-    }else if(operation==eqtype.product){
-        return 1/this;
-    }else{
-        throw ("Unknown Operation: "+operation);
-    }
-};
+
 Array.prototype.setType=function(e){
     this.type=e;
     return this;
@@ -975,7 +981,7 @@ String.prototype.differentiate=function(){
     return Number(this.toString()=="x");
 };
 Array.prototype.differentiate=function(times){
-    times=times||1;//double derivative etc. (1/2th derivative even)
+    times=p(times).eval() ||1;//double derivative etc. (1/2th derivative even)
     if(times<0){
         return this.integrate(-times);
     }
@@ -1004,7 +1010,25 @@ Array.prototype.differentiate=function(times){
         var a=this[0];
         var b=this[1];
         
-        return [[[a.differentiate(),b].setType(eqtype.product),[-1,b.differentiate(),a].setType(eqtype.product)].setType(eqtype.sum),[b,b].setType(eqtype.product)].setType(eqtype.fraction).simplify();
+        return (
+        [
+            [
+                [
+                    a.differentiate(),
+                    b
+                ].setType(eqtype.product),
+                [
+                    -1,
+                    b.differentiate(),
+                    a
+                ].setType(eqtype.product)
+            ].setType(eqtype.sum),
+            [
+                b,
+                b
+            ].setType(eqtype.product)
+        ].setType(eqtype.fraction).simplify()
+        );
         //return a.differentiate().multiply(b).add(a.multiply(-1).multiply(b.differentiate())).divide(b.multiply(b));
         
     }else if(this.type==eqtype.power){
@@ -1020,10 +1044,16 @@ Array.prototype.differentiate=function(times){
         return [[a.differentiate(),[a,[b,-1].setType(eqtype.sum)].setType(eqtype.power),b].setType(eqtype.product),[["log",a].setType(eqtype.fn),b.differentiate(),[a,b].setType(eqtype.power)].setType(eqtype.product)].setType(eqtype.sum).simplify();
         
     }else if(this.type==eqtype.product){
-        var a=this[0];
-        var b=this.slice(1).setType(eqtype.product);
-        return [[a,b.differentiate()].setType(eqtype.product),[b,a.differentiate()].setType(eqtype.product)].setType(eqtype.sum).simplify();
-        
+        if(this.length>1){
+            var a=this[0];
+            var b=this.slice(1).setType(eqtype.product);
+            return [[a,b.differentiate()].setType(eqtype.product),[b,a.differentiate()].setType(eqtype.product)].setType(eqtype.sum).simplify();
+        }else if(this.length==1){
+            return this[0].differentiate();
+        }else{
+            console.warn("Tried to differentiate empty product");
+            return 0;
+        }
     }else{
         throw ("Invalid Expression Type: "+this.type);
         return;
@@ -1061,7 +1091,7 @@ String.prototype.factorise=function(){
     return this.toString();
 };
 Number.prototype.factorise=function(){
-    return this;
+    return Number(this);
 };
 
 Array.prototype.factorise=function(){
@@ -1123,7 +1153,7 @@ Array.prototype.factorise=function(){
 //American spelling
 Array.prototype.factorize=Array.prototype.factorise;
 Array.prototype.inverse=function(){
-    var __debug_iterations=0;
+
     if(this.type==eqtype.constant || this.type==eqtype.number){
         return;
     }
@@ -1134,7 +1164,7 @@ Array.prototype.inverse=function(){
     }
     
     if(!this.search("x")){
-        throw("No 'x' found in "+this);return;
+        throw("Could not find inverse.");return;
     }
     var right=[];
     if(this.type==eqtype.fraction){
@@ -1142,11 +1172,12 @@ Array.prototype.inverse=function(){
         right.push(this[0].dreplace(/^x$/g,"y"));
         right.push(p(1).divide(this[1].dreplace(/^x$/g,"y")));
     }else{
+    
         right=this.dreplace(/^x$/g,"y");
     }
     var left=[p("x")];
-    left.type=right.type;
-    
+    left.type=eqtype.sum;
+    var __debug_iterations=0;
     while(1){
     __debug_iterations++;
     
@@ -1188,11 +1219,13 @@ Array.prototype.inverse=function(){
         if(right[0].search("y")){
             //a has the x
             left=p("l^(1/b)").dreplace(/l/g,left).dreplace(/b/g,right[1]);
+            
             right=right[0];
         }else{
             //b has the x
-            left=p("log(x)").dreplace(/^x$/g,left);
-            left=left.divide(p("log(x)").dreplace(/^x$/g,right[0]));
+            left=[["log",left].setType(eqtype.fn), ["log", right[0]].setType(eqtype.fn)  ].setType(eqtype.fraction);
+            
+            //left=left.divide(p("log(x)").dreplace(/^x$/g,right[0]));
             right=right[1];
         }
     }else{
@@ -1205,7 +1238,7 @@ Array.prototype.inverse=function(){
         }
         right=right[0];
     }
-    if(__debug_iterations>10){
+    if(__debug_iterations>3){
         throw("Could not solve for y: "+left+"="+right);
         return;
     }
@@ -1220,49 +1253,36 @@ function clean(n){
             n=n.replace("\\"+i,latexchars[i]);
         }
   	}
-    return n.replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
+    return n.replace(/\*\(\)/g,"*(1)").replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
 }
 function p_latex(n){
     return p(clean(n)).simplify();
 }
 function compile(n){
     n=clean(n);
-	obj={};
-	/*
-	
-	operator precedence:
-	 ()
-	 ^
-	 * /
-	 + -
-	  
-	
-	*/
-	//parse
-	var eq=n.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
-	
-	if(eq.length>2){
-		throw("Too many '='s");
-		return;
-	}
-	var lhs,rhs;
-	if(eq.length==2){
-		lhs=p(eq[0]);
-        var inverselhs=(lhs.dreplace(/y/g,"x")).inverse();
-        rhs=(inverselhs.dreplace(/^x$/g,p(eq[1]))).go();
-	}else{
-		lhs=p("y"); //This behaviour should be discouraged implicitly.
-		rhs=p(eq[0]).go();
-	}
+    	
+	var eq=p(n);
+    var fun;
+    if(eq.type==eqtype.equality){
+        if(eq[0]=="y"){
+            fun=eq[1];
+        }else{
+            throw("Could not solve");
+        }
+    }else{
+        fun=eq;
+    }
 	//compile
 	var ret={"f":function(){throw("Not a function");}};
     
 	//if it is a function
-    var jsc=rhs.getString(0,true);
+    if(fun.simplify){
+        fun=fun.simplify();
+    }
+    var jsc=fun.simplify().getString(0,true);
 	ret.f=eval("("+"function(x){return "+jsc+";})");
 	ret.plot=eval("(function(ctx){ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();})");
 	return ret;
-	
 	
 }
 String.prototype.markup=function(){
@@ -1288,25 +1308,28 @@ String.prototype.canEval=function(){
     if(this.toString()=="π"){
         return 2;
     }
-    if(this[0]=="\"" && this[this.length-1]=="\""){
-        return true;
-    }
-    ///var isnum=/^[\d\.]+(e[\+\-][\d]+)?$/.test(this.toString());
-    var isnum=!isNaN(this.toString());
-    if(!isnum){
-        if(!window[this.toString()]){
-            return false;
+    
+    
+    if(window[this.toString()]){
+        if(typeof window[this.toString()]!="function"){
+            return true;
         }
-    }else{
-        console.warn("Number in string: "+this.toString());
     }
-    return true;
+    return false;
 };
 
 Number.prototype.canEval=function(){
     return true;
 };
 Array.prototype.canEval=function(){
+//TODO: null factor law.
+    if(this.type==eqtype.fn && window[this[0]] && typeof window[this[0]] =="function" ){
+        //Check if it can be represented as an absolute value.
+        if(this[0]=="diff"){
+            return 4;
+        }
+        return this[1].canEval();
+    }
     for(var i=0;i<this.length;i++){
         if(typeof this[i] == "number"){
         }else if(this[i].canEval){
@@ -1315,7 +1338,6 @@ Array.prototype.canEval=function(){
                 return res;
             }
         }else if(typeof this[i] == "object"){
-            //why object instead of number?
             if(!this[i]==NaN && isNaN(this[i])){
                 return false;
             }
@@ -1328,204 +1350,199 @@ String.prototype.simplify=function (){
     return this.toString();
 };
 Number.prototype.simplify=function (){
-    return this;
+    return Number(this);
 };
-Number.prototype.go=function(){
-    return this;
+
+Function.prototype.eval=function(){
+	return isNaN;
 };
-String.prototype.go=function(){
-    return this.toString();
+Function.prototype.canEval=function(){
+	return 2;
 };
-String.prototype.has=function(x){
-    return Number(this.toString()==x);
-};
-Number.prototype.has=function(x){
-    return false;
-};
-Array.prototype.has=function(x){
-    //has factor. Return +exponent if it's there. Return -exponent if its in the denomiator. Else return false;
-    
-    // I suppose we should also:
-    //return 0 if it is in both.
-    var res=[].setType(eqtype.sum);
-    if(this.type==eqtype.fraction){
-        res=res.add(this[0].has(x));
-        res=res.add(this[1].has(x));
-    }else if(this.type==eqtype.power){
-        res=res.add(this[0].has(x).multiply(this[1]));
-    }else if(this.type==eqtype.fn){
-        return NaN;
+
+Array.prototype.takeDenom=function(){
+    var ret=1;
+    if(this.type==eqtype.sum){
+        //factorise
+        
+        
+        
+        
+        //
+        return 1;
+    }if(this.type==eqtype.fn){
+        return 1;
     }else if(this.type==eqtype.product){
         for(var i=0;i<this.length;i++){
-            res=res.add(this[i].has(x));
+            if(this[i].takeDenom){
+                ret=ret.multiply(this[i].takeDenom());
+            }
         }
+    }else if(this.type==eqtype.fraction){
+        var numer=this[0];
+        var denom=this[1];
+        this.type=this[0].type;
+        this.splice(0);
+        for(var n=0;n<numer.length;n++){
+            this.push(numer[n]);
+        }
+        if(!this.length){
+            this.push(1)
+        }
+        ret=ret.multiply(denom);
     }else{
-        return NaN;
+        //throw("Unimplemented takeDenom: "+this.type);
     }
-    return res.eval() || res.simplify();
+    return ret;
 };
-Array.prototype.isDifferential=function(){
-    var self=this.simplify();
+
+
+Array.prototype.simplify=function (onlyeval,___retry){
+    //O(d)
     
-    if(this.type==eqtype.fraction){
-        var ds=0;
-        var dxs=0;
-        if(ds=self[0].has("d")){
-            if(dxs=self[1].has("dx")){
-                return (ds==dxs)?(dxs):NaN;
-            }
-        }
-        return false;
-    }else if(this.type==eqtype.product){
-        var count=[].setType(eqtype.sum);
-        this.forEach(function(f){
-            count.push(f.isDifferential());
-        });
-        return count.eval() || count.simplify();
+    if(this.length==1){
+		return this[0].simplify();
+	}
+    if(this.type==eqtype.fraction && this[1].eval()===1){
+        return this[0];
     }
-    
-    return false;
-    
-    
-    //this would ignore the numbers in ((d*(2+3*2))/(dx/2))
-    if(self.type==eqtype.fraction){
-        var res;
-        if( (res = (self[0].has("d") * (self[1].has("dx")))) && !self.search("x")){
-            return res;
-        }
-        if( (res = (self[0].has("dx") * (self[1].has("d")))) && !self.search("x")){
-            return -res;
-        }
-    }
-    return false;
-};
-Array.prototype.go=function(){
-    
-    //performs a mathematical operation, e.g. d/dx (x^2)
-    var self=this.simplify();
-    if(self.type==eqtype.product){
-        var foundit=false;
-        
-        for(var i=0;i<self.length;i++){
-            var res;
-            if(self[i].isDifferential && (res=self[i].isDifferential())){
-                foundit=res;
-                self.splice(i,1);
-                i--;
-                break;
-            }
-        }
-        if(foundit==1){
-    
-            return this.simplify().differentiate();
-        }else if(foundit==-1){
-            //we have dx/d (f(x)) whatever that means
-            return undefined;
-        }
-    
-    }
-    if(self.type==eqtype.fraction){
-        if(self[0].has("d")==1 && self[1].has("dx")==1){
-            return self.dreplace(/^d$/g,1).dreplace(/^dx$/g,1).simplify().differentiate();
-        }
-    }
-    
-    for(var i=0;i<self.length;i++){
-        if(self[i].go){
-            self[i]=self[i].go();
-        }
-    }
-    
-    return self;
-};
-Array.prototype.simplify=function (){
     if(this.canEval && this.canEval()===true){
-            return this.eval();
-    }
-    if(this.type==eqtype.fn){
-        this[1]=this[1].simplify();
-        if(this[0]=="log" && this[1]=="e"){
-            return 1;
-        }
-        return this;
-    }
-    if(this.type==eqtype.fraction){
-        this[0]=this[0].simplify();
-        this[1]=this[1].simplify();
-        
-    }
-    if(this.type==eqtype.power){
-        this[1]=this[1].simplify();
-        if(this[1].eval()===1){
-            return this[0];
-        }
-        this[0]=this[0].simplify();
-        return this;
+        return this.eval();
     }
 	for(var i=0;i<this.length;i++){
-		while(((typeof e[i]) == "object") && this[i].length==1){
+		while(i<this.length && ((typeof this[i]) == "object") && this[i].length==1){
 			this[i]=this[i][0];
 		}
         if(this[i].canEval && this[i].canEval()===true){
             this[i]=this[i].eval();
         }else{
-            this[i]=this[i].simplify();
-        }
+			this[i]=this[i].simplify(true);
+		}
 	}
-    if(this.type==eqtype.product){
-        var _prod=1;
+    if(onlyeval){
+		return this;
+	}
+    if(this.type==eqtype.fn){
+        this[1]=this[1].simplify();
+        if(this[0]=="log" && this[1]=="e"){
+            return 1;
+        }
+        if(this[0]=="diff"){
+            return this[1].differentiate();
+        }
+        return this;
+    }else if(this.type==eqtype.fraction){
+        this[1]=this[1].simplify();
+        var denomc=this[1].eval();
+        
+        if(!isNaN(denomc)){
+            if(denomc==1){
+                return this[0].simplify();
+            }else if(denomc==Infinity){
+                return 0;
+            }else if(denomc==-Infinity){
+                return -0;
+            }
+            if(denomc!=1){
+                this[0]=this[0].multiply(denomc);
+            }
+            return this[0].simplify();
+        }
+        this[0]=this[0].simplify();
+        //if(this[1].eval()===1){
+        //    return this[0];
+        //}
+        if(this[0].takeDenom){
+            this[1]=this[1].multiply(this[0].takeDenom()).simplify();
+    
+        }
+        if(this[1].takeDenom){
+            this[0]=this[0].multiply(this[1].takeDenom()).simplify();
+        }
+        if(___retry){
+            return this;
+        }else{
+            return this.simplify(0,1);
+        }
+    }else if(this.type==eqtype.power){
+        this[1]=this[1].simplify();
+		//already evaled?
+        if(this[1].eval()===1){
+            return this[0].simplify();
+        }
+        this[0]=this[0].simplify();
+    }else if(this.type==eqtype.product){
         for(var i=0;i<this.length;i++){
-            var N=this[i].eval();
-            if(!isNaN(N)){
-                _prod*=N;
+            
+            this[i]=this[i].simplify();
+            if(this[i]===0){
+                return 0;
+            }else if(this[i]===1){
                 this.splice(i,1);
                 i--;
             }
         }
-        if(_prod!=1){
+        for(var i=0;i<this.length;i++){
+            var _prod=1;
+			/*while(i<this.length && (typeof (this[i]=this[i].simplify()) =="number")){
+				if(this[i]===1){
+                    this.splice(i,1);
+                }else if(this[i]===0){
+                    return 0;
+                    alert("Lost data!!!: "+this.splice(i,1));
+                }
+			}*/
+            while(i<this.length && typeof this[i] =="object" && this[i].type==eqtype.product){
+				var _n=this.splice(i,1)[0];
+                
+                for(var n=0;n<_n.length;n++){
+                    this.push(_n[n]);
+                }
+				//this=this.concat(_n);
+            }
+            if(i<this.length && typeof this[i] =="object" && this[i].type==eqtype.fraction){
+				var _fract=this.splice(i,1)[0];
+                ///Make me a fraction
+                var numer=this.splice(0);
+                if(!numer.length){
+                    numer.push(1);
+                }
+                _fract[0]=_fract[0].multiply(numer);
+                this.type=eqtype.fraction;
+                this.push(_fract[0]);
+                this.push(_fract[1]);
+            }
+            if(this.type!=eqtype.product){
+                return this.simplify();
+            }
+            
+        }
+        var _prod=1;
+        for(var i=0;i<this.length;i++){
+            if(typeof this[i] == "number"){
+                _prod*=this[i];
+                this.splice(i,1);
+                i--;
+            }
+        }
+        if(_prod!==1){
             this.push(_prod);
         }
-        if(_prod==0){
+        else if(_prod===0){
             //Null factor law.
             //Check for singularites
             return 0;
         }
-        var newproducts=[];
-        for(var i=0;i<this.length;i++){
-            if((typeof this[i]=="object") && this[i].type==eqtype.product){
-                newproducts.push(this.splice(i,1)[0]);
-                i--;
-            }
-        }
-        if(newproducts.length){
-            var self=this;
-            newproducts.forEach(function(ff){
-                while(typeof ff=="object" && ff.length==1){
-                    ff=ff[0];
-                }
-                
-                ff.forEach(function(gg){
-                    while(typeof gg=="object" && gg.length==1){
-                        ff=ff[0];
-                    }
-                    self.push(gg);
-                });
-                
-                
-                
-            });
-            return self;
-        }
-    
+        
     }else if(this.type==eqtype.sum){
         var _prod=0;
         for(var i=0;i<this.length;i++){
-            var N=this[i].eval();
-            if(!isNaN(N)){
-                _prod+=N;
+            this[i]=this[i].simplify();
+            while(i<this.length && typeof this[i] == "number"){
+                _prod+=this[i];
                 this.splice(i,1);
-                i--;
             }
+            
         }
         if(_prod!==0){
             this.push(_prod);
@@ -1544,9 +1561,11 @@ String.prototype.getString=function(){
 Number.prototype.getString=function(){
     return this.toString();
 };
-
+function diff(x){
+    console.log(["diff_",x]);
+    return p(x).differentiate();
+}
 function text(e){return e.toString()}
-var functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta".split(",");
 Array.prototype.getString=function(braces,javascript){
     var s=braces?"(":"";
     var self=this;
@@ -1622,7 +1641,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ".split(",");
+functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff".split(",");
 
 window._i=33;
 var known_derivatives={
@@ -1641,11 +1660,12 @@ var known_derivatives={
     "Γ":p("Γ(x)*ψ(x)")
 };
 
-p("(random(x)-0.5)");
+//p("(random(x)-0.5)");
+if(p("(1/(1*x))*(2*1*1*1*2/3*3*0.5)").simplify().getString()!="2/x"){
+    console.warn("Simplifier improvements required");
+}
+
 
 //"i" can be changed between one and zero to get the real and imaginary part.
-
+//JSON.stringify and parser for lame browsers
 if(!this.JSON){this.JSON={}}(function(){function f(n){return n<10?'0'+n:n}if(typeof Date.prototype.toJSON!=='function'){Date.prototype.toJSON=function(key){return isFinite(this.valueOf())?this.getUTCFullYear()+'-'+f(this.getUTCMonth()+1)+'-'+f(this.getUTCDate())+'T'+f(this.getUTCHours())+':'+f(this.getUTCMinutes())+':'+f(this.getUTCSeconds())+'Z':null};String.prototype.toJSON=Number.prototype.toJSON=Boolean.prototype.toJSON=function(key){return this.valueOf()}}var cx=/[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,escapable=/[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,gap,indent,meta={'\b':'\\b','\t':'\\t','\n':'\\n','\f':'\\f','\r':'\\r','"':'\\"','\\':'\\\\'},rep;function quote(string){escapable.lastIndex=0;return escapable.test(string)?'"'+string.replace(escapable,function(a){var c=meta[a];return typeof c==='string'?c:'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})+'"':'"'+string+'"'}function str(key,holder){var i,k,v,length,mind=gap,partial,value=holder[key];if(value&&typeof value==='object'&&typeof value.toJSON==='function'){value=value.toJSON(key)}if(typeof rep==='function'){value=rep.call(holder,key,value)}switch(typeof value){case'string':return quote(value);case'number':return isFinite(value)?String(value):'null';case'boolean':case'null':return String(value);case'object':if(!value){return'null'}gap+=indent;partial=[];if(Object.prototype.toString.apply(value)==='[object Array]'){length=value.length;for(i=0;i<length;i+=1){partial[i]=str(i,value)||'null'}v=partial.length===0?'[]':gap?'[\n'+gap+partial.join(',\n'+gap)+'\n'+mind+']':'['+partial.join(',')+']';gap=mind;return v}if(rep&&typeof rep==='object'){length=rep.length;for(i=0;i<length;i+=1){k=rep[i];if(typeof k==='string'){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}else{for(k in value){if(Object.hasOwnProperty.call(value,k)){v=str(k,value);if(v){partial.push(quote(k)+(gap?': ':':')+v)}}}}v=partial.length===0?'{}':gap?'{\n'+gap+partial.join(',\n'+gap)+'\n'+mind+'}':'{'+partial.join(',')+'}';gap=mind;return v}}if(typeof JSON.stringify!=='function'){JSON.stringify=function(value,dreplacer,space){var i;gap='';indent='';if(typeof space==='number'){for(i=0;i<space;i+=1){indent+=' '}}else if(typeof space==='string'){indent=space}rep=dreplacer;if(dreplacer&&typeof dreplacer!=='function'&&(typeof dreplacer!=='object'||typeof dreplacer.length!=='number')){throw new Error('JSON.stringify');}return str('',{'':value})}}if(typeof JSON.parse!=='function'){JSON.parse=function(text,reviver){var j;function walk(holder,key){var k,v,value=holder[key];if(value&&typeof value==='object'){for(k in value){if(Object.hasOwnProperty.call(value,k)){v=walk(value,k);if(v!==undefined){value[k]=v}else{delete value[k]}}}}return reviver.call(holder,key,value)}text=String(text);cx.lastIndex=0;if(cx.test(text)){text=text.replace(cx,function(a){return'\\u'+('0000'+a.charCodeAt(0).toString(16)).slice(-4)})}if(/^[\],:{}\s]*$/.test(text.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,'@').replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,']').replace(/(?:^|:|,)(?:\s*\[)+/g,''))){j=eval('('+text+')');return typeof reviver==='function'?walk({'':j},''):j}throw new SyntaxError('JSON.parse');}}}());
-
-
-
