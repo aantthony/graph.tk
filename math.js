@@ -396,9 +396,9 @@ function p(inp){
     
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
-	e=e.replace(/([^\+\-\*\/\^\:\(\)\d])\(/g,"$1:(");
+	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=])\(/g,"$1:(");
     e=e.replace(/([xe\d])\(/g,"$1*(");
-	e=e.replace(/\)([^\+\-\*\/\^\:\(\)])/g,")*$1");
+	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=])/g,")*$1");
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
@@ -1264,14 +1264,12 @@ function p_latex(n){
 }
 function compile(n){
     n=clean(n);
-    	
 	var eq=p(n);
     var funcs=[];
     if(eq.type==eqtype.equality){
         if(eq[0]=="y"){
-            fun=eq[1];
+            funcs.push(eq[1]);
         }else{
-        
             try{
                 funcs.push(eq[0].dreplace(/^y$/g,"x").simplify().inverse().simplify().dreplace(/x/g,eq[1].simplify()));
             }catch(ex){
