@@ -69,7 +69,7 @@ Number.prototype.format=function(digits) {
         return num.toPrecision(digits);
     }
     return num;
-}
+};
 
 
 function random_hash(){

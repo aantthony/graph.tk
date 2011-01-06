@@ -166,7 +166,7 @@ app.init=function (div){
         }
         app.add("\\frac{d}{dx}\\left(e^x+x^3\\right)");
     }
-    var div=document.createElement("div")
+    var div=document.createElement("div");
     var logo=new Image();
     logo.src="favicon.ico";
     logo.style.float="left";
