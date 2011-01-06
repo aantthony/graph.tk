@@ -334,6 +334,7 @@ var latexchars={
 "varkappa":"ϰ",
 "piv":"ϖ",
 "varpi":"ϖ",
+"pm":"±",
 "rhov":"ϱ",
 "varrho":"ϱ",
 "thetav":"ϑ",
