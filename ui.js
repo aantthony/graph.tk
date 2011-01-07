@@ -23,6 +23,11 @@ app.config={"lineWidth":1.5,"pt":true};
 app.ui=(function(){
 	var allowdrag=true;
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
+    if(/(iPhone)/i.test(navigator.userAgent)){
+        if(!navigator.standalone){
+           alert("To run this app in fullscreen mode, add it to your home screen.");
+        }
+    }
 	var draw;
 	var ctx;
 	var ptd,con,proto,conin;
