@@ -581,7 +581,7 @@ function p(inp){
         if(!isNaN(parsednumber=Number(e))){
             return parsednumber;
         }else if(!/^aaaa[a-z\d]{20}aaaa$/.test(e)){
-            var match=/^([\d]+(\.[\d])?)([^\d]+)$/(e);
+            var match=/^([\d]+(\.[\d])?)([^\d]+)$/.exec(e);
             if(match){
                 alert("old code: "+e);
                 terms.type=eqtype.product;
@@ -1878,7 +1878,6 @@ var known_derivatives={
 if(p("(1/(1*x))*(2*1*1*1*2/3*3*0.5)").simplify().getString()!="2/x"){
     app.ui.console.warn("Simplifier improvements required");
 }
-
 
 //"i" can be changed between one and zero to get the real and imaginary part.
 //JSON.stringify and parser for lame browsers

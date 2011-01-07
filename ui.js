@@ -7,7 +7,6 @@ String.prototype.capitalize=function(){return this.charAt(0).toUpperCase()+this.
 
 var app={};
 
-
 	//Visible region on screen: (Global so things eval'ed in math.js can access)
     //Maybe all things should be in one object to avoid stuff like this.
 var boundleft = -10;
