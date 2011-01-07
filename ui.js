@@ -586,6 +586,16 @@ app.ui=(function(){
 		document.body.appendChild(canvas);
 		if(canvas.getContext){
 			ctx=canvas.getContext("2d");
+            if(!ctx && G_vmlCanvasManager){
+                G_vmlCanvasManager.initElement(el);
+                if(canvas.getContext){
+                    ctx = canvas.getContext("2d");
+                }else{
+                    alert("Explorer Canvas failed: quitting.");
+                }
+            }else if(!ctx){
+                alert("Browser not supported.");
+            }
             if(!app.config.fillText){
                 app.config.fillText=ctx.fillText?true:false;
             }
