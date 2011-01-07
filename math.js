@@ -75,7 +75,8 @@ Number.prototype.format=function(digits) {
 function random_hash(){
     var s="";
     for(var i=0;i<20;i++){
-        s+=(~~(Math.random()*16)).toString(16);
+        s+=(10+~~(Math.random()*26)).toString(36)
+        //s+=(~~(Math.random()*16)).toString(16);
     }
     return s;
 }
@@ -399,8 +400,8 @@ function p(inp){
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
     e=e.replace(/∞/g,"Infinity");
-    e=e.replace(/\.([^\d])/g,"*$1");
-    e=e.replace(/([\d]+(\.[\d]+)?)([xpi])/g,"$1*$3");
+    e=e.replace(/\.([^\d]|$)/g,"*$1");
+    e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.])/g,"$1*$3");
     
 	e=e.replace(/\^([\d]+)\(/g,"^$1:(");
     e=e.replace(/([xe\d∫])\(/g,"$1*(");
@@ -427,7 +428,7 @@ function p(inp){
             fail=false;
 			var h=random_hash();
 			obj[h]=p(n.substring(1,n.length-1));
-			return "hash"+h+"hash";
+			return "aaaa"+h+"aaaa";
 		});
         if(fail){
             throw ("Could not parse parentheses");
@@ -546,7 +547,7 @@ function p(inp){
         }else{
             var fname=p(be[0]);
             if(fname.eqtype==eqtype.power){
-                console.log("ok");
+                //console.log("ok");
             }else if(typeof fname!="string"){
                 terms.type=eqtype.product;
                 terms.push(fname);
@@ -579,7 +580,7 @@ function p(inp){
         var parsednumber=NaN;
         if(!isNaN(parsednumber=Number(e))){
             return parsednumber;
-        }else if(!/^hash[a-z\d]{20}hash$/.test(e)){
+        }else if(!/^aaaa[a-z\d]{20}aaaa$/.test(e)){
             var match=/^([\d]+(\.[\d])?)([^\d]+)$/(e);
             if(match){
                 alert("old code: "+e);
@@ -605,14 +606,14 @@ function p(inp){
     
     }
     
-    terms=terms.dreplace(/^hash[a-z\d]{20}hash$/,function(e){
+    terms=terms.dreplace(/^aaaa[a-z\d]{20}aaaa$/,function(e){
         var to_ret=obj[e.substring(4,24)];
         delete obj[e.substring(4,24)];
         return to_ret;
     });
     /*
 	for(var i=0;i<terms.length;i++){
-		if(/^hash[a-z\d]{20}hash$/.test(terms[i])){
+		if(/^aaaa[a-z\d]{20}aaaa$/.test(terms[i])){
 			terms[i]=obj[terms[i].substring(4,24)];
 			//terms[i]="e";
 		}
@@ -627,7 +628,7 @@ function p(inp){
             return ["diff"].setType(eqtype.operatorfactor);
         }
     }
-    console.log(terms.type+": "+terms.getString());
+    //console.log(terms.type+": "+terms.getString());
     if(terms.type==eqtype.product){
         var found=[];
         for(var i=0;i<terms.length;i++){
@@ -1154,7 +1155,7 @@ Array.prototype.integrate=function(times){
     }else if(this.type==eqtype.product){
         var _non_constant=0;
         var self=this.simplify();
-        console.log(self);
+        //console.log(self);
         if(_dx=self.indexOf("dx")){
             self.splice(_dx,1);
         }
@@ -1865,7 +1866,7 @@ var known_derivatives={
     "exp":p("exp(x)"),
     "floor":p("shaw(x)"),
     "u":p("delta(x)"),
-    "sqrt":p("(x^(-1/2))*0.5"),
+    "sqrt":p("1/(2*sqrt(x))"),
     "asin":p("1/sqrt(1-x^2)"),
     "acos":p("-1/sqrt(1-x^2)"),
     "fact":p("Γ(x+1)*ψ(x+1)"),
