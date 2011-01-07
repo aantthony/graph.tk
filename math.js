@@ -398,7 +398,14 @@ function p(inp){
     
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
-    e=e.replace(/([xe\d])\(/g,"$1*(");
+    e=e.replace(/∞/g,"Infinity");
+    e=e.replace(/\.([^\d])/g,"*$1");
+    e=e.replace(/([\d]+(\.[\d]+)?)([xpi])/g,"$1*$3");
+    
+	e=e.replace(/\^([\d]+)\(/g,"^$1:(");
+    e=e.replace(/([xe\d∫])\(/g,"$1*(");
+    e=e.replace(/∫([^\*])/g,"∫*$1");
+    e=e.replace(/([pixe\d\.])∫/g,"$1*∫");
 	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=])\(/g,"$1:(");
     
 	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=])/g,")*$1");
@@ -538,7 +545,9 @@ function p(inp){
             terms.push(["log", p(match[1])].setType(eqtype.fn));
         }else{
             var fname=p(be[0]);
-            if(typeof fname!="string"){
+            if(fname.eqtype==eqtype.power){
+                console.log("ok");
+            }else if(typeof fname!="string"){
                 terms.type=eqtype.product;
                 terms.push(fname);
                 terms.push(p(be[1]));
@@ -571,8 +580,9 @@ function p(inp){
         if(!isNaN(parsednumber=Number(e))){
             return parsednumber;
         }else if(!/^hash[a-z\d]{20}hash$/.test(e)){
-            var match=/^([\d](\.[\d])?)([^\d]+)$/(e);
+            var match=/^([\d]+(\.[\d])?)([^\d]+)$/(e);
             if(match){
+                alert("old code: "+e);
                 terms.type=eqtype.product;
                 terms.push(p(match[1]));
                 terms.push(match[3]);
@@ -584,15 +594,7 @@ function p(inp){
                         terms.push(p(v));
                     });
                 }else{
-                    if(0 && e.length>1 && e[0]=="d"){
-                        terms.type=eqtype.product;
-                        terms.push("d");
-                        terms.push(p(e.substring(1)));
-                    }else{
-                        return e;
-                        terms.type=eqtype.variable;
-                        terms.push(e);
-                    }
+                    return e;
                 }
             }
         }else{
@@ -625,12 +627,22 @@ function p(inp){
             return ["diff"].setType(eqtype.operatorfactor);
         }
     }
+    console.log(terms.type+": "+terms.getString());
     if(terms.type==eqtype.product){
-        var found=0;
+        var found=[];
         for(var i=0;i<terms.length;i++){
             if(terms[i].type==eqtype.operatorfactor){
-                found++;
                 var operation=terms.splice(i,1)[0][0];
+                found.push(operation);
+                var subject=terms.splice(i).setType(eqtype.product);
+                if(terms.length){
+                    return [operation,subject].setType(eqtype.fn).multiply(terms);
+                }else{
+                    return [operation,subject].setType(eqtype.fn);
+                }
+            }else if(terms[i]=="∫"){
+                var operation=terms.splice(i,1)[0];
+                found.push(operation="int");
                 var subject=terms.splice(i).setType(eqtype.product);
                 if(terms.length){
                     return [operation,subject].setType(eqtype.fn).multiply(terms);
@@ -797,7 +809,7 @@ Array.prototype.dreplace=function(a,b){
         }else if(typeof this[i]=="object"){
             cp.push(this[i].dreplace(a,b));
         }else{
-            console.log(typeof this[i]);
+            //console.log(typeof this[i]);
             cp.push(this[i]);
         }
     
@@ -1142,9 +1154,14 @@ Array.prototype.integrate=function(times){
     }else if(this.type==eqtype.product){
         var _non_constant=0;
         var self=this.simplify();
+        console.log(self);
+        if(_dx=self.indexOf("dx")){
+            self.splice(_dx,1);
+        }
         if(self.length==2 && typeof self[1]=="number"){
             itg.push([self[0].integrate(times)].setType(eqtype.product));
-        }else{
+        }else if(this.length==1){
+            return this[0].integrate();
             throw ("Integration failed");
         }
     }else{
@@ -1363,7 +1380,7 @@ function compile(n){
     ret.ys=[];
     
     if(funcs.length){
-        console.log(funcs);
+        //console.log(funcs);
         var fn=funcs[0].simplify();
         var jsc=fn.getString(0,true);
         ret.f=eval("("+"function(x){return "+jsc+";})");
@@ -1425,7 +1442,6 @@ String.prototype.canEval=function(){
         return 2;
     }
     
-    
     if(window[this.toString()]){
         if(typeof window[this.toString()]!="function"){
             return true;
@@ -1439,18 +1455,20 @@ Number.prototype.canEval=function(){
 };
 Array.prototype.canEval=function(){
 //TODO: null factor law.
+    var max=true;
     if(this.type==eqtype.fn && window[this[0]] && typeof window[this[0]] =="function" ){
         //Check if it7 can be represented as an absolute value.
         if(this[0]=="diff"){
             return 4;
+        }else if(this[0]=="int"){
+            return 4;
         }
         if(this[0]=="log"){
-            return 2;
+            max=2;
         }
         return this[1].canEval();
     }
    
-    var max=true;
     for(var i=0;i<this.length;i++){
         if(typeof this[i] == "number"){
         }else if(this[i].canEval){
@@ -1552,6 +1570,8 @@ Array.prototype.simplify=function (onlyeval,___retry){
             return this[0];
         }else if(this[1]===0){
             return 1;
+        }else if(this[0]===1){
+            return 1;
         }
     }
     if(this.type==eqtype.fn){
@@ -1564,7 +1584,14 @@ Array.prototype.simplify=function (onlyeval,___retry){
             if(this.length!=2){
                 throw("Differential operator alone");
             }
-            return this[1].differentiate();
+            return this[1].simplify().differentiate();
+        }
+        //How can we do both?
+        if(this[0]=="int"){
+            if(this.length!=2){
+                throw("Integral operator alone");
+            }
+            return this[1].simplify().integrate();
         }
         return this;
     }else if(this.type==eqtype.fraction){
@@ -1747,6 +1774,9 @@ Number.prototype.getString=function(){
 function diff(x){
     return p(x).differentiate();
 }
+function int(x){
+    return p(x).integrate();
+}
 function text(e){return e.toString()}
 Array.prototype.getString=function(braces,javascript){
     var s=braces?"(":"";
@@ -1823,7 +1853,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff".split(",");
+functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
 
 window._i=33;
 var known_derivatives={
