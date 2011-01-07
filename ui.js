@@ -19,7 +19,7 @@ var width,height;
 var LocalStrings=["Could not initalize"];
 
 //NO xc until the CAS is ready, or newtons method coded
-app.config={"lineWidth":1.5,"yc":true,"xc":false};
+app.config={"lineWidth":1.5,"pt":true};
 app.ui=(function(){
 	var allowdrag=true;
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
@@ -145,20 +145,12 @@ app.ui=(function(){
             if(!e.disabled){
                 ctx.strokeStyle=ctx.fillStyle=e.color;
                 e.plot(ctx);
-                if(app.config.yc && e.f){
-                    var yc=e.f(0);
-                    if(!isNaN(yc)){
-                        //scalex*px-cx,cy-scaley*py
-                        if(app.config.fillText){
-                            ctx.fillText(yc.format(),10-cx,cy-scaley*yc);
-                        }
-                    }
-                }
-                if(app.config.xc && e.xc){
-                    e.xc.forEach(function(xc){
-                        if(app.config.fillText){
-                            ctx.fillText(xc.getString(),scalex*xc-cx.eval(),cy-10);
-                        }
+                if(app.config.fillText && app.config.pt && e.pt){
+                    e.pt.forEach(function(pt){
+                        ctx.beginPath();
+                        ctx.arc(scalex*pt[0]-cx,cy-scaley*pt[1],app.config.lineWidth*2,0,Math.PI*2,true);
+                        ctx.fill();
+                        ctx.fillText(pt.text,12+scalex*pt[0]-cx,cy-scaley*pt[1]);
                     });
                 }
             }
@@ -525,11 +517,20 @@ app.ui=(function(){
                     }
                     warn_.firstChild.nodeValue="";
                     warn_.style.display="none";
-        
+                    for(k in c){
+                        if(c.hasOwnProperty(k)){
+                            graphs[i][k]=c[k];
+                        }
+                    }
+                    /*
                     graphs[i].f=c.f;
                     graphs[i].plot=c.plot;
                     graphs[i].math=c.math;
                     graphs[i].xc=c.xc;
+                    graphs[i].yc=c.yc;
+                    graphs[i].xs=c.xs;
+                    graphs[i].ys=c.ys;
+                    */
                     draw();
                     break;
                 }
@@ -626,10 +627,8 @@ app.ui=(function(){
                     //logt.appendChild((p_latex($(conin).mathquill("latex")).markup()));
                 conin.last=$(conin).mathquill("latex");
                 var out=p_latex(conin.last).simplify();
-                if(out.go){
-                    out=out.go();
-                }
-                if(!out.canEval()){
+                var can_eval_code=out.canEval();
+                if(can_eval_code==false || can_eval_code==2){
                     app.ui.console.log(((out.getString().markup())));
                 }else{
                     app.ui.console.log(generateJSON(usr.eval(out.getString(0,1))));
@@ -791,7 +790,7 @@ app.ui=(function(){
         if(!noshow && !_console){
 			app.ui.console.show();
 		}
-    
+        logt.scrollTop=1e8;    
     },"log":function(x,noshow){
         if(typeof x !="object"){
             var div=document.createElement("div");
@@ -803,6 +802,7 @@ app.ui=(function(){
         if(!noshow && !_console){
 			app.ui.console.show();
 		}
+        logt.scrollTop=1e8;
 
 	}};
 	

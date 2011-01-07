@@ -56,10 +56,19 @@ var graph=function(n){
 	}
 	var t={};
     var c=compile(latex);
-    t.f=c.f;
+    for(i in c){
+        if(c.hasOwnProperty(i)){
+            t[i]=c[i];
+        }
+    }
+    /*t.f=c.f;
     t.xc=c.xc;
+    t.yc=c.yc;
+    t.xs=c.xs;
+    t.ys=c.ys;
     t.math=c.math;
-    t.plot=c.plot;
+    t.plot=c.plot;*/
+    
 	t.equation=latex;
 	t.gid=random_hash();
 	t.color=app.ui.colors.free.pop();

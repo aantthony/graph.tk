@@ -398,9 +398,13 @@ function p(inp){
     
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
-	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=])\(/g,"$1:(");
     e=e.replace(/([xe\d])\(/g,"$1*(");
+	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=])\(/g,"$1:(");
+    
 	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=])/g,")*$1");
+    
+    //multiplicative identity
+    e=e.replace(/\*([\)\=]|$)/g,"$1");
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
@@ -753,14 +757,20 @@ Array.prototype.search=function (x){
     return false;
 };
 String.prototype.dreplace=function(a,b){
-    if(a.test && a.test(this.toString())){
-        return b;
-    }
-    if(this.toString()===a){
-        return b;
+    if(a.test){
+        if(a.test(this.toString())){
+            if(typeof b=="function"){
+                return(b(this.toString()));
+            }else{
+                return b;
+            }
+        }else{
+            return this.toString();
+        }
+    }else{
+        app.ui.console.warn("Use regex for .dreplace()");
     }
     return this.toString();
-
 };
 Number.prototype.dreplace=function(a,b){
     return Number(this);
@@ -770,6 +780,7 @@ Array.prototype.dreplace=function(a,b){
     cp.type=this.type;
     for(var i=0;i<this.length;i++){
         if(typeof this[i]=="string"){
+            
             if(a.test){
                 if(a.test(this[i])){
                     if(typeof b=="function"){
@@ -786,6 +797,7 @@ Array.prototype.dreplace=function(a,b){
         }else if(typeof this[i]=="object"){
             cp.push(this[i].dreplace(a,b));
         }else{
+            console.log(typeof this[i]);
             cp.push(this[i]);
         }
     
@@ -1007,8 +1019,21 @@ Number.prototype.differentiate=function(){
     }
     return 0;
 };
+Number.prototype.integrate=function(){
+    if(this==0){
+        return 0;
+    }
+    return [this,"x"].setType(eqtype.product);
+};
 String.prototype.differentiate=function(){
     return Number(this.toString()=="x");
+};
+String.prototype.integrate=function(){
+    if(this.toString()=="x"){
+        return [0.5,["x",2].setType(eqtype.power)].setType(eqtype.product);
+    }else{
+        return [this.toString(),"x"].setType(eqtype.product);
+    }
 };
 Array.prototype.differentiate=function(times){
     times=p(times).eval() ||1;//double derivative etc. (1/2th derivative even)
@@ -1031,7 +1056,7 @@ Array.prototype.differentiate=function(times){
         //Chain rule!
         var fnd;
         if(fnd=known_derivatives[this[0]]){
-            return [fnd.dreplace(/^x$/g,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
+            return [fnd.dreplace(/^x$/,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
         }else{
             throw("I don't know the derivative of the "+this[0]+" function!");
         }
@@ -1097,22 +1122,36 @@ Array.prototype.integrate=function(times){
     if(times<0){
         return this.differentiate(-times);
     }
+    if(n=this.eval()){
+        return ["x",n].setType(eqtype.product);
+    }
     var itg=[];
-    itg.type=sum;
-    var m;
-    if(this.type!=eqtype.sum){
-        m=p(0);
-        m.type=eqtype.sum;
-        m.add(this);
-    }else if(this.type==eqtype.sum){
-        m=this;
+    itg.type=eqtype.sum;
+    if(this.type==eqtype.sum){
+        this.forEach(function(e){
+            itg.push(e.integrate(times));
+        });
+    }else if(this.type==eqtype.power){
+        this[0]=this[0].simplify();
+        if(this[0]=="x" && !isNaN(n=this[1].eval())){
+            var _n_plus_one=this[1].add(1).simplify();
+            itg.push([["x",_n_plus_one].setType(eqtype.power),_n_plus_one].setType(eqtype.fraction)); 
+        }else{
+            throw ("Integration failed");
+        }
+    }else if(this.type==eqtype.product){
+        var _non_constant=0;
+        var self=this.simplify();
+        if(self.length==2 && typeof self[1]=="number"){
+            itg.push([self[0].integrate(times)].setType(eqtype.product));
+        }else{
+            throw ("Integration failed");
+        }
     }else{
         throw ("Invalid Expression Type: "+this.type);
     }
-    m.forEach(function(e){
-        m.push(e.integrate(times));
-    });
-    return m;
+   
+    return itg.simplify();
 };
 String.prototype.inverse=function(){
     return this.toString();
@@ -1199,11 +1238,11 @@ Array.prototype.inverse=function(){
     var right=[];
     if(this.type==eqtype.fraction){
         right.type=eqtype.product;
-        right.push(this[0].dreplace(/^x$/g,"y"));
-        right.push(p(1).divide(this[1].dreplace(/^x$/g,"y")));
+        right.push(this[0].dreplace(/^x$/,"y"));
+        right.push(p(1).divide(this[1].dreplace(/^x$/,"y")));
     }else{
     
-        right=this.dreplace(/^x$/g,"y");
+        right=this.dreplace(/^x$/,"y");
     }
     var left=[p("x")];
     left.type=eqtype.sum;
@@ -1255,7 +1294,7 @@ Array.prototype.inverse=function(){
             //b has the x
             left=[["log",left].setType(eqtype.fn), ["log", right[0]].setType(eqtype.fn)  ].setType(eqtype.fraction);
             
-            //left=left.divide(p("log(x)").dreplace(/^x$/g,right[0]));
+            //left=left.divide(p("log(x)").dreplace(/^x$/,right[0]));
             right=right[1];
         }
     }else{
@@ -1312,20 +1351,45 @@ function compile(n){
 	var ret={"f":function(){throw("Not a function");}};
     //If fun is an array of inverses
     var builder="(function(ctx){";
-    ret.xc=[];
+    ret.pt=[];
+    
+    //Singularites
+    
+    //Singularites arise from:
+    // Division by zero
+    //   * Logs
+    // ->± Infinity
+    ret.xs=[];
+    ret.ys=[];
+    
     if(funcs.length){
         console.log(funcs);
-        var jsc=funcs[0].simplify().getString(0,true);
+        var fn=funcs[0].simplify();
+        var jsc=fn.getString(0,true);
         ret.f=eval("("+"function(x){return "+jsc+";})");
         builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
         try{
-            //ret.xc.push(funcs[0].inverse().dreplace(/^x$/g,0).simplify().simplify());
+            var array=[0,ret.f(0)];
+            
+            if(array[1]!=Infinity && array[1]!=-Infinity){
+                array.text=fn.dreplace(/^x$/,0).simplify().getString(0);
+                ret.pt.push(array);
+            }else{
+                ret.xs.push(0);
+            }
+            //ret.xc.push(funcs[0].inverse().dreplace(/^x$/,0).simplify().simplify());
         }catch(ex){}
         for(var i=1;i<funcs.length;i++){
-            var jsc=funcs[i].simplify().getString(0,true);
+            var fn=funcs[i].simplify();
+            var jsc=fn.getString(0,true);
             builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
             try{
-                //ret.xc.push(funcs[i].inverse().dreplace(/^x$/g,0).simplify().simplify());
+                var array=[0,ret.f(0)];
+                if(array[1]!=Infinity && array[1]!=-Infinity){
+                    array.text=jsc;
+                    ret.pt.push(array);
+                }
+                //ret.xc.push(funcs[i].inverse().dreplace(/^x$/,0).simplify().simplify());
             }catch(ex){}
     
         }
@@ -1380,8 +1444,12 @@ Array.prototype.canEval=function(){
         if(this[0]=="diff"){
             return 4;
         }
+        if(this[0]=="log"){
+            return 2;
+        }
         return this[1].canEval();
     }
+   
     var max=true;
     for(var i=0;i<this.length;i++){
         if(typeof this[i] == "number"){
@@ -1393,9 +1461,13 @@ Array.prototype.canEval=function(){
             if(res==4){
                 return 4;
             }
+            if(res==2){
+                max=2;
+                //return 2;
+            }
         }
     }
-    return true;
+    return max;
 };
 
 String.prototype.simplify=function (){
@@ -1455,9 +1527,7 @@ Array.prototype.simplify=function (onlyeval,___retry){
     if(this.length==1){
 		return this[0].simplify();
 	}
-    if(this.type==eqtype.fraction && this[1].eval()===1){
-        return this[0];
-    }
+    
     if(this.canEval && this.canEval()===true){
         return this.eval();
     }
@@ -1474,9 +1544,20 @@ Array.prototype.simplify=function (onlyeval,___retry){
     if(onlyeval){
 		return this;
 	}
+    if(this.type==eqtype.fraction && this[1]===1){
+        return this[0];
+    }
+    if(this.type==eqtype.power){
+        if(this[1]===1){
+            return this[0];
+        }else if(this[1]===0){
+            return 1;
+        }
+    }
     if(this.type==eqtype.fn){
         this[1]=this[1].simplify();
         if(this[0]=="log" && this[1]=="e"){
+            //SHOULD BE IN .canEval
             return 1;
         }
         if(this[0]=="diff"){
@@ -1537,6 +1618,53 @@ Array.prototype.simplify=function (onlyeval,___retry){
                 i--;
             }
         }
+        var replacements_base=[];
+        var replacements_exp=[];
+        var to_splice=[];//IN ORDER
+        for(var i=0;i<this.length;i++){
+            var z;
+            //search on first element
+            if((z=replacements_base.indexOf(this[i]))!=-1 && z!=i){
+                replacements_exp[z]=replacements_exp[z].add(1);
+                to_splice.push(i);
+            }else if((z=this.indexOf(this[i]))!=i){
+                replacements_base[z]=this[z];
+                replacements_exp[z]=2;
+                to_splice.push(i);
+            }else if(this[i].type==eqtype.power){
+                if((z=replacements_base.indexOf(this[i][0]))!=-1){
+                    replacements_exp[z]=replacements_exp[z].add(this[i][1]);
+                    to_splice.push(i);
+                }else if((z=this.indexOf(this[i][0]))!=i){
+                    if(z!=-1){
+                        replacements_base[z]=this[z];
+                        replacements_exp[z]=this[i][1].add(this[i][1]);
+                        to_splice.push(i);
+                    }else{
+                        replacements_base[i]=this[i][0];
+                        replacements_exp[i]=this[i][1];
+                    }
+                }else{
+                    replacements_base[i]=this[i][0];
+                    replacements_exp[i]=this[i][1];
+                }
+            }
+        }
+        
+        var offset=0;
+        //console.log(to_splice);
+        
+        //console.log(replacements_exp);
+        for(var i=0;i<to_splice.length;i++){
+            //this[to_splice[i]+offset]=1;
+            //this.splice(to_splice[i]+offset,1);
+            offset--;
+        }
+        for(var i=0;i<replacements_base.length;i++){
+            if(replacements_base[i]){
+            //   this[i]=[replacements_base[i],replacements_exp[i]].setType(eqtype.power);
+            }
+        }
         for(var i=0;i<this.length;i++){
             var _prod=1;
 			/*while(i<this.length && (typeof (this[i]=this[i].simplify()) =="number")){
@@ -1558,7 +1686,7 @@ Array.prototype.simplify=function (onlyeval,___retry){
             if(i<this.length && typeof this[i] =="object" && this[i].type==eqtype.fraction){
 				var _fract=this.splice(i,1)[0];
                 ///Make me a fraction
-                var numer=this.splice(0);
+                var numer=this.splice(0).setType(this.type);
                 if(!numer.length){
                     numer.push(1);
                 }
@@ -1699,6 +1827,7 @@ functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bell
 
 window._i=33;
 var known_derivatives={
+    "sqrt":p("1/(2*sqrt(x))"),
     "log":p("1/x"),
     "sin":p("cos(x)"),
     "cos":p("-sin(x)"),
