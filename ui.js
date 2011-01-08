@@ -89,7 +89,6 @@ app.ui=(function(){
 	    ctx.lineCap = "butt";
         ctx.strokeStyle = ctx.fillStyle = "black";
 	    ctx.clearRect(0, 0, width, height);
-
 	    //try{
 
 	    boundleft = cx / scalex;
@@ -107,26 +106,12 @@ app.ui=(function(){
 	    //Draw grid lines
 	
 		
-		ctx.lineWidth=2;
-        ctx.font="10pt sans-serif";
-	
-		
-		
-					
-	    ctx.beginPath();
-	    ctx.move(overleft,0);
-	    ctx.line(overright,0);
-	    ctx.stroke();
-
-	    ctx.beginPath();
-	    ctx.move(0,overbottom);
-	    ctx.line(0,overtop);
-	    ctx.stroke();
-
-
+        ctx.font="12px sans-serif";
+        
 	    ctx.strokeStyle = "#888";
-
+        ctx.fillStyle="#888";
 	    ctx.lineWidth = 0.1;
+        var n=0;
 	    for (var x = overleft; x <= overright; x += gridsize / 4) {
 	        ctx.beginPath();
 	        ctx.move(x, overbottom);
@@ -139,10 +124,34 @@ app.ui=(function(){
 	        ctx.line(overright, y);
 	        ctx.stroke();
 	    }
+        /*ctx.shadowColor = "rgba(255,255,255,1.0)";
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0
+        ctx.shadowBlur = 4;*/
+    
+        var dblleft=gridsize*4 * ~~ (boundleft / (4*gridsize)) - 4*gridsize;
+        var dblleft=gridsize*4 * ~~ (boundbottom / (4*gridsize)) - 4*gridsize;
+        for(var x=dblleft; x<=overright; x+=gridsize*4){
+            if(x!=0){
+            ctx.beginPath();
+            ctx.arc(scalex*x-cx,cy-scaley*0,2,0,Math.PI*2,true);
+            ctx.fill();
+            ctx.fillText(x.toFixed(3).replace(/\.?0+$/,""),scalex*x-cx,14+cy-scaley*0);
+            }
+            
+        }
+        for(var y=dblleft; y<=overright; y+=gridsize*4){
+            if(y!=0){
+            ctx.beginPath();
+            ctx.arc(-cx,cy-scaley*y,2,0,Math.PI*2,true);
+            ctx.fill();
+            ctx.fillText(y.toFixed(3).replace(/\.?0+$/,""),10-cx,4+cy-scaley*y);
+            }
+            
+        }
+        
 
-
-
-	   ctx.lineWidth = 0.4;
+        ctx.lineWidth = 0.4;
 		for (var x = overleft; x <= overright; x += gridsize) {
 			ctx.beginPath();
 			ctx.move(x, overbottom);
@@ -157,6 +166,23 @@ app.ui=(function(){
 			ctx.stroke();
 		}
         
+		ctx.lineWidth=2;
+	
+		
+		ctx.strokeStyle="black";
+					
+	    ctx.beginPath();
+	    ctx.move(overleft,0);
+	    ctx.line(overright,0);
+	    ctx.stroke();
+
+	    ctx.beginPath();
+	    ctx.move(0,overbottom);
+	    ctx.line(0,overtop);
+	    ctx.stroke();
+
+        
+
         ctx.lineWidth=app.config.lineWidth;
         graphs.forEach(function(e){
             if(!e.disabled){

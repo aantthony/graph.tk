@@ -407,7 +407,7 @@ var latexchars={
 };
 
 var obj={};
-var eqtype={"product":1,"sum":2,"number":3,"constant":4,"variable":5,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15};
+var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15};
 var __debug_parser=0;
 function __debug(x){
     return x;
@@ -554,8 +554,8 @@ function p(inp){
         var be=e.split(":");
         if(be.length!=2){  
             
-            alert(e);
-            //throw (MessageStrings.functionchain);
+            //alert(e);
+            throw (MessageStrings.functionchain);
             //return;
         }
         var dmatch=/^([^\']+)(\'+)$/.exec(be[0]);
@@ -619,7 +619,7 @@ function p(inp){
             return;
         }
         var base=p(be[0]);
-        if(base.type==eqtype.product){
+        if(__debug(0,0) && base.type==eqtype.product){
             terms.type=eqtype.product;
             base[base.length-1]=[base[base.length-1],p(be[1])].setType(eqtype.power);
             terms.push(base);
@@ -926,7 +926,7 @@ Array.prototype.dreplace=function(a,b){
                     cp.push(this[i]);
                 }
             }else{
-                cp.push((a==this.toString())?b:this[i]);
+                cp.push((a==this[i].toString())?b:this[i]);
             }
         }else if(typeof this[i]=="object"){
             cp.push(this[i].dreplace(a,b));
@@ -1082,7 +1082,7 @@ String.prototype.eval=function(){
 };
 Array.prototype.eval=function(){
     if(!this.length){
-        console.error("Empty: "+this.type);
+        app.ui.console.warn("Empty! in .eval(): "+this.type);
     }
     if(this.canEval()){
         return eval(this.getString(1,1));
@@ -1428,7 +1428,7 @@ Array.prototype.integrate=function(times){
    
     return itg.simplify();
 };
-String.prototype.inverse=function(){
+String.prototype.inverses=function(){
     return this.toString();
 };
 String.prototype.factorise=function(){
@@ -1493,20 +1493,61 @@ Array.prototype.factorise=function(){
     }
     return nr;
 };
-
+String.prototype.roots=function(){
+    if(this=="x"){
+        return [0];
+    }
+    return [];
+};
+Number.prototype.roots=function(){return [];};
+Array.prototype.roots=function(){
+    var rt=[];
+    var inv=this.inverses();
+    inv=[inv];
+    for(var i=0;i<inv.length;i++){
+        var n=inv[i].dreplace("x",0).simplify();
+        if(inv.indexOf(n)==-1){
+            rt.push(n);
+        }
+    }
+    return rt;
+};
+Number.prototype.singularities=String.prototype.singularities=function(){return [];};
+Array.prototype.singularities=function(){
+    var ret=[]
+    if(this.type==eqtype.fraction){
+        var r=this[1].roots();
+        for(var b=0;b<r.length;b++){
+            if(ret.indexOf(r[b])==-1){
+                ret.push(r[b]);
+            }
+        }
+        r=this[0].singularities();
+        for(var b=0;b<r.length;b++){
+            if(ret.indexOf(r[b])==-1){
+                ret.push(r[b]);
+            }
+        }
+        
+    }else{
+        for(var i=0;i<this.length;i++){
+            var r=this[i].singularities();
+            for(var b=0;b<r.length;b++){
+                if(ret.indexOf(r[b])==-1){
+                    ret.push(r[b]);
+                }
+            }
+        }
+    
+    }
+    return ret;
+};
 //American spelling
 Array.prototype.factorize=Array.prototype.factorise;
-Array.prototype.inverse=function(){
-
-    if(this.type==eqtype.constant || this.type==eqtype.number){
+Array.prototype.inverses=function(){
+    if(!isNaN(this.eval())){
         return;
     }
-    //eqtype.variable is deprecated
-    else if(this.type==eqtype.variable){
-        //a variable is its own inverse with respect to itself.
-        return this;
-    }
-    
     if(!this.search("x")){
         return;
     }
@@ -1517,13 +1558,26 @@ Array.prototype.inverse=function(){
         right.push(p(1).divide(this[1].dreplace(/^x$/,"y")));
     }else{
     
-        right=this.dreplace(/^x$/,"y");
+        right=this.simplify().dreplace(/^x$/,"y");
     }
     var left=[p("x")];
     left.type=eqtype.sum;
     var __debug_iterations=0;
-    while(1){
+    while(__debug_iterations<3){
     __debug_iterations++;
+    var got_anywhere=false;
+    var last_try=false;
+    //console.log("d: "+__debug_iterations);
+    while(typeof right=="object" && right.length==1){
+    //console.log(1);
+        if(right=="y"){
+            return left;
+        }
+        right=right[0];
+    }
+    if(right=="y"){
+        return left;
+    }
     
     if(right.type==eqtype.product){
         var moved=false;
@@ -1532,11 +1586,12 @@ Array.prototype.inverse=function(){
                 moved=true;
                 left=left.divide(right.splice(i,1).setType(eqtype.product));
                 i--;
+                got_anywhere=true;
             }
         }
         if(!moved){
             //add powers
-            right=right.expand("x");
+            //right=right.expand();
         
         }
     }else if(right.type==eqtype.sum){
@@ -1546,13 +1601,33 @@ Array.prototype.inverse=function(){
                 moved=true;
                 left=left.add(right.splice(i,1).setType(eqtype.sum).multiply(-1));
                 i--;
+                got_anywhere=true;
             }
         }
         if(!moved){
             //factorise!!!!!
             
-            right=right.factorise();
+            //right=right.factorise();
         }
+    }else if(right.type==eqtype.fraction){
+        
+        
+        //l = a/b
+        if(right[0].search("y")){
+            //a has the x
+            //l*b = a
+            left=left.multiply(right[1]);
+            right=right[0];
+            got_anywhere=true;
+        }else{
+            //l=a/b
+            //a/l=b
+            left=[right[0],left].setType(eqtype.fraction);
+            right=right[1];
+            got_anywhere=true;
+        }
+    
+    
     }else if(right.type==eqtype.power){
         //l=a^b
         //l^(1/b)=a
@@ -1565,27 +1640,32 @@ Array.prototype.inverse=function(){
             left=p("l^(1/b)").dreplace(/l/g,left).dreplace(/b/g,right[1]);
             
             right=right[0];
+            got_anywhere=true;
         }else{
             //b has the x
             left=[["log",left].setType(eqtype.fn), ["log", right[0]].setType(eqtype.fn)  ].setType(eqtype.fraction);
             
             //left=left.divide(p("log(x)").dreplace(/^x$/,right[0]));
             right=right[1];
+            got_anywhere=true;
         }
     }else{
         return "right.type is someting else: "+right.type+": "+right;
     }
     
-    while(right.length==1){
-        if(right[0]=="y"){
-            return left;
-        }
-        right=right[0];
+    if(!got_anywhere){
+        last_try=true;
+    }
+    
+    if(last_try){
+        return;
     }
     if(__debug_iterations>3){
         throw(MessageStrings.inversefail+": "+left.getString()+"="+right.getString());
         return;
     }
+    
+    
     }
     return left;
     
@@ -1659,7 +1739,7 @@ function compile(n){
             
         }else if(eq[0].search("y")){
             try{
-                funcs.push(eq[0].dreplace(/^y$/g,"x").simplify().inverse().simplify().dreplace(/x/g,eq[1].simplify()));
+                funcs.push(eq[0].dreplace(/^y$/g,"x").simplify().inverses().simplify().dreplace(/x/g,eq[1].simplify()));
             }catch(ex){
                 throw("CAS: "+ex);
             }
@@ -1696,16 +1776,52 @@ function compile(n){
                 ret.f=eval("("+"function(x){return "+jsc+";})");
                 first=false;
             }
+            
+            
+            
+            
+            
+            try{
+                //find singularites. And make it so the graph skips parts that aren't part of the domain.
+                //It will break at the singualrities points, and resume graphing when it reaches the first number that
+                //isn't NaN
+                
+            }catch(ex){
+                //doesn't really matter
+            }
             builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
+            
+            
+            
+            
+            
+            
+            
             try{
                 var array=[0,0];
                 array.math=fn.dreplace(/^x$/,0);
                 array[1]=array.math.simplify().getString(0,1,1);
                 ret.pt.push(array);
+                
+                try{
+                var rts=fn.roots();
+                for(var rid=0;rid<rts.length;rid++){
+                    var array=[0,0];
+                    array.math=rts[rid];
+                    array[0]=array.math.simplify().getString(0,1,1);
+                    ret.pt.push(array);
+                }
+                }catch(ex){
+                    //could not find roots using cas.
+                    
+                    //Use newtons method:
+                
+                }
+                
                 //console.log("ok");
                 //ret.xc.push(funcs[i].inverse().dreplace(/^x$/,0).simplify().simplify());
             }catch(ex){
-                alert(ex);
+                //alert(ex);
             }
     
         }
