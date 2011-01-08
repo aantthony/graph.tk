@@ -435,7 +435,7 @@ function p(inp){
     
     //level++;
     //if(level>15){throw("too recursive for debugging");return;}
-    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"p: "+inp);
+    //__debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"p: "+inp);
 	var eq=[];
 	var e=inp.replace(/\s/g,"").replace(/\]/g,")").replace(/\[/g,"(").replace(/\)\(/g,")*(");
     
@@ -488,7 +488,7 @@ function p(inp){
     var prod_op="*/";
     
     if(e.indexOf(",")!=-1){
-        __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
+        //__debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
         terms.type=eqtype.discretevector;
         var be=e.split(",");
         be.forEach(function(zz){
@@ -496,7 +496,7 @@ function p(inp){
         });
     
     }else if((e.indexOf("+")!=-1) || (e.indexOf("-")!=-1)){
-    __debug(!__debug_parser,0) ||app.ui.console.log(spaces.substring(0,level)+"+>: "+e);
+    //__debug(!__debug_parser,0) ||app.ui.console.log(spaces.substring(0,level)+"+>: "+e);
         terms.type=eqtype.sum;
         var nextisinverse=false;
         for(var i=0;i<e.length;i++){
@@ -522,7 +522,7 @@ function p(inp){
         
         
     }else if((e.indexOf("*")!=-1) || (e.indexOf("/")!=-1)){
-    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"*>: "+e);
+    //__debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"*>: "+e);
         terms.type=eqtype.product;
         var denom=[];
         denom.type=eqtype.product;
@@ -553,7 +553,7 @@ function p(inp){
             terms.type=eqtype.fraction;
         }
     }else if(e.indexOf(":")!=-1){
-     __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
+     //__debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
         terms.type=eqtype.fn;
         var be=e.split(":");
         if(be.length!=2){  
@@ -612,7 +612,7 @@ function p(inp){
             }
         }
     }else if(e.indexOf("^")!=-1){
-    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"^>: "+e);
+    //__debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"^>: "+e);
         
         var be=e.split("^");
         //NOTE: for now
@@ -688,7 +688,7 @@ function p(inp){
 			//terms[i]="e";
 		}
 	}*/
-    __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
+    //__debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"@>: "+JSON.stringify(terms));
     level--;
     while(typeof terms == "object" && terms.type==eqtype.variable){
         terms=terms[0];
