@@ -409,15 +409,19 @@ var latexchars={
 var obj={};
 var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15};
 var __debug_parser=0;
-function __debug(x){
-    return x;
+var __debug_mode=1;
+function __debug(x,y){
+    if(__debug_mode){
+        return x;
+    }
+    return y;
 }
 var spaces="                     ";
 var level=0;
 function p(inp){
     if(typeof inp=="number" || !isNaN(inp)){
         return Number(inp);
-    }else if(__debug(1,0) && typeof inp=="object"){
+    }else if(typeof inp=="object"){
         if(!isNaN(inp)){
             app.ui.console.warn("this is returned somewhere instead of Number(this)");
             return Number(inp);
@@ -619,15 +623,9 @@ function p(inp){
             return;
         }
         var base=p(be[0]);
-        if(__debug(0,0) && base.type==eqtype.product){
-            terms.type=eqtype.product;
-            base[base.length-1]=[base[base.length-1],p(be[1])].setType(eqtype.power);
-            terms.push(base);
-        }else{
-            terms.type=eqtype.power;
-            terms.push(base);
-            terms.push(p(be[1]));
-        }
+        terms.type=eqtype.power;
+        terms.push(base);
+        terms.push(p(be[1]));
         
     }else if(e.indexOf("!")!=-1){
         terms.type=eqtype.product;
@@ -1082,7 +1080,7 @@ String.prototype.eval=function(){
 };
 Array.prototype.eval=function(){
     if(!this.length){
-        app.ui.console.warn("Empty! in .eval(): "+this.type);
+        __debug(__debug(0,1)||app.ui.console.warn("Empty! in .eval(): "+this.type),0);
     }
     if(this.canEval()){
         return eval(this.getString(1,1));
@@ -2282,7 +2280,9 @@ Array.prototype.getString=function(braces,javascript){
     var endchar="";
     var afterme="";
     var second=true;
-    this.forEach(function(e){
+    //this.forEach(function(e){
+    for(var i=0;i<this.length;i++){
+        var e=this[i];
         if(!_first){
             second=false;
         }
@@ -2344,7 +2344,7 @@ Array.prototype.getString=function(braces,javascript){
         
         s+=afterme;
         afterme="";
-    });
+    }
     s+=endchar;
     endchar="";
     if(braces){

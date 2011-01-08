@@ -9,7 +9,7 @@ mkdir -p min
 
 VERSION_CODE=$(git rev-parse --short HEAD)
 
-cat math.js ui.js main.js | sed s/GIT_VERSION/${VERSION_CODE}/ >./tmp/main_modified.js
+cat math.js ui.js main.js | sed s/__debug_mode\=1/__debug_mode\=0/ |sed s/GIT_VERSION/${VERSION_CODE}/ >./tmp/main_modified.js
 cd ./scripts/packer
 #perl ./jsPacker.pl -i ../../tmp/main_modified.js -e62 -q -s -f -o ../../tmp/main_packed.js
 echo "DANGER: PACKER DISABLED!!!!"

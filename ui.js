@@ -255,6 +255,9 @@ app.ui=(function(){
 	if (/AppleWebKit/.test(navigator.userAgent)) {
 	    scaleconst = 0.0001;
 	}
+    if (/Chrome/.test(navigator.userAgent)) {
+	    scaleconst = 0.005;
+	}
 	if (/Firefox/.test(navigator.userAgent)) {
 	    scaleconst = 0.01;
 	}
@@ -264,7 +267,7 @@ app.ui=(function(){
 	if (!/Mac OS X/.test(navigator.userAgent)) {
 	    scaleconst = 0.1
 	}
-
+    
 	function mousewheel(e){
         if(!allowdrag){return;}
 		e = e || window.event;
