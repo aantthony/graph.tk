@@ -1267,6 +1267,69 @@ Array.prototype.differentiate=function(times){
     return itg.simplify();
 
 };
+String.prototype.expand=function(){
+    return this.toString();
+};
+Number.prototype.expand=function(){
+    return this.toString();
+};
+Array.prototype.expand=function(){
+    var self=this.simplify().simplify();
+    var expanded=[].setType(eqtype.sum);
+    if(self.type==eqtype.sum){
+        for(var i=0;i<self.length;i++){
+            expanded.push(self[i].expand());
+        }
+    
+    }else if(self.type==eqtype.product){
+        for(var i=0;i<self.length;i++){
+            self[i]=(self[i].expand());
+        }
+        //this = (a+b+c+d)(e+f+g+h)(i+j+k+l)(m+n+o+p)...
+        /*
+                 (ae+af+ag+ah  +be+bf+bg+bh   + ce+cf+cg+ch)(i+j+k+l)(n+n+o+p)
+        
+        
+        */
+        var first=self[0];
+        var second=self[1];
+        if(first.type==eqtype.sum){
+            if(second.type==eqtype.sum){
+                for(var a=0;a<first.length;a++){
+                    for(var b=0;b<second.length;b++){
+                        expanded.push(first[a].multiply(second[b]));
+                    }
+                }
+            }else{
+                for(var a=0;a<first.length;a++){
+                    expanded.push(first[a].multiply(second));
+                }
+            }
+        }else if(first.type==eqtype.fraction || first.type==eqtype.product){
+            if(second.type==eqtype.sum){
+                for(var b=0;b<second.length;b++){
+                    expanded.push(first.multiply(second[b]));
+                }
+            }else{
+                expanded.push(first.multiply(second));
+            }
+        }else{
+            expanded.push(first.multiply(second));
+        }
+        if(self.length>2){
+            
+            self.splice(0,2);
+            self=self.expand();
+            
+            return expanded.multiply(self).expand().simplify();
+        }
+        
+    
+    }
+
+    return expanded.simplify();
+
+};
 String.prototype.divides=function(o){
     if(!isNaN(o.eval())){
         return true;
@@ -1324,14 +1387,37 @@ Array.prototype.integrate=function(times){
         var _non_constant=0;
         var self=this.simplify();
         //console.log(self);
-        if(_dx=self.indexOf("dx")){
+        if((_dx=self.indexOf("dx"))!=-1){
             self.splice(_dx,1);
         }
         if(self.length==2 && typeof self[1]=="number"){
             itg.push([self[0].integrate(times)].setType(eqtype.product));
         }else if(this.length==1){
             return this[0].integrate();
+        }else{
+        
+            for(var a=0;a<this.length;a++){
+                var u=this[a];
+                var du=this[a].differentiate();
+                for(var b=0;b<this.length;b++){
+                    if(this[b].divides(du)){
+                        this[b]=this[b].divide(du).simplify();
+                        this[a]="u";
+                        
+                        if(0 && itworked){
+                        
+                        }
+                    
+                    }
+            
+            
+                }
+            
+            
+            }
+            
             throw (MessageStrings.intfail);
+        
         }
     }else if(this.type==eqtype.fn){
         if(window && window.app && window.app.variables && window.app.variables[this[0]]){

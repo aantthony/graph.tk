@@ -11,7 +11,9 @@ VERSION_CODE=$(git rev-parse --short HEAD)
 
 cat math.js ui.js main.js | sed s/GIT_VERSION/${VERSION_CODE}/ >./tmp/main_modified.js
 cd ./scripts/packer
-perl ./jsPacker.pl -i ../../tmp/main_modified.js -e62 -q -s -f -o ../../tmp/main_packed.js
+#perl ./jsPacker.pl -i ../../tmp/main_modified.js -e62 -q -s -f -o ../../tmp/main_packed.js
+echo "DANGER: PACKER DISABLED!!!!"
+cp ../../tmp/main_modified.js ../../tmp/main_packed.js
 cd ../../
 
 #leave mathquill as is
