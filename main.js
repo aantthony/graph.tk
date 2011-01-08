@@ -1,20 +1,12 @@
 var usr=(function(){
-var usr={"eval":function(d){
-    return window.eval(d);
+var usr={"eval":function(_____d){
+    return eval(_____d);
 },"clear":function(){return app.ui.console.clear();}};
 
 return usr;
 })();
 
 var graphs=[];
-function getlatexpart(match, submatch)
-{
-  if(submatch == ",")
-	return "";
-  if(latexchars[submatch] !== undefined)
-	return latexchars[submatch];
-  return submatch;
-}
 
 
 function track(event) {
@@ -77,6 +69,7 @@ var graph=function(n){
 	return t;
 };
 
+app.variables={};
 app.version="GIT_VERSION";
 app.add=function(n){
 	graphs.push(new graph(n));
@@ -173,7 +166,7 @@ app.init=function (div){
                 }catch(ex){}
             }
         }
-        app.add("\\frac{d}{dx}\\left(e^x+x^3\\right)");
+        app.add("\\frac{d}{dx}\\left(sin\\left(x\\right)+log\\left(x+1\\right)\\right)");
     }
     var div=document.createElement("div");
     var logo=new Image();
@@ -181,10 +174,15 @@ app.init=function (div){
     logo.style.float="left";
     div.appendChild(logo);
     
-    div.appendChild(document.createTextNode("graph.tk - version "+app.version));
-    div.style.height="2em";
+    div.appendChild(document.createTextNode("graph.tk - "+messages.version+" "+app.version));
+    //div.style.height="4em";
+    var span=document.createElement("span");
+    span.className="mathquill-rendered-math mathquill-editable";
+    span.innerHTML='<br />'+messages.example+': '+messages.type+' <span class="textarea"><textarea></textarea></span><span class="fraction"><span class="numerator"><var>d</var></span><span class="denominator"><var>d</var><var>x</var></span><span style="width:0">&nbsp;</span></span><span><span class="paren" style="font-size: 1.89542em; ">(</span><span class=""><span class="fraction"><span class="numerator"><span>1</span></span><span class="denominator"><var>x</var></span><span style="width:0">&nbsp;</span></span></span><span class="paren" style="font-size: 1.89542em; ">)</span></span>';
+    div.appendChild(span);
     app.ui.console.log(div,true);
-    app.ui.console.log("Start by typing d/dx (1/x)",true);
+    
+    //app.ui.console.log("Example: Type d/dx (1/x)",true);
     
     //app.add("x^2");
 };

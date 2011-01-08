@@ -15,8 +15,21 @@ var boundtop = 10;
 var boundbottom = -10;
 var width,height;
 
-var LocalStrings=["Could not initalize"];
 
+var messages={
+    "standalone":"To run this app in fullscreen mode, add it to your home screen.",
+    "excanvasfail":"Explorer Canvas failed: quitting.",
+    "badbrowser":"Browser not supported",
+    "example":"Example",
+    "version":"version",
+    "type":"Type",
+    "add":"Add a new equation/graph",
+    "console":"Show Console",
+    "help":"Help Page",
+    "png":"Take Screenshot Image",
+    "showhide":"Show/Hide Graph"
+
+};
 //NO xc until the CAS is ready, or newtons method coded
 app.config={"lineWidth":1.5,"pt":true};
 app.ui=(function(){
@@ -24,7 +37,7 @@ app.ui=(function(){
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
     if(/(iPhone)/i.test(navigator.userAgent)){
         if(!navigator.standalone){
-           alert("To run this app in fullscreen mode, add it to your home screen.");
+           alert(messages.standalone);
         }
     }
 	var draw;
@@ -515,7 +528,7 @@ app.ui=(function(){
                         var c=compile(l__);
                     }catch(ex){
                          
-                        warn_.firstChild.nodeValue="Error: "+JSON.stringify(ex).toString();
+                        warn_.firstChild.nodeValue=messages.error+": "+JSON.stringify(ex).toString();
                         warn_.style.display="block";
                         return;
                     }
@@ -590,10 +603,10 @@ app.ui=(function(){
                 if(canvas.getContext){
                     ctx = canvas.getContext("2d");
                 }else{
-                    alert("Explorer Canvas failed: quitting.");
+                    alert(messages.excanvasfail);
                 }
             }else if(!ctx){
-                alert("Browser not supported.");
+                alert(messages.badbrowser);
             }
             if(!app.config.fillText){
                 app.config.fillText=ctx.fillText?true:false;
@@ -639,8 +652,20 @@ app.ui=(function(){
 			if(event.which==13){
                 
                     //logt.appendChild((p_latex($(conin).mathquill("latex")).markup()));
+                try{
+                var needsredraw=false;
                 conin.last=$(conin).mathquill("latex");
                 var out=p_latex(conin.last).simplify();
+                if(out.type==eqtype.equality){
+                    if(typeof out[0]=="string"){
+                        if(out[0]=="e" || out[0]=="pi"){
+                            throw(MessageStrings.protected);
+                            return;
+                        }
+                        app.variables[out[0]]=out[1].eval();
+                        needsredraw=true;
+                    }
+                }
                 var can_eval_code=out.canEval();
                 if(can_eval_code==false || can_eval_code==2){
                     app.ui.console.log(((out.getString().markup())));
@@ -648,6 +673,12 @@ app.ui=(function(){
                     app.ui.console.log(generateJSON(usr.eval(out.getString(0,1))));
                 }
                 $(conin).mathquill("latex","");
+                if(needsredraw){
+                    draw();
+                }
+                }catch(ex){
+                    app.ui.console.warn(ex.toString());
+                }
 			}
 			else if(event.which==38 && event.shiftKey){
                 if(!/\\[a-z]*|[^\s]/ig.test(conin.last)){
@@ -670,13 +701,14 @@ app.ui=(function(){
 		var _proto=document.createElement("li");
 		var _proto_div=document.createElement("div");
         var _proto_warn=document.createElement("aside");
-        _proto_warn.appendChild(document.createTextNode(LocalStrings[0]));
+        _proto_warn.appendChild(document.createTextNode("fail"));
         
 		_proto_div.className="b";
 		_proto_div.style.backgroundColor="#07c";
 		var _proto_input=document.createElement("input");
 		_proto_input.type="checkbox";
 		_proto_input.checked="checked";
+        _proto_input.title=messages.showhide;
 		_proto_div.appendChild(_proto_input);
 		
 		
@@ -693,30 +725,33 @@ app.ui=(function(){
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value="+";
         newfuncbtn.type="button";
+        newfuncbtn.title=messages.add;
         newfuncbtn.onclick=function(){app.add()};
         buttons.appendChild(newfuncbtn);
         
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value=">_";
         newfuncbtn.type="button";
+        newfuncbtn.title=messages.console;
         newfuncbtn.onclick=function(){app.console()};
         buttons.appendChild(newfuncbtn);
         
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value=".png";
         newfuncbtn.type="button";
+        newfuncbtn.title=messages.png;
         newfuncbtn.onclick=function(){app.png()};
         buttons.appendChild(newfuncbtn);
         
         var alink=document.createElement("a");
-        alink.href="http://graph.tk/about/";
+        alink.href="/about/";
         alink.target="_blank";
         
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value="";
         newfuncbtn.style.textDecoration="none";
         newfuncbtn.type="button";
-        
+        newfuncbtn.title=messages.help;
         
         alink.appendChild(newfuncbtn);
         buttons.appendChild(alink);
@@ -792,9 +827,10 @@ app.ui=(function(){
         app.ui.console.hide();
     },"warn":function(x,noshow){
         var div=document.createElement("div");
-            var warn=document.createElement("div");
-            warn.className="warn";
-            div.appendChild(warn);
+        var warn=document.createElement("div");
+        warn.className="warn";
+        div.appendChild(warn);
+        div.style.minHeight="23px";
         if(typeof x !="object"){
             div.appendChild(document.createTextNode(x));
         }else{

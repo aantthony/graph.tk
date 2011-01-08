@@ -35,7 +35,22 @@ Divion should be dreplaced with multiplication by the reciprocal.
 
 TODO: -frac does not work.
     */
-
+var MessageStrings={
+    "failinit":"Could not initalize",
+    "protected":"Read-Only variable",
+    "nonconstantconstant":"Expression not constant",
+    "parentheses":"Could not parse parentheses",
+    "functionchain":"Function composition is a binary operator",
+    "expchain":"^ is a binary operator.",
+    "nonvector":"Vector operation attempted on non-vector",
+    "unknownderivative":"The derivative of %s is not known",
+    "intfail":"Integration failed",
+    "inversefail":"Could not find inverse",
+    "lonedoperator":"Differential operator alone",
+    "loneioperator":"Integral operator alone",
+    "fnnamenotstring":"Invalid function name"
+    
+};
 Number.prototype.format=function(digits) {
     var num=Number(this);
     e = Math.E;
@@ -299,6 +314,7 @@ var latexchars={
 'le':"<=",
 "infty":"∞",
 "cdot":"*",
+"text":"",
 "frac":"",
 "backslash":"\\",
 "alpha":"α",
@@ -431,7 +447,7 @@ function p(inp){
 			return "aaaa"+h+"aaaa";
 		});
         if(fail){
-            throw ("Could not parse parentheses");
+            throw (MessageStrings.parentheses);
             break;
         }
 	}
@@ -514,7 +530,7 @@ function p(inp){
         //^ is a BINARY operator that goes from right to left.
         //  1^2^3 = 1^(2^(3))
         if(be.length!=2){
-            throw ("^ is a binary operator");
+            throw (messages.expchain);
             return;
         }
         var base=p(be[0]);
@@ -534,27 +550,39 @@ function p(inp){
         var be=e.split(":");
         
         if(be.length!=2){
-            throw ("Function composition is a binary operator");
+            throw (MessageStrings.functionchain);
             return;
         }
-        
-        var match=/^log_([\d\.\+\-e]+)$/(be[0]);
-        if(match){
-            var fn_=["log",p(be[1])].setType(eqtype.fn);
-            terms.type=eqtype.fraction;
-            terms.push(fn_);
-            terms.push(["log", p(match[1])].setType(eqtype.fn));
+        var dmatch=/^([^\']+)(\'+)$/.exec(be[0]);
+        if(dmatch){
+            console.log("found");
+            terms.type=eqtype.fn;
+            var b=[dmatch[1],be[1]].setType(eqtype.fn);
+            for(var count=dmatch[2].length;count--;count>0){
+                console.log("diff");
+                b=["diff",b].setType(eqtype.fn);
+            }
+            terms=b;
+            
         }else{
-            var fname=p(be[0]);
-            if(fname.eqtype==eqtype.power){
-                //console.log("ok");
-            }else if(typeof fname!="string"){
-                terms.type=eqtype.product;
-                terms.push(fname);
-                terms.push(p(be[1]));
+            var match=/^log_([\d\.\+\-e]+)$/(be[0]);
+            if(match){
+                var fn_=["log",p(be[1])].setType(eqtype.fn);
+                terms.type=eqtype.fraction;
+                terms.push(fn_);
+                terms.push(["log", p(match[1])].setType(eqtype.fn));
             }else{
-                terms.push(fname);
-                terms.push(p(be[1]));
+                var fname=p(be[0]);
+                if(fname.eqtype==eqtype.power){
+                    //console.log("ok");
+                }else if(typeof fname!="string"){
+                    terms.type=eqtype.product;
+                    terms.push(fname);
+                    terms.push(p(be[1]));
+                }else{
+                    terms.push(fname);
+                    terms.push(p(be[1]));
+                }
             }
         }
     }else if(e.indexOf("!")!=-1){
@@ -624,6 +652,14 @@ function p(inp){
         terms=terms[0];
     }
     if(terms.length==2){
+        
+        //terms=terms.simplify();
+        if(terms.length==2 && terms.type==eqtype.fraction && terms[0].simplify()=="d" && terms[1].simplify()=="dx"){
+            return ["diff"].setType(eqtype.operatorfactor);
+        }
+        /*if(terms.length==2 && terms.type==eqtype.fraction && terms[0]=="d" && terms[1]=="dx"){
+            return ["diff"].setType(eqtype.operatorfactor);
+        }*/
         if(terms[0].length==1 && terms[0]=="d" && terms[1].length==1 && terms[1]=="dx"){
             return ["diff"].setType(eqtype.operatorfactor);
         }
@@ -725,12 +761,12 @@ Array.prototype.im=function(){
 
 Array.prototype.cross=function(o){
     if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
-        throw ("I or it is not a vector!");
+        throw (MessageStrings.nonvector);
     }
 };
 Array.prototype.dot=function(o){
     if(o.type!=eqtype.discretevector || this.type!=eqtype.discretevector){
-        throw ("I or it is not a vector!");
+        throw (MessageStrings.nonvector);
     }
     var s=[];
     s.type=eqtype.sum;
@@ -781,7 +817,9 @@ String.prototype.dreplace=function(a,b){
             return this.toString();
         }
     }else{
-        app.ui.console.warn("Use regex for .dreplace()");
+        if(a==this.toString()){
+            return b;
+        }
     }
     return this.toString();
 };
@@ -805,7 +843,7 @@ Array.prototype.dreplace=function(a,b){
                     cp.push(this[i]);
                 }
             }else{
-                app.ui.console.warn("Use regex for .dreplace()");
+                cp.push((a==this.toString())?b:this[i]);
             }
         }else if(typeof this[i]=="object"){
             cp.push(this[i].dreplace(a,b));
@@ -937,6 +975,15 @@ String.prototype.eval=function(){
     }
     if(!isNaN(this.toString())){
         return Number(this.toString());
+    }
+    if(window.app){
+    if(app.variables[this.toString()]){
+		if(typeof app.variables[this.toString()]!="function"){
+			return app.variables[this.toString()].eval();
+		}else{
+			return NaN;
+		}
+    }
     }
     if(window[this.toString()]){
 		if(typeof window[this.toString()]!="function"){
@@ -1071,7 +1118,11 @@ Array.prototype.differentiate=function(times){
         if(fnd=known_derivatives[this[0]]){
             return [fnd.dreplace(/^x$/,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
         }else{
-            throw("I don't know the derivative of the "+this[0]+" function!");
+            if(window && window.app && window.app.variables && window.app.variables[this[0]] && typeof window.app.variables[this[0]]=="function"){
+                return [window.app.variables[this[0]].math.differentiate().dreplace(/^x$/,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
+                //throw("chain rule");
+            }
+            throw(MessageStrings.unknownderivative.replace("%s",this[0]));
         }
         return;
     }else if(this.type==eqtype.fraction){
@@ -1119,11 +1170,11 @@ Array.prototype.differentiate=function(times){
         }else if(this.length==1){
             return this[0].differentiate();
         }else{
-            app.ui.console.warn("Tried to differentiate empty product");
+            app.ui.console.warn("empty product!");
             return 0;
         }
     }else{
-        throw ("Invalid Expression Type: "+this.type);
+        throw ("fail: diff: Expression Type: "+this.type);
         return;
     }
     
@@ -1150,7 +1201,7 @@ Array.prototype.integrate=function(times){
             var _n_plus_one=this[1].add(1).simplify();
             itg.push([["x",_n_plus_one].setType(eqtype.power),_n_plus_one].setType(eqtype.fraction)); 
         }else{
-            throw ("Integration failed");
+            throw (MessageStrings.intfail);
         }
     }else if(this.type==eqtype.product){
         var _non_constant=0;
@@ -1163,10 +1214,10 @@ Array.prototype.integrate=function(times){
             itg.push([self[0].integrate(times)].setType(eqtype.product));
         }else if(this.length==1){
             return this[0].integrate();
-            throw ("Integration failed");
+            throw (MessageStrings.intfail);
         }
     }else{
-        throw ("Invalid Expression Type: "+this.type);
+        throw ("fail: int: type: "+this.type);
     }
    
     return itg.simplify();
@@ -1251,7 +1302,7 @@ Array.prototype.inverse=function(){
     }
     
     if(!this.search("x")){
-        throw("Could not find inverse.");return;
+        return;
     }
     var right=[];
     if(this.type==eqtype.fraction){
@@ -1326,7 +1377,7 @@ Array.prototype.inverse=function(){
         right=right[0];
     }
     if(__debug_iterations>3){
-        throw("solve for y: "+left.getString()+"="+right.getString());
+        throw(MessageStrings.inversefail+": "+left.getString()+"="+right.getString());
         return;
     }
     }
@@ -1336,8 +1387,21 @@ Array.prototype.inverse=function(){
 function clean(n){
     // de-latexify a string.
     for(var i in latexchars){
-        while(i.length>1 && n.indexOf("\\"+i)!=-1){
-            n=n.replace("\\"+i,latexchars[i]);
+        if(latexchars.hasOwnProperty(i)){
+            while(i.length>1 && n.indexOf("\\"+i)!=-1){
+                n=n.replace("\\"+i,latexchars[i]);
+            }
+        }
+  	}
+    return n.replace(/\*\(\)/g,"*(1)").replace(/\{ \}/g,"{1}").replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
+}
+function dirty(n){
+    //un clean()
+    for(var i in latexchars){
+        if(latexchars.hasOwnProperty(i)){
+            if(latexchars[i].length && latexchars[i]!=" " && n.indexOf(latexchars[i])!=-1){
+                n=n.replace(latexchars[i],i);
+            }
         }
   	}
     return n.replace(/\*\(\)/g,"*(1)").replace(/\{ \}/g,"{1}").replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
@@ -1346,18 +1410,43 @@ function p_latex(n){
     return p(clean(n)).simplify();
 }
 function compile(n){
-    n=clean(n);
-	var eq=p(n);
+    var eq;
+    if(typeof n=="string"){
+        n=clean(n);
+    }
+    eq=p(n).simplify();
     var funcs=[];
+    var yfuncs=[];
+    var funcdefs={};
+    var vars={};
+    var reliance=[];
     if(eq.type==eqtype.equality){
-        if(eq[0]=="y"){
-            funcs.push(eq[1]);
-        }else{
+        if(typeof eq[0]=="string"){
+            if(eq[0]=="y"){
+                funcs.push(eq[1]);
+            }else if(eq[0]=="x"){
+                yfuncs.push(eq[1]);
+            }else if(eq[0]!=""){
+                var varname=eq[0];
+                vars[varname]=eq[1].simplify().eval();
+                if(isNaN(vars[varname])){
+                    throw(MessageStrings.nonconstantconstant);
+                }
+            }
+        }else if(eq[0].length==2 && eq[0].type==eqtype.fn && typeof eq[0][0]=="string" && typeof eq[0][1]=="string"){
+            var mm=eq[1].dreplace(eq[0][1],"x").simplify();
+            var jsc=mm.getString(0,true);
+            funcdefs[eq[0][0]]=eval("("+"function(x){return "+jsc+";})");
+            funcdefs[eq[0][0]].math=mm;
+            
+        }else if(eq[0].search("y")){
             try{
                 funcs.push(eq[0].dreplace(/^y$/g,"x").simplify().inverse().simplify().dreplace(/x/g,eq[1].simplify()));
             }catch(ex){
                 throw("CAS: "+ex);
             }
+        }else{
+            throw("CAS: Failure");
         }
     }else{
         if(eq.simplify){
@@ -1379,32 +1468,22 @@ function compile(n){
     // ->± Infinity
     ret.xs=[];
     ret.ys=[];
-    
+    var first=true;
     if(funcs.length){
-        //console.log(funcs);
-        var fn=funcs[0].simplify();
-        var jsc=fn.getString(0,true);
-        ret.f=eval("("+"function(x){return "+jsc+";})");
-        builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
-        try{
-            var array=[0,ret.f(0)];
+        for(var i=0;i<funcs.length;i++){
             
-            if(array[1]!=Infinity && array[1]!=-Infinity){
-                array.text=fn.dreplace(/^x$/,0).simplify().getString(0);
-                ret.pt.push(array);
-            }else{
-                ret.xs.push(0);
-            }
-            //ret.xc.push(funcs[0].inverse().dreplace(/^x$/,0).simplify().simplify());
-        }catch(ex){}
-        for(var i=1;i<funcs.length;i++){
             var fn=funcs[i].simplify();
             var jsc=fn.getString(0,true);
+            if(first){
+                ret.f=eval("("+"function(x){return "+jsc+";})");
+                first=false;
+            }
             builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
             try{
                 var array=[0,ret.f(0)];
                 if(array[1]!=Infinity && array[1]!=-Infinity){
-                    array.text=jsc;
+                    array.text=fn.dreplace(/^x$/,0).simplify().getString(0);
+                    //array.text=jsc;
                     ret.pt.push(array);
                 }
                 //ret.xc.push(funcs[i].inverse().dreplace(/^x$/,0).simplify().simplify());
@@ -1413,8 +1492,31 @@ function compile(n){
         }
     }
     
+    if(window && window.app && window.app.variables){
+        for(i in vars){
+            if(vars.hasOwnProperty(i)){
+                if(i=="e" || i=="pi"){
+                    throw(MessageStrings.protected);
+                    return;
+                }
+                window.app.variables[i]=vars[i];
+            }
+        }
+        for(i in funcdefs){
+            if(funcdefs.hasOwnProperty(i)){
+                if(functions.indexOf(i)!=-1){
+                    throw(MessageStrings.protected);
+                    return;
+                }
+                window.app.variables[i]=funcdefs[i];
+            }
+        }
+    }
     builder+="})";
     ret.math=funcs;
+    ret.funcdefs=funcdefs;
+    ret.vars=vars;
+    ret.reliance=reliance;
 	ret.plot=eval(builder);
 	return ret;
 	
@@ -1442,7 +1544,14 @@ String.prototype.canEval=function(){
     if(this.toString()=="π"){
         return 2;
     }
-    
+    if(window.app){
+        if(app.variables[this.toString()]){
+            if(typeof app.variables[this.toString()]!="function"){
+                return 8;
+            }
+        }
+    }
+
     if(window[this.toString()]){
         if(typeof window[this.toString()]!="function"){
             return true;
@@ -1469,6 +1578,15 @@ Array.prototype.canEval=function(){
         }
         return this[1].canEval();
     }
+    if(this.type==eqtype.fn && app.variables[this[0]] && typeof app.variables[this[0]] =="function" ){
+        //Check if it7 can be represented as an absolute value.
+        
+        var ret=this[1].canEval();
+        if(!ret || ret==4){
+            return ret;
+        }
+        return 2;
+    }
    
     for(var i=0;i<this.length;i++){
         if(typeof this[i] == "number"){
@@ -1482,6 +1600,10 @@ Array.prototype.canEval=function(){
             }
             if(res==2){
                 max=2;
+                //return 2;
+            }
+            if(res==8){
+                max=8;
                 //return 2;
             }
         }
@@ -1542,6 +1664,11 @@ Array.prototype.takeDenom=function(){
 
 Array.prototype.simplify=function (onlyeval,___retry){
     //O(d)
+    if(this.type==eqtype.equality){
+        this[0]=this[0].simplify();
+        this[1]=this[1].simplify();
+        return this;
+    }
     
     if(this.length==1){
 		return this[0].simplify();
@@ -1566,6 +1693,7 @@ Array.prototype.simplify=function (onlyeval,___retry){
     if(this.type==eqtype.fraction && this[1]===1){
         return this[0];
     }
+    
     if(this.type==eqtype.power){
         if(this[1]===1){
             return this[0];
@@ -1583,14 +1711,14 @@ Array.prototype.simplify=function (onlyeval,___retry){
         }
         if(this[0]=="diff"){
             if(this.length!=2){
-                throw("Differential operator alone");
+                throw(MessageStrings.lonedoperator);
             }
             return this[1].simplify().differentiate();
         }
         //How can we do both?
         if(this[0]=="int"){
             if(this.length!=2){
-                throw("Integral operator alone");
+                throw(MessageStrings.loneioperator);
             }
             return this[1].simplify().integrate();
         }
@@ -1766,7 +1894,17 @@ Array.prototype.simplify=function (onlyeval,___retry){
     }
 	return z;
 };
-String.prototype.getString=function(){
+String.prototype.getString=function(__ignore,javascript){
+    if(javascript && window.app){
+        var self=this.toString()
+        if(self=="x"){
+            return self;
+        }
+        if(window[self]){
+            return self;
+        }
+        return "app.variables["+JSON.stringify(self)+"]";
+    }
     return this.toString();
 };
 Number.prototype.getString=function(){
@@ -1804,14 +1942,18 @@ Array.prototype.getString=function(braces,javascript){
             }
             else if(self.type==eqtype.fn){
                 if(typeof e !="string" && typeof e!="function"){
-                    throw("function name is not a string: "+e);
+                    throw(messages.fnnamenotstring);
                     return "ERROR";
                 }
                 if(functions.indexOf(e)==-1){
-                
-                    //multiply instead;
-                    throw("Unknown function: "+e);
-                    return "ERROR";
+                    var _found=false;
+                    if(window && window.app && window.app.variables && window.app.variables[e] && typeof window.app.variables[e]=="function"){
+                        _found=true;
+                    }
+                    if(!_found){
+                        throw("Unknown function: "+e);
+                        return "ERROR";
+                    }
                 }
                 afterme="(";
                 endchar=")";
@@ -1876,7 +2018,7 @@ var known_derivatives={
 
 //p("(random(x)-0.5)");
 if(p("(1/(1*x))*(2*1*1*1*2/3*3*0.5)").simplify().getString()!="2/x"){
-    app.ui.console.warn("Simplifier improvements required");
+    alert("Simplifier improvements required");
 }
 
 //"i" can be changed between one and zero to get the real and imaginary part.
