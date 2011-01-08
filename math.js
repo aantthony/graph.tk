@@ -1320,8 +1320,7 @@ Array.prototype.expand=function(){
             
             self.splice(0,2);
             self=self.expand();
-            
-            return expanded.multiply(self).expand().simplify();
+            return self.concat(expanded).setType(eqtype.product).expand().simplify();
         }
         
     
