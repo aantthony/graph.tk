@@ -90,7 +90,7 @@ Number.prototype.format=function(digits) {
 function random_hash(){
     var s="";
     for(var i=0;i<20;i++){
-        s+=(10+~~(Math.random()*26)).toString(36)
+        s+=(10+~~(Math.random()*23)).toString(36)
         //s+=(~~(Math.random()*16)).toString(16);
     }
     return s;
@@ -305,6 +305,28 @@ function djkb(ia, lvl, x) {
 
 var latexchars={
 'gt':">",
+"sin":"sin:",
+"cos":"cos:",
+"tan":"tan:",
+"sec":"sec:",
+"cosec":"cosec:",
+"csc":"csc:",
+"cotan":"cotan:",
+"cot":"cot:",
+"ln":"ln:",
+"lg":"log:",
+"log":"log:",
+"det":"det:",
+"dim":"dim:",
+"max":"max:",
+"min":"min:",
+"mod":"mod:",
+"lcm":"lcm:",
+"gcd":"gcd:",
+"gcf":"gcf:",
+"hcf":"hcf:",
+"lim":"lim:",
+":":"",
 "left(":"(",
 "right)":")",
 "left[":"[",
@@ -415,6 +437,10 @@ function p(inp){
     
     //TODO: known functions only, otherwise make it a product
     //TODO: allow things like 2x
+    
+    while(e.indexOf("xx")!=-1){
+        e=e.replace(/xx/g,"x*x");
+    }
     e=e.replace(/∞/g,"Infinity");
     e=e.replace(/\.([^\d]|$)/g,"*$1");
     e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.])/g,"$1*$3");
@@ -522,6 +548,65 @@ function p(inp){
             terms=[terms,denom];
             terms.type=eqtype.fraction;
         }
+    }else if(e.indexOf(":")!=-1){
+     __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
+        terms.type=eqtype.fn;
+        var be=e.split(":");
+        if(be.length!=2){  
+            
+            alert(e);
+            //throw (MessageStrings.functionchain);
+            //return;
+        }
+        var dmatch=/^([^\']+)(\'+)$/.exec(be[0]);
+        if(dmatch){
+            //console.log("found");
+            terms.type=eqtype.fn;
+            var b=[dmatch[1],be[1]].setType(eqtype.fn);
+            for(var count=dmatch[2].length;count--;count>0){
+                //console.log("diff");
+                b=["diff",b].setType(eqtype.fn);
+            }
+            terms=b;
+            
+        }else{
+            var match=/^log_([\d\.\+\-e]+)$/(be[0]);
+            if(match){
+                var fn_=["log",p(be[1])].setType(eqtype.fn);
+                terms.type=eqtype.fraction;
+                terms.push(fn_);
+                terms.push(["log", p(match[1])].setType(eqtype.fn));
+            }else{
+                var fname=p(be[0]);
+                if(fname.type==eqtype.power){
+                    var basefn=fname[0].simplify();
+                    var power=fname[1].simplify().eval();
+                    //if trig
+                    if(power<0){
+                        //find inverse
+                        basefn="a"+basefn;
+                        power=-power;
+                    }
+                    
+                    if( 1 || is_it_a_trig_function){
+                        terms.type=eqtype.power;
+                        terms.push([basefn,p(be[1])].setType(eqtype.fn));
+                        terms.push(power);
+                    }
+                    
+                    
+                    
+                    
+                }else if(typeof fname!="string"){
+                    terms.type=eqtype.product;
+                    terms.push(fname);
+                    terms.push(p(be[1]));
+                }else{
+                    terms.push(fname);
+                    terms.push(p(be[1]));
+                }
+            }
+        }
     }else if(e.indexOf("^")!=-1){
     __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"^>: "+e);
         
@@ -544,47 +629,6 @@ function p(inp){
             terms.push(p(be[1]));
         }
         
-    }else if(e.indexOf(":")!=-1){
-     __debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
-        terms.type=eqtype.fn;
-        var be=e.split(":");
-        
-        if(be.length!=2){
-            throw (MessageStrings.functionchain);
-            return;
-        }
-        var dmatch=/^([^\']+)(\'+)$/.exec(be[0]);
-        if(dmatch){
-            //console.log("found");
-            terms.type=eqtype.fn;
-            var b=[dmatch[1],be[1]].setType(eqtype.fn);
-            for(var count=dmatch[2].length;count--;count>0){
-                //console.log("diff");
-                b=["diff",b].setType(eqtype.fn);
-            }
-            terms=b;
-            
-        }else{
-            var match=/^log_([\d\.\+\-e]+)$/(be[0]);
-            if(match){
-                var fn_=["log",p(be[1])].setType(eqtype.fn);
-                terms.type=eqtype.fraction;
-                terms.push(fn_);
-                terms.push(["log", p(match[1])].setType(eqtype.fn));
-            }else{
-                var fname=p(be[0]);
-                if(fname.eqtype==eqtype.power){
-                    //console.log("ok");
-                }else if(typeof fname!="string"){
-                    terms.type=eqtype.product;
-                    terms.push(fname);
-                    terms.push(p(be[1]));
-                }else{
-                    terms.push(fname);
-                    terms.push(p(be[1]));
-                }
-            }
-        }
     }else if(e.indexOf("!")!=-1){
         terms.type=eqtype.product;
         var last=0;
@@ -931,6 +975,9 @@ String.prototype.divide=function(o){
     return product;
 };
 Array.prototype.divide=function(o){
+    if(o===1){
+        return this;
+    }
     if(this.type==eqtype.fraction){
         this[1].multiply(p(o));
         return this;
@@ -1220,6 +1267,29 @@ Array.prototype.differentiate=function(times){
     return itg.simplify();
 
 };
+String.prototype.divides=function(o){
+    if(!isNaN(o.eval())){
+        return true;
+    }
+    if(o==this.toString()){
+        return true;
+    }
+    return false;
+
+};
+Number.prototype.divides=function(o){
+    if(!isNaN(o.eval())){
+        return true;
+    }
+    return false;
+
+};
+Array.prototype.divides=function(o){
+    if(!isNaN(o.eval())){
+        return true;
+    }
+    return false;
+};
 Array.prototype.integrate=function(times){
     times=times||1;//double integral etc. (1/2th integral even)
     if(times<0){
@@ -1239,6 +1309,14 @@ Array.prototype.integrate=function(times){
         if(this[0]=="x" && !isNaN(n=this[1].eval())){
             var _n_plus_one=this[1].add(1).simplify();
             itg.push([["x",_n_plus_one].setType(eqtype.power),_n_plus_one].setType(eqtype.fraction)); 
+        }else if(!isNaN(n=this[0].eval())){
+           
+            // ∫  e^(log(a) * u) du
+            //  = e^(log(a) * u)/u
+            var bd=this[1].differentiate().simplify();
+            if((1).divides(bd)){
+                return [["e",[["log",this[0]].setType(eqtype.fn),this[1]].setType(eqtype.product)].setType(eqtype.power),bd].setType(eqtype.fraction);
+            }
         }else{
             throw (MessageStrings.intfail);
         }
@@ -1254,6 +1332,10 @@ Array.prototype.integrate=function(times){
         }else if(this.length==1){
             return this[0].integrate();
             throw (MessageStrings.intfail);
+        }
+    }else if(this.type==eqtype.fn){
+        if(window && window.app && window.app.variables && window.app.variables[this[0]]){
+            return window.app.variables[this[0]].math.dreplace("x",this[1]).integrate();
         }
     }else{
         throw ("fail: int: type: "+this.type);
@@ -1425,9 +1507,12 @@ Array.prototype.inverse=function(){
 };
 function clean(n){
     // de-latexify a string.
+    n=n.replace(/\\?(sin|cos|tan|sec|cosec|csc|cotan|cot)\^([^\{]|\{[^\}]+\})/g,"$1^$2:");
+    n=n.replace(/\\?(sin|cos|tan|sec|cosec|csc|cotan|cot)([^\:\^])/g,"$1:$2");
+    n=n.replace(/\\?(log)_([^\{]|\{[^\}]+\})/g,"$1_$2:");
     for(var i in latexchars){
         if(latexchars.hasOwnProperty(i)){
-            while(i.length>1 && n.indexOf("\\"+i)!=-1){
+            while(n.indexOf("\\"+i)!=-1){
                 n=n.replace("\\"+i,latexchars[i]);
             }
         }
@@ -1459,7 +1544,7 @@ function compile(n){
     }
     eq=p(n);
     
-    var dependence=eq.dependence();
+    var dependence=eq.dependence?eq.dependence():[];
     eq=eq.simplify();
     var funcs=[];
     var yfuncs=[];
@@ -2080,17 +2165,31 @@ var known_derivatives={
     "exp":p("exp(x)"),
     "floor":p("shaw(x)"),
     "u":p("delta(x)"),
-    "sqrt":p("1/(2*sqrt(x))"),
     "asin":p("1/sqrt(1-x^2)"),
     "acos":p("-1/sqrt(1-x^2)"),
     "fact":p("Γ(x+1)*ψ(x+1)"),
     "Gamma":p("Γ(x)*ψ(x)"),
     "Γ":p("Γ(x)*ψ(x)")
 };
+var known_inverses={
+    "sqrt":p("x^2"),
+    "log":p("e^x"),
+    "sin":p("asin(x)"),
+    "cos":p("acos(x)"),
+    "tan":p("atan(x)"),
+    "exp":p("log(x)"),
+    "floor":p("floor(x+1)"),
+    "u":p("(2x-1)^Infinity"),
+    "asin":p("sin(x)"),
+    "acos":p("cos(x)"),
+    "atan":p("tan(x)")
+};
+
 
 //p("(random(x)-0.5)");
-if(p("(1/(1*x))*(2*1*1*1*2/3*3*0.5)").simplify().getString()!="2/x"){
-    alert("Simplifier improvements required");
+var _test_debug_simplifer;
+if((_test_debug_simplifer=p("(1/(1*x))*(2*1*1*1*2/3*3*0.5)").simplify().getString())!="2/x"){
+    alert("Simplifier improvements required: "+_test_debug_simplifer);
 }
 
 //"i" can be changed between one and zero to get the real and imaginary part.
