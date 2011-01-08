@@ -81,6 +81,27 @@ app.png=function(){
 app.console=function(){
     app.ui.console.toggle();
 };
+app.refresh=function(changes){
+    var redraw=false;
+    for(var i=0;i<graphs.length;i++){
+        for(var d=0;d<graphs[i].dependence.length;d++){
+            if(changes.indexOf(graphs[i].dependence[d])!=-1){
+                //app.ui.console.log("auto-update");
+                var c=compile(graphs[i].equation);
+    for(_k in c){
+        if(c.hasOwnProperty(_k)){
+            graphs[i][_k]=c[_k];
+        }
+    }
+                redraw=true;
+            }
+        }
+    
+    }
+    if(redraw){
+        app.ui.refresh();
+    }
+};
 app.remove=function(n){
     if(typeof n !="string"){
         var id = n.id.substring(3);

@@ -555,11 +555,11 @@ function p(inp){
         }
         var dmatch=/^([^\']+)(\'+)$/.exec(be[0]);
         if(dmatch){
-            console.log("found");
+            //console.log("found");
             terms.type=eqtype.fn;
             var b=[dmatch[1],be[1]].setType(eqtype.fn);
             for(var count=dmatch[2].length;count--;count>0){
-                console.log("diff");
+                //console.log("diff");
                 b=["diff",b].setType(eqtype.fn);
             }
             terms=b;
@@ -794,7 +794,46 @@ Number.prototype.search=function(x){
 String.prototype.search=function (x){
     return this==x;
 };
-Array.prototype.search=function (x){
+
+String.prototype.dependence=function (x){
+    var self=this.toString();
+    if(typeof app.variables[self] =="function"){
+        return [self];
+    }
+    return [];
+};
+
+Array.prototype.dependence=function(){
+    
+    var dep=[];
+    if(this.type==eqtype.fn || this.type==eqtype.equality){
+        if(this.type==eqtype.fn && !window[this[0]]){
+            dep.push(this[0]);
+        }
+        if(this[1].dependence){
+        var n=this[1].dependence();
+        for(var b=0;b<n.length;b++){
+            if(dep.indexOf(n[b])==-1){
+                dep.push(n[b]);
+            }
+        }
+        }
+        return dep;
+        
+    }
+    for(var i=0;i<this.length;i++){
+        if(this[i].dependence){
+        var n=this[i].dependence();
+        for(var b=0;b<n.length;b++){
+            if(dep.indexOf(n[b])==-1){
+                dep.push(n[b]);
+            }
+        }
+        }
+    }
+    return dep;
+};
+Array.prototype.search=function(x){
     var found=false;
     for(var i=0;i<this.length;i++){
 //        if(this[i].search){
@@ -1395,6 +1434,10 @@ function clean(n){
   	}
     return n.replace(/\*\(\)/g,"*(1)").replace(/\{ \}/g,"{1}").replace(/_\{([^\}\{]+)\}/g,"_$1").replace(/\}\{/g,")/(").replace(/\}/g,"))").replace(/\{/g,"((").replace(/\\/g,"");;
 }
+function utf8_print(n){
+    // de-latexify a string.
+    return n.replace(/sqrt/g,"√");
+}
 function dirty(n){
     //un clean()
     for(var i in latexchars){
@@ -1414,12 +1457,15 @@ function compile(n){
     if(typeof n=="string"){
         n=clean(n);
     }
-    eq=p(n).simplify();
+    eq=p(n);
+    
+    var dependence=eq.dependence();
+    eq=eq.simplify();
     var funcs=[];
     var yfuncs=[];
     var funcdefs={};
     var vars={};
-    var reliance=[];
+    var changed=[];
     if(eq.type==eqtype.equality){
         if(typeof eq[0]=="string"){
             if(eq[0]=="y"){
@@ -1428,16 +1474,18 @@ function compile(n){
                 yfuncs.push(eq[1]);
             }else if(eq[0]!=""){
                 var varname=eq[0];
-                vars[varname]=eq[1].simplify().eval();
+                vars[varname]=eq[1].eval();
                 if(isNaN(vars[varname])){
                     throw(MessageStrings.nonconstantconstant);
                 }
+                changed.push(varname);
             }
         }else if(eq[0].length==2 && eq[0].type==eqtype.fn && typeof eq[0][0]=="string" && typeof eq[0][1]=="string"){
             var mm=eq[1].dreplace(eq[0][1],"x").simplify();
             var jsc=mm.getString(0,true);
             funcdefs[eq[0][0]]=eval("("+"function(x){return "+jsc+";})");
             funcdefs[eq[0][0]].math=mm;
+            changed.push(eq[0][0]);
             
         }else if(eq[0].search("y")){
             try{
@@ -1480,14 +1528,15 @@ function compile(n){
             }
             builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
             try{
-                var array=[0,ret.f(0)];
-                if(array[1]!=Infinity && array[1]!=-Infinity){
-                    array.text=fn.dreplace(/^x$/,0).simplify().getString(0);
-                    //array.text=jsc;
-                    ret.pt.push(array);
-                }
+                var array=[0,0];
+                array.math=fn.dreplace(/^x$/,0);
+                array[1]=array.math.simplify().getString(0,1,1);
+                ret.pt.push(array);
+                //console.log("ok");
                 //ret.xc.push(funcs[i].inverse().dreplace(/^x$/,0).simplify().simplify());
-            }catch(ex){}
+            }catch(ex){
+                alert(ex);
+            }
     
         }
     }
@@ -1516,8 +1565,11 @@ function compile(n){
     ret.math=funcs;
     ret.funcdefs=funcdefs;
     ret.vars=vars;
-    ret.reliance=reliance;
+    ret.dependence=dependence;
 	ret.plot=eval(builder);
+    if(window && window.app && window.app.refresh){
+        window.app.refresh(changed);
+    }
 	return ret;
 	
 }
@@ -1574,9 +1626,22 @@ Array.prototype.canEval=function(){
             return 4;
         }
         if(this[0]=="log"){
+        
+            var de=log(this[1].eval());
+            if(~~de==de){
+                return true;
+            }else{
+                max=2;
+            }
+        }
+        if(this[0]=="sqrt" && !(this[1]==pow(~~(sqrt(this[1])),2)  ) ){
             max=2;
         }
-        return this[1].canEval();
+        var ret= this[1].canEval();
+        if(!ret || ret==4){
+            return ret;
+        }
+        return max;
     }
     if(this.type==eqtype.fn && app.variables[this[0]] && typeof app.variables[this[0]] =="function" ){
         //Check if it7 can be represented as an absolute value.
@@ -1662,7 +1727,7 @@ Array.prototype.takeDenom=function(){
 };
 
 
-Array.prototype.simplify=function (onlyeval,___retry){
+Array.prototype.simplify=function (onlyeval,___retry,hard){
     //O(d)
     if(this.type==eqtype.equality){
         this[0]=this[0].simplify();
@@ -1674,6 +1739,13 @@ Array.prototype.simplify=function (onlyeval,___retry){
 		return this[0].simplify();
 	}
     
+    if(hard && this.type==eqtype.fn){
+        if(window && window.app && window.app.variables && window.app.variables[this[0]] && typeof window.app.variables[this[0]]=="function"){
+            
+            return window.app.variables[this[0]].math.dreplace(/^x$/,this[1]).simplify();
+        }
+    }
+    
     if(this.canEval && this.canEval()===true){
         return this.eval();
     }
@@ -1684,7 +1756,7 @@ Array.prototype.simplify=function (onlyeval,___retry){
         if(this[i].canEval && this[i].canEval()===true){
             this[i]=this[i].eval();
         }else{
-			this[i]=this[i].simplify(true);
+			this[i]=this[i].simplify(true,0,hard);
 		}
 	}
     if(onlyeval){
