@@ -1,8 +1,8 @@
-## What is it?
-This is a web application that graphs multiple functions, calculates expressions, and graphically solves differential equations.
+Graph.tk is a web application that graphs, solves, simplifies, integrates and differentiates expressions. Currently, it can differentiate most of the functions it knows, but there are many bugs. It cannot expand or factorize properly yet, so it cannot find inverses well, or solve equations.
+It can currently solve already factorized expressions like: 0=(x^2/12-log(2))*(x-1)(x+3).
 
 ### Try it out
-[graph.tk](http://graph.tk/) is the website which this code is used on. This repository is more up to date, but currently has bugs.
+[graph.tk](http://graph.tk/) is the website which this code is used on. [aantthony.github.com](http://aantthony.github.com/) is much more powerful and up to date but currently has a lot of bugs.
 
 ### Requirements:
 * JQuery
@@ -14,15 +14,8 @@ This is a web application that graphs multiple functions, calculates expressions
 * http://www.chromeexperiments.com/detail/graph-plotter/
 * http://graph.tk/about
 
-## Plans
-### Minor Ideas
-* allow things like dy/dx x
-* allow things like &int;x dx
-
-### Big Ideas
+### Things planned
 * 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted.
-* CAS - Not likely to happen, but it would be cool
-
 
 ## License
 This program is free software: you can redistribute it and/or modify
