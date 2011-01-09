@@ -1,5 +1,5 @@
 Graph.tk is a web application that graphs, solves, simplifies, integrates and differentiates expressions. Currently, it can differentiate most of the functions it knows, but there are many bugs. It cannot expand or factorize properly yet, so it cannot find inverses well, or solve equations.
-It can currently solve already factorized expressions like: 0=(x^2/12-log(2))*(x-1)(x+3).
+It can currently solve already factorized expressions like: 0=(x^2 /12-log(2))*(x-1)(x+3).
 
 ### Try it out
 [graph.tk](http://graph.tk/) is the website which this code is used on. [aantthony.github.com](http://aantthony.github.com/) is much more powerful and up to date but currently has a lot of bugs.
