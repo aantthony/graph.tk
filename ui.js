@@ -189,13 +189,14 @@ app.ui=(function(){
                 ctx.strokeStyle=ctx.fillStyle=e.color;
                 e.plot(ctx);
                 if(app.config.fillText && app.config.pt && e.pt){
+                    //TODO: duplicate point checking
                     e.pt.forEach(function(pt){
                         ctx.beginPath();
-                        var _nx=usr.eval(pt[0]);
-                        var _ny=usr.eval(pt[1]);
+                        var _nx=pt[0].eval();
+                        var _ny=pt[1].eval()
                         ctx.arc(scalex*_nx-cx,cy-scaley*_ny,app.config.lineWidth*2,0,Math.PI*2,true);
                         ctx.fill();
-                        ctx.fillText(utf8_print(pt.math.simplify(0,0,1).getString(0)),12+scalex*_nx-cx,cy-scaley*_ny);
+                        ctx.fillText(utf8_print(pt.simplify(0,0,1).getString(0)),12+scalex*_nx-cx,cy-scaley*_ny);
                     });
                 }
             }

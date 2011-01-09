@@ -19,7 +19,7 @@ function track(event) {
 
 
 
-randfuncs = "x^2@3x@2e^{-x}@2x+3@\\lambda=3@e^{-\\lambda*x}@\\left(0.5,0.5\\right)@\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(nx\\right)}n@\\prod_{1}^{4}x-n	m:H_2SO_4@\\left|x^2-4\\right|+2@\\frac1x@x^{-2}@x!@\\ln x@\\sum_{n=1}^{\\infinity}\\frac{x^n}{n}@\\sin x@e^x:\\left[−2,2\\right]@\\tan\\left(x\\right)@\\left(x+2\\right)\\left(x-3\\right)^2	diff\\left(0,2,2x\\right)@\\left(x-2\\right)^2@\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}@\\prod_{n=1}^5\\left(x-n\\right)@\\sum_{n=0}^5n@x^x@\\Gamma\\left(x\\right)@\\frac{x!}{3!-x}@x%3@\\left(x>3\\right)?2x:-3@\\fact\\left(x\\right)@\\frac\\phi x@\\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined@g\\left[0\\right]'\\left(2x\\right)@g\\left[0\\right]\\left(x\\right)+1@\\sqrt x".split("@");
+randfuncs = "y=x^2@y^2=1-x^2@2e^{-x}@2x+3@\\lambda=3@e^{-\\lambda*x}@\\left|x^2-4\\right|+2@\\frac1x@x^{-2}@x!@\\ln x@\\sum_{n=1}^{\\infinity}\\frac{x^n}{n}@\\sin x@e^x:\\left[−2,2\\right]@\\tan\\left(x\\right)@\\left(x+2\\right)\\left(x-3\\right)^2	diff\\left(0,2,2x\\right)@\\left(x-2\\right)^2@\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}@\\prod_{n=1}^5\\left(x-n\\right)@\\sum_{n=0}^5n@x^x@\\Gamma\\left(x\\right)@\\frac{x!}{3!-x}@x%3@\\left(x>3\\right)?2x:-3@\\fact\\left(x\\right)@\\frac\\phi x@\\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined@g\\left[0\\right]'\\left(2x\\right)@g\\left[0\\right]\\left(x\\right)+1@\\sqrt x".split("@");
 
 var randfunc_index = 0;
 
@@ -31,6 +31,186 @@ function randfunc() {
 
 
 
+
+
+function compile(n){
+    var eq;
+    if(typeof n=="string"){
+        n=clean(n);
+    }
+    eq=p(n);
+    
+    var dependence=eq.dependence?eq.dependence():[];
+    eq=eq.simplify();
+    var funcs=[];
+    var yfuncs=[];
+    var funcdefs={};
+    var vars={};
+    var changed=[];
+    if(eq.type==eqtype.equality){
+        if(typeof eq[0]=="string"){
+            if(eq[0]=="y"){
+                funcs.push(eq[1]);
+            }else if(eq[0]=="x"){
+                yfuncs.push(eq[1]);
+            }else if(eq[0]!=""){
+                var varname=eq[0];
+                vars[varname]=eq[1].eval();
+                if(isNaN(vars[varname])){
+                    throw(MessageStrings.nonconstantconstant);
+                }
+                changed.push(varname);
+            }
+        }else if(eq[0].length==2 && eq[0].type==eqtype.fn && typeof eq[0][0]=="string" && typeof eq[0][1]=="string"){
+            var mm=eq[1].dreplace(eq[0][1],"x").simplify();
+            var jsc=mm.getString(0,true);
+            funcdefs[eq[0][0]]=eval("("+"function(x){return "+jsc+";})");
+            funcdefs[eq[0][0]].math=mm;
+            changed.push(eq[0][0]);
+            
+        }else if(eq[0].search("y")){
+            try{
+                funcs.push(eq[0].dreplace(/^y$/g,"x").simplify().inverses().simplify().dreplace(/x/g,eq[1].simplify()));
+            }catch(ex){
+                throw("CAS: "+ex);
+            }
+        }else{
+            throw("CAS: Failure");
+        }
+    }else{
+        if(eq.simplify){
+            eq=eq.simplify();
+        }
+        funcs.push(eq);
+    }
+	//compile
+	var ret={"f":function(){throw("Not a function");}};
+    //If fun is an array of inverses
+    var builder="(function(ctx){";
+    ret.pt=[].setType(eqtype.discretevector);
+    
+    //Singularites
+    
+    //Singularites arise from:
+    // Division by zero
+    //   * Logs
+    // ->± Infinity
+    var first=true;
+    if(funcs.length){
+        for(var i=0;i<funcs.length;i++){
+            
+            var fn=funcs[i].simplify();
+            var jsc=fn.getString(0,true);
+            if(first){
+                ret.f=eval("("+"function(x){return "+jsc+";})");
+                first=false;
+            }
+            
+            
+            
+            
+            var singularities=[];
+            try{
+                var singularities=fn.singularities();
+                singularities.remove(Infinity);
+                singularities.remove(-Infinity);
+            }catch(ex){
+                if(__debug(1,0)){
+                    throw(ex);
+                }
+                //doesn't really matter
+            }
+            builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");";
+            if(0 && singularities.length){
+                
+            
+            }else{
+                builder+="for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
+            }
+            
+            
+            try{
+                var rts=fn.differentiate().simplify().roots();
+                for(var r=0;r<rts.length;r++){
+                    var array=[0,0].setType(eqtype.discretevector);
+                    //console.log(fn.getString());
+                    
+                    array[0]=rts[r];
+                    array[1]=fn.dreplace("x",array[0]).simplify();
+                    
+                    ret.pt.push(array);
+                }
+            }catch(ex){
+                throw(ex);
+            }
+            
+            
+            
+            try{
+                var array=[0,0].setType(eqtype.discretevector);
+                //console.log(fn.getString());
+                array_math=fn.dreplace(/^x$/,0);
+                array[1]=array_math.simplify();
+                //.getString(0,1,1);
+                
+                ret.pt.push(array);
+                
+                try{
+                var rts=fn.roots();
+                for(var rid=0;rid<rts.length;rid++){
+                    var array=[0,0].setType(eqtype.discretevector);
+                    array[0]=rts[rid].simplify();;
+                    //.getString(0,1,1);
+                    ret.pt.push(array);
+                }
+                }catch(ex){
+                    //could not find roots using cas.
+                    
+                    //Use newtons method:
+                
+                }
+                
+                //console.log("ok");
+                //ret.xc.push(funcs[i].inverse().dreplace(/^x$/,0).simplify().simplify());
+            }catch(ex){
+                //alert(ex);
+            }
+    
+        }
+    }
+    
+    if(window && window.app && window.app.variables){
+        for(i in vars){
+            if(vars.hasOwnProperty(i)){
+                if(i=="e" || i=="pi"){
+                    throw(MessageStrings.protected);
+                    return;
+                }
+                window.app.variables[i]=vars[i];
+            }
+        }
+        for(i in funcdefs){
+            if(funcdefs.hasOwnProperty(i)){
+                if(functions.indexOf(i)!=-1){
+                    throw(MessageStrings.protected);
+                    return;
+                }
+                window.app.variables[i]=funcdefs[i];
+            }
+        }
+    }
+    builder+="})";
+    ret.math=funcs;
+    ret.funcdefs=funcdefs;
+    ret.vars=vars;
+    ret.dependence=dependence;
+	ret.plot=eval(builder);
+    if(window && window.app && window.app.refresh){
+        window.app.refresh(changed);
+    }
+	return ret;
+	
+}
 
 
 

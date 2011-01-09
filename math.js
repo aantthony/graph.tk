@@ -305,6 +305,8 @@ function djkb(ia, lvl, x) {
 
 var latexchars={
 'gt':">",
+"left|":"abs:(",
+"right|":")",
 "sin":"sin:",
 "cos":"cos:",
 "tan":"tan:",
@@ -407,6 +409,7 @@ var latexchars={
 };
 
 var obj={};
+//TODO: Maybe discretevector should be removed and assumed that all un .type'ed arrays are a discretevector by default.
 var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15};
 var __debug_parser=0;
 var __debug_mode=1;
@@ -445,6 +448,8 @@ function p(inp){
     while(e.indexOf("xx")!=-1){
         e=e.replace(/xx/g,"x*x");
     }
+    
+    //TODO: -- -> +
     e=e.replace(/∞/g,"Infinity");
     e=e.replace(/\.([^\d]|$)/g,"*$1");
     e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.])/g,"$1*$3");
@@ -584,7 +589,7 @@ function p(inp){
                 var fname=p(be[0]);
                 if(fname.type==eqtype.power){
                     var basefn=fname[0].simplify();
-                    var power=fname[1].simplify().eval();
+                    var power=fname[1].simplify();
                     //if trig
                     if(power<0){
                         //find inverse
@@ -628,6 +633,8 @@ function p(inp){
         terms.push(p(be[1]));
         
     }else if(e.indexOf("!")!=-1){
+    
+        //TODO: Fix this
         terms.type=eqtype.product;
         var last=0;
         for(var i=0;i<e.length;i++){
@@ -1492,26 +1499,76 @@ Array.prototype.factorise=function(){
     return nr;
 };
 String.prototype.roots=function(){
-    if(this=="x"){
+    if(this.toString()=="x"){
         return [0];
     }
     return [];
 };
 Number.prototype.roots=function(){return [];};
 Array.prototype.roots=function(){
-    var rt=[];
-    var inv=this.inverses();
-    inv=[inv];
+    var rt=[].setType(eqtype.discretevector);
+    var self=this.factorise();
+    if(self.type==eqtype.product){
+        //Null factor law
+        
+        for(var i=0;i<self.length;i++){
+            var n=self[i].roots();
+            for(var b=0;b<n.length;b++){
+                if(rt.indexOf(n[b])==-1){
+                    //This doesn't work when one of the factors is infinity
+                    //Now check that none of the other factors are infinity, when
+                    // x is equal to n[b]
+                    var safe=true;
+                    for(var c=0;c<self.length;c++){
+                        if(c!=i){
+                            var rep=self[i].dreplace("x",n[b]).simplify().eval();
+                            //console.log(c);
+                            //console.log(this[i].getString());
+                            //console.log(rep);
+                            if(rep==Infinity || rep==-Infinity){
+                                safe=false;
+                                break;
+                            }
+                    
+                        }
+                    }
+                    if(safe){
+                        rt.push(n[b]);
+                    }
+                }
+            }
+        }
+        return rt;
+    }
+    else if(self.type==eqtype.fraction){
+        rt=self[0].roots();
+        var ort=self[1].singularities();
+        for(var i=0;i<ort.length;i++){
+            if(rt.indexOf(ort[i])==-1){
+                rt.push(ort[i]);
+            }
+        }
+        return rt;
+    }
+    var inv=self.inverses();
+    if(inv && inv.length){
+        inv=[inv];
+    }else{
+        inv=[];
+    }
     for(var i=0;i<inv.length;i++){
         var n=inv[i].dreplace("x",0).simplify();
-        if(inv.indexOf(n)==-1){
+        if(rt.indexOf(n)==-1){
             rt.push(n);
         }
     }
     return rt;
 };
-Number.prototype.singularities=String.prototype.singularities=function(){return [];};
+Number.prototype.singularities=function(){return [];};
+String.prototype.singularities=function(){return [];return [-Infinity,Infinity];};
 Array.prototype.singularities=function(){
+
+// ?? (1/f(x)).roots() instead?
     var ret=[]
     if(this.type==eqtype.fraction){
         var r=this[1].roots();
@@ -1700,163 +1757,6 @@ function dirty(n){
 function p_latex(n){
     return p(clean(n)).simplify();
 }
-function compile(n){
-    var eq;
-    if(typeof n=="string"){
-        n=clean(n);
-    }
-    eq=p(n);
-    
-    var dependence=eq.dependence?eq.dependence():[];
-    eq=eq.simplify();
-    var funcs=[];
-    var yfuncs=[];
-    var funcdefs={};
-    var vars={};
-    var changed=[];
-    if(eq.type==eqtype.equality){
-        if(typeof eq[0]=="string"){
-            if(eq[0]=="y"){
-                funcs.push(eq[1]);
-            }else if(eq[0]=="x"){
-                yfuncs.push(eq[1]);
-            }else if(eq[0]!=""){
-                var varname=eq[0];
-                vars[varname]=eq[1].eval();
-                if(isNaN(vars[varname])){
-                    throw(MessageStrings.nonconstantconstant);
-                }
-                changed.push(varname);
-            }
-        }else if(eq[0].length==2 && eq[0].type==eqtype.fn && typeof eq[0][0]=="string" && typeof eq[0][1]=="string"){
-            var mm=eq[1].dreplace(eq[0][1],"x").simplify();
-            var jsc=mm.getString(0,true);
-            funcdefs[eq[0][0]]=eval("("+"function(x){return "+jsc+";})");
-            funcdefs[eq[0][0]].math=mm;
-            changed.push(eq[0][0]);
-            
-        }else if(eq[0].search("y")){
-            try{
-                funcs.push(eq[0].dreplace(/^y$/g,"x").simplify().inverses().simplify().dreplace(/x/g,eq[1].simplify()));
-            }catch(ex){
-                throw("CAS: "+ex);
-            }
-        }else{
-            throw("CAS: Failure");
-        }
-    }else{
-        if(eq.simplify){
-            eq=eq.simplify();
-        }
-        funcs.push(eq);
-    }
-	//compile
-	var ret={"f":function(){throw("Not a function");}};
-    //If fun is an array of inverses
-    var builder="(function(ctx){";
-    ret.pt=[];
-    
-    //Singularites
-    
-    //Singularites arise from:
-    // Division by zero
-    //   * Logs
-    // ->± Infinity
-    ret.xs=[];
-    ret.ys=[];
-    var first=true;
-    if(funcs.length){
-        for(var i=0;i<funcs.length;i++){
-            
-            var fn=funcs[i].simplify();
-            var jsc=fn.getString(0,true);
-            if(first){
-                ret.f=eval("("+"function(x){return "+jsc+";})");
-                first=false;
-            }
-            
-            
-            
-            
-            
-            try{
-                //find singularites. And make it so the graph skips parts that aren't part of the domain.
-                //It will break at the singualrities points, and resume graphing when it reaches the first number that
-                //isn't NaN
-                
-            }catch(ex){
-                //doesn't really matter
-            }
-            builder+="ctx.beginPath();var x=boundleft;ctx.move(x,"+jsc+");for(var x=boundleft;x<boundright;x+=(boundright-boundleft)/width){"+"ctx.line(x,"+jsc+");}ctx.stroke();";
-            
-            
-            
-            
-            
-            
-            
-            try{
-                var array=[0,0];
-                array.math=fn.dreplace(/^x$/,0);
-                array[1]=array.math.simplify().getString(0,1,1);
-                ret.pt.push(array);
-                
-                try{
-                var rts=fn.roots();
-                for(var rid=0;rid<rts.length;rid++){
-                    var array=[0,0];
-                    array.math=rts[rid];
-                    array[0]=array.math.simplify().getString(0,1,1);
-                    ret.pt.push(array);
-                }
-                }catch(ex){
-                    //could not find roots using cas.
-                    
-                    //Use newtons method:
-                
-                }
-                
-                //console.log("ok");
-                //ret.xc.push(funcs[i].inverse().dreplace(/^x$/,0).simplify().simplify());
-            }catch(ex){
-                //alert(ex);
-            }
-    
-        }
-    }
-    
-    if(window && window.app && window.app.variables){
-        for(i in vars){
-            if(vars.hasOwnProperty(i)){
-                if(i=="e" || i=="pi"){
-                    throw(MessageStrings.protected);
-                    return;
-                }
-                window.app.variables[i]=vars[i];
-            }
-        }
-        for(i in funcdefs){
-            if(funcdefs.hasOwnProperty(i)){
-                if(functions.indexOf(i)!=-1){
-                    throw(MessageStrings.protected);
-                    return;
-                }
-                window.app.variables[i]=funcdefs[i];
-            }
-        }
-    }
-    builder+="})";
-    ret.math=funcs;
-    ret.funcdefs=funcdefs;
-    ret.vars=vars;
-    ret.dependence=dependence;
-	ret.plot=eval(builder);
-    if(window && window.app && window.app.refresh){
-        window.app.refresh(changed);
-    }
-	return ret;
-	
-}
 String.prototype.markup=function(){
     var e=document.createElement("div");
     e.appendChild(document.createTextNode(this.toString()));
@@ -1901,7 +1801,26 @@ Number.prototype.canEval=function(){
 };
 Array.prototype.canEval=function(){
 //TODO: null factor law.
+//TODO: support for surds.
     var max=true;
+    if(this.type==eqtype.power){
+        
+        var reta=this[0].canEval();
+        var retb=this[1].canEval();
+        if(reta ==false || retb==false){
+            return false;
+        }
+        if(reta==4 || retb==4){
+            return 4;
+        }
+        if(this[1].eval()==0.5){
+            return ["sqrt",this[0]].setType(eqtype.fn).canEval();
+        }
+        if(reta==2 || retb==2){
+            return 2;
+        }
+        return true;
+    }
     if(this.type==eqtype.fn && window[this[0]] && typeof window[this[0]] =="function" ){
         //Check if it7 can be represented as an absolute value.
         if(this[0]=="diff"){
@@ -2012,7 +1931,11 @@ Array.prototype.takeDenom=function(){
 
 
 Array.prototype.simplify=function (onlyeval,___retry,hard){
-    //O(d)
+    //NOTE: this code may be destructive to the array.
+    //It should not be destructive to the array, because sometimes
+    //simplifying might not be beneficial for all things.
+    
+    //For the time being, it shall be considered destructive.
     if(this.type==eqtype.equality){
         this[0]=this[0].simplify();
         this[1]=this[1].simplify();
@@ -2226,6 +2149,7 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
         else if(_prod===0){
             //Null factor law.
             //Check for singularites
+            this.push(0);
             return 0;
         }
         
@@ -2241,6 +2165,10 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
         }
         if(_prod!==0){
             this.push(_prod);
+        }
+        if(!this.length){
+            this.push(0);
+            return 0;
         }
     }
     
