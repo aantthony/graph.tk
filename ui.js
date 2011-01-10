@@ -7,7 +7,7 @@ String.prototype.capitalize=function(){return this.charAt(0).toUpperCase()+this.
 
 var app={};
 
-	//Visible region on screen: (Global so things eval'ed in math.js can access)
+	//Visible region on screen: (Global so things eval'ed in compile() can access)
     //Maybe all things should be in one object to avoid stuff like this.
 var boundleft = -10;
 var boundright = 10;
@@ -30,10 +30,13 @@ var messages={
     "showhide":"Show/Hide Graph"
 
 };
-//NO xc until the CAS is ready, or newtons method coded
-app.config={"lineWidth":1.5,"pt":true};
+
+app.config={
+    "lineWidth":1.5,
+    "pt":true
+};
 app.ui=(function(){
-	var allowdrag=true;
+	var allowdrag=true;//Set using block: and unblock: in the postMessage API.
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
     if(/(iPhone)/i.test(navigator.userAgent)){
         if(!navigator.standalone){
@@ -42,17 +45,24 @@ app.ui=(function(){
     }
 	var draw;
 	var ctx;
-	var ptd,con,proto,conin;
-    var logt;
+	var ptd,con,proto,conin,logt,ul;
+    /*
+        ptd: (0,0)
+        con: Console div
+        proto: prototype function li.
+        conin: Mathquill input span for console.
+        logt: console results div.
+    
+    */
 	function resize(){
 	    width=window.innerWidth  || document.body.clientWidth;
-	    height=window.innerHeight|| document.body.clientHeight || 120;//120 for iframe
+	    height=window.innerHeight|| document.body.clientHeight || 120;//120 for iframe default
         logt.style.maxHeight=~~(height-85)+"px";
 	    canvas.width = width;
 	    canvas.height= height;
 	    ctx && draw();
 	}
-	//Mouse coordinates
+	//Current Mouse coordinates
 	var mx = 400;
 	var my = 300;
 
@@ -73,14 +83,15 @@ app.ui=(function(){
 	var _cx = 0;
 	var _cy = 0;
 	
-	//camera
+	//Camera position
 	var cx = (window.innerWidth || document.body.clientWidth  || 640)/-3;
 	var cy = (window.innerHeight|| document.body.clientHeight || 120)*2/3;
 	var cz = 10000;
 
 
 	function draw(){
-	    e = Math.E;//they can be accidentially changed
+        //they can be accidentially changed
+	    e = Math.E;
 	    pi = Math.PI;
 
 	    if (!ctx) {
@@ -128,7 +139,7 @@ app.ui=(function(){
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0
         ctx.shadowBlur = 4;*/
-    
+        //Like overleft, but in units of 4*gridsize
         var dblleft=gridsize*4 * ~~ (boundleft / (4*gridsize)) - 4*gridsize;
         var dblleft=gridsize*4 * ~~ (boundbottom / (4*gridsize)) - 4*gridsize;
         for(var x=dblleft; x<=overright; x+=gridsize*4){
@@ -249,6 +260,8 @@ app.ui=(function(){
 			}
 	
 	    }
+        
+        //Last mouse position
 	    lmx = mx;
 	    lmy = my;
 	};
@@ -502,9 +515,6 @@ app.ui=(function(){
 
 	}
 	
-	var ul;
-	
-	
 	var ui={
     "remove":function(n){
         if(!ul){
@@ -542,7 +552,7 @@ app.ui=(function(){
         li.addEventListener("mouseup",function(e){
 			$(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
 			$(inputbox).trigger({ type: "keydown", which: 39 });
-			inputbox.getElementsByTagName("textarea")[0].focus();
+            $(inputbox).focus();
 		},false);
         
 		$(inputbox).mathquill("editable");
@@ -590,7 +600,7 @@ app.ui=(function(){
         };
 		if(!n.auto){
             $(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
-			inputbox.getElementsByTagName("textarea")[0].focus();
+			$(inputbox).focus();
         }
 		
         warn_.firstChild.nodeValue="";
@@ -635,6 +645,9 @@ app.ui=(function(){
 			ctx=canvas.getContext("2d");
 		}else{
 			if(!ctx && G_vmlCanvasManager){
+                //Explorer canvas. Currently doesn't work because
+                //the parser is too much for ie. But we will
+                //try to fix that in a parser rewrite.
                 G_vmlCanvasManager.initElement(el);
                 if(canvas.getContext){
                     ctx = canvas.getContext("2d");
@@ -649,43 +662,42 @@ app.ui=(function(){
 		if(!app.config.fillText){
             app.config.fillText=ctx.fillText?true:false;
         }
-		//TODO: css
 		canvas.style.background="white";
 		canvas.style.cursor = "default";
 		canvas.style.position="fixed";
 		
-		
 		ptd=document.createElement("div");
-        if(!fullscreen){
-            ptd.style.display="none";
-        }
-		ptd.id="ptd";
+        ptd.id="ptd";
 		ptd.className="monospace";
 		ptd.appendChild(document.createTextNode("(0,0)"));
 		document.body.appendChild(ptd);
+        if(!fullscreen){
+            ptd.style.display="none";
+        }
+		
 		con=document.createElement("div");
 		con.id="con";
 		con.className="overlay";
 		con.style.display="none";
+        
         logt=document.createElement("div");
         logt.id="logt";
         logt.className="monospace";
-        var conin_=document.createElement("span");
-        
-        conin_.id="conin";
-        
         con.appendChild(logt);
+        
+        var conin_=document.createElement("span");
+        conin_.id="conin";
         con.appendChild(conin_);
+        
+        
 		document.body.appendChild(con);
-		//Todo, change the console to look like kingsql.
+        
 		conin=document.getElementById("conin");
         $(conin).mathquill("editable");
 		$(conin).mathquill("redraw");
         
 		conin.addEventListener("keydown",function(event){
 			if(event.which==13){
-                
-                    //logt.appendChild((p_latex($(conin).mathquill("latex")).markup()));
                 try{
                 var needsredraw=false;
                 conin.last=$(conin).mathquill("latex");
@@ -795,14 +807,13 @@ app.ui=(function(){
 		proto = _proto.cloneNode(true);
 		proto.removeAttribute("id");
 
-
-		window.onresize=resize;
 		canvas.onmousedown=mousedown;
 		
 		document.body.addEventListener("mouseup",function(){if(!allowdrag){return;}drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
 		document.body.addEventListener("mousemove",mousemove,false);
 		   	   window.addEventListener("mousewheel",mousewheel,false);
                window.addEventListener("DOMMouseScroll",mousewheel,false);
+               window.addEventListener("resize",resize,false);
         con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
 		document.body.removeChild(document.body.firstChild);
 		//we may have to implement scaling if browsers don't work properly
@@ -846,8 +857,9 @@ app.ui=(function(){
 	};//end ui
 	
 
-	
+	//Is console visible:
 	var _console=false;
+    
 	ui.console={"show":function(){
         con.style.display="block";
         _console=true;

@@ -8,8 +8,9 @@ return usr;
 
 var graphs=[];
 
-
 function track(event) {
+    //Google Analytics. If anyone wants access to the
+    //data, I can give your google account permssion.
 	if (window.pageTracker) {
 		setTimeout(function () {
 			pageTracker._trackEvent("Graph", event)
@@ -27,10 +28,6 @@ var randfunc_index = 0;
 function randfunc() {
 	return randfuncs[(randfunc_index++) % randfuncs.length];
 }
-
-
-
-
 
 
 function compile(n){
@@ -233,18 +230,12 @@ var graph=function(n){
             t[i]=c[i];
         }
     }
-    /*t.f=c.f;
-    t.xc=c.xc;
-    t.yc=c.yc;
-    t.xs=c.xs;
-    t.ys=c.ys;
-    t.math=c.math;
-    t.plot=c.plot;*/
     
 	t.equation=latex;
+    
 	t.gid=random_hash();
 	t.color=app.ui.colors.free.pop();
-	t.auto=auto;
+	if(auto){t.auto=true;}
 	t.node=app.ui.add(t);
 	return t;
 };
