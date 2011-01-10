@@ -1,5 +1,10 @@
 #!/bin/bash
+#based on
+#https://github.com/laughinghan/mathquill/blob/d7581a4b9c173876db40daaaef8673ccefb32ab6/publish.sh
+#Thank you :)
+
 make
+VERSION_CODE=$(git rev-parse --short HEAD)
 git stash
 mkdir -p ./build
 cp about/*.html ./build/about/
@@ -23,7 +28,7 @@ git add -f *.ico
 git add -f manifest.manifest
 git add -f *.gif
 echo "added files"
-git commit -a -m "publish new version"
+git commit -a -m "publish ${VERSION_CODE}"
 git push
 git checkout $branch
 git stash pop
