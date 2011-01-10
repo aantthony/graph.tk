@@ -5,7 +5,7 @@
 
 make
 VERSION_CODE=$(git rev-parse --short HEAD)
-#git stash
+git stash
 rm -rf build
 mkdir -p ./build/
 mkdir -p ./build/min
@@ -37,4 +37,4 @@ echo "added files"
 git commit -a -m "publish ${VERSION_CODE}"
 git push
 git checkout $branch
-#git stash pop
+git stash pop
