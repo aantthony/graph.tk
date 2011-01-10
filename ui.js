@@ -260,7 +260,7 @@ app.ui=(function(){
 	    scaleconst = 0.005;
 	}
 	if (/Firefox/.test(navigator.userAgent)) {
-	    scaleconst = 0.01;
+	    scaleconst = 0.012;
 	}
 	if (/Opera/.test(navigator.userAgent)) {
 	    scaleconst = 0.03
@@ -268,8 +268,8 @@ app.ui=(function(){
 	if (!/Mac OS X/.test(navigator.userAgent)) {
 	    scaleconst = 0.1
 	}
-    
 	function mousewheel(e){
+        
         if(!allowdrag){return;}
 		e = e || window.event;
 	    if (e.x !== undefined) {
@@ -279,10 +279,11 @@ app.ui=(function(){
 	        mx = e.pageX;
 	        my = e.pageY;
 	    }
-		var ex=Math.exp(e.wheelDeltaY*scaleconst);
+        
+        var delta=(e.wheelDeltaY!=undefined)?e.wheelDeltaY:-e.detail;
+		var ex=Math.exp(delta*scaleconst);
 	    scalex*=ex;
 	    scaley*=ex;
-		
 		/*
 		
 			nscalex/scalex=exp
@@ -302,11 +303,14 @@ app.ui=(function(){
 		var dx=mx+cx;
 		var dy=my-cy;
 		if((dx*dx+dy*dy)>1000){
+            //Move camera towards the point if
+            //the squared distance to the origin is more than 1000.
 			cx=ex*(mx+cx)-mx;
 			cy+=my+ex*(cy-my)-cy;
 		}
 	    draw();
         
+        //Prevent browser from scrolling page
         e.preventDefault();
         return false;
 	}
@@ -317,7 +321,6 @@ app.ui=(function(){
 		if(webkit){
 			canvas.style["-webkit-transform"]="translate(0px,0px)";
 		}else{
-			
 		    canvas.style.left = _cx + "px";
 		    canvas.style.top = _cy + "px";
 		}
@@ -630,7 +633,8 @@ app.ui=(function(){
 		document.body.appendChild(canvas);
 		if(canvas.getContext){
 			ctx=canvas.getContext("2d");
-            if(!ctx && G_vmlCanvasManager){
+		}else{
+			if(!ctx && G_vmlCanvasManager){
                 G_vmlCanvasManager.initElement(el);
                 if(canvas.getContext){
                     ctx = canvas.getContext("2d");
@@ -639,14 +643,12 @@ app.ui=(function(){
                 }
             }else if(!ctx){
                 alert(messages.badbrowser);
+                return;
             }
-            if(!app.config.fillText){
-                app.config.fillText=ctx.fillText?true:false;
-            }
-		}else{
-			alert("Failed!");
 		}
-		
+		if(!app.config.fillText){
+            app.config.fillText=ctx.fillText?true:false;
+        }
 		//TODO: css
 		canvas.style.background="white";
 		canvas.style.cursor = "default";
@@ -800,10 +802,14 @@ app.ui=(function(){
 		document.body.addEventListener("mouseup",function(){if(!allowdrag){return;}drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
 		document.body.addEventListener("mousemove",mousemove,false);
 		   	   window.addEventListener("mousewheel",mousewheel,false);
+               window.addEventListener("DOMMouseScroll",mousewheel,false);
         con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
 		document.body.removeChild(document.body.firstChild);
 		//we may have to implement scaling if browsers don't work properly
 		ctx.move=function(px,py,pz){
+            if(isNaN(px) || isNaN(py) || isNaN(pz)){
+                //return;
+            }
 			return ctx.moveTo(scalex*px-cx,cy-scaley*py);
 			return;
 			if (!isNaN(py)) {
@@ -818,6 +824,9 @@ app.ui=(function(){
 			}
 		};
 		ctx.line=function(px,py,pz){
+            if(isNaN(px) || isNaN(py) || isNaN(pz)){
+                //return;
+            }
 			return ctx.lineTo(scalex*px-cx,cy-scaley*py);
 			ctx.lineTo(scalex*px-cx, cy-scaley*py);
 			return;
