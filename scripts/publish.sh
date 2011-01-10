@@ -22,6 +22,7 @@ git add about/
 git add *.ico
 git add manifest.manifest
 git add *.gif
+echo "added files"
 git commit -a -m "publish new version"
 git push
 git checkout $branch
