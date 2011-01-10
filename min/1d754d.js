@@ -4729,7 +4729,7 @@ var boundtop = 10;
 var boundbottom = -10;
 var overleft,overtop,overbottom,overright;
 var width,height;
-
+var test=1;
 
 var messages={
     "standalone":"To run this app in fullscreen mode, add it to your home screen.",
@@ -5918,7 +5918,7 @@ var graph=function(n){
 };
 
 app.variables={};
-app.version="8c4e8fd";
+app.version="0039993";
 app.add=function(n){
 	graphs.push(new graph(n));
     app.ui.refresh();
