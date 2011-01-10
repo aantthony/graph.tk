@@ -1,5 +1,0 @@
-overview
-help
-develop
-contact
-privacy
