@@ -32,6 +32,7 @@ git add -f about/
 git add -f *.ico
 git add -f manifest.manifest
 git add -f *.gif
+git add -f min
 echo "added files"
 git commit -a -m "publish ${VERSION_CODE}"
 git push
