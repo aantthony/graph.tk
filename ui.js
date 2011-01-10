@@ -13,6 +13,7 @@ var boundleft = -10;
 var boundright = 10;
 var boundtop = 10;
 var boundbottom = -10;
+var overleft,overtop,overbottom,overright;
 var width,height;
 
 
@@ -109,10 +110,10 @@ app.ui=(function(){
 
 
 	    gridsize = pow(2, 6 - Math.round(log(scalex) / log(2)));
-	    var overleft = gridsize * ~~ (boundleft / gridsize) - gridsize;
-	    var overright = gridsize * ~~ (boundright / gridsize) + gridsize;
-	    var overtop = gridsize * ~~ (boundtop / gridsize) + gridsize;
-	    var overbottom = gridsize * ~~ (boundbottom / gridsize) - gridsize;
+	    overleft = gridsize * ~~ (boundleft / gridsize) - gridsize;
+	    overright = gridsize * ~~ (boundright / gridsize) + gridsize;
+	    overtop = gridsize * ~~ (boundtop / gridsize) + gridsize;
+	    overbottom = gridsize * ~~ (boundbottom / gridsize) - gridsize;
 
 	    //Draw grid lines
 	
@@ -204,10 +205,18 @@ app.ui=(function(){
                     e.pt.forEach(function(pt){
                         ctx.beginPath();
                         var _nx=pt[0].eval();
-                        var _ny=pt[1].eval()
-                        ctx.arc(scalex*_nx-cx,cy-scaley*_ny,app.config.lineWidth*2,0,Math.PI*2,true);
-                        ctx.fill();
-                        ctx.fillText(utf8_print(pt.simplify(0,0,1).getString(0)),12+scalex*_nx-cx,cy-scaley*_ny);
+                        var _ny=pt[1].eval();
+                        
+                        //Stupid Firefox!
+                        if(!isNaN(_nx) && !isNaN(_ny) && _ny<overtop && _ny>overbottom && _nx<overright && _nx>overleft){
+                            try{
+                                ctx.arc(scalex*_nx-cx,cy-scaley*_ny,app.config.lineWidth*2,0,Math.PI*2,true);
+                                ctx.fill();
+                                ctx.fillText(utf8_print(pt.simplify(0,0,1).getString(0)),12+scalex*_nx-cx,cy-scaley*_ny);
+                            }catch(ex){
+                                app.ui.console.warn("Could not plot dot: ("+_nx+","+_ny+")");
+                            }
+                        }
                     });
                 }
             }
@@ -817,9 +826,30 @@ app.ui=(function(){
         con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
 		document.body.removeChild(document.body.firstChild);
 		//we may have to implement scaling if browsers don't work properly
+        if(webkit){
 		ctx.move=function(px,py,pz){
-            if(isNaN(px) || isNaN(py) || isNaN(pz)){
-                //return;
+			return ctx.moveTo(scalex*px-cx,cy-scaley*py);
+		};
+        
+		ctx.line=function(px,py,pz){
+			return ctx.lineTo(scalex*px-cx,cy-scaley*py);
+		};
+        }else{
+            ctx.move=function(px,py,pz){
+            if(isNaN(px) || isNaN(py)){
+                return;
+            }
+            if(px>overright){
+                px=overright;
+            }
+            if(px<overleft){
+                px=overleft;
+            }
+            if(py>overtop){
+                py=overtop;
+            }
+            if(py<overbottom){
+                py=overbottom;
             }
 			return ctx.moveTo(scalex*px-cx,cy-scaley*py);
 			return;
@@ -834,9 +864,22 @@ app.ui=(function(){
 				ctx.moveTo(scalex*(px+cx), scaley*(-cy-py));
 			}
 		};
+        
 		ctx.line=function(px,py,pz){
-            if(isNaN(px) || isNaN(py) || isNaN(pz)){
-                //return;
+            if(isNaN(px) || isNaN(py)){
+                return;
+            }
+            if(px>overright){
+                px=overright;
+            }
+            if(px<overleft){
+                px=overleft;
+            }
+            if(py>overtop){
+                py=overtop;
+            }
+            if(py<overbottom){
+                py=overbottom;
             }
 			return ctx.lineTo(scalex*px-cx,cy-scaley*py);
 			ctx.lineTo(scalex*px-cx, cy-scaley*py);
@@ -852,6 +895,10 @@ app.ui=(function(){
 				ctx.lineTo(scalex*(px-cx), scaley*(cy-py));
 			}
 		};
+        
+        
+        
+        }
 		resize();
 	}//end init();
 	};//end ui
