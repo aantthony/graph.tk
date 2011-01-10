@@ -16,6 +16,12 @@ git checkout gh-pages
 rm index.html
 mv ./build/release.html ./index.html
 cp ./build/* ./
+git add index.html
+git add *.png
+git add about/
+git add *.ico
+git add manifest.manifest
+git add *.gif
 git commit -a -m "publish new version"
 git push
 git checkout $branch
