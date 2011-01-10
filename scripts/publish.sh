@@ -6,15 +6,21 @@
 make
 VERSION_CODE=$(git rev-parse --short HEAD)
 #git stash
-mkdir -p ./build
+rm -rf build
+mkdir -p ./build/
+mkdir -p ./build/min
+mkdir -p ./build/about
+mkdir -p ./build/about/resources
 cp about/*.html ./build/about/
-cp about/resources ./build/about/
+cp about/resources/* ./build/about/resources/
 cp release.html ./build/index.html
+
+cp min/* ./build/min/
 cp *.png ./build/
 cp *.ico ./build/
 cp *.gif ./build/
 cp manifest.manifest ./build/
-cp -r ./graph.tk/min ./build/
+cp -r ./min ./build/
 
 branch=`git branch | grep '\*' | sed 's/\* *//'`
 git checkout gh-pages
