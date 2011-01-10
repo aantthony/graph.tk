@@ -2,7 +2,7 @@
 #based on
 #https://github.com/laughinghan/mathquill/blob/d7581a4b9c173876db40daaaef8673ccefb32ab6/publish.sh
 #Thank you :)
-mv index.html debug.html
+cp index.html debug.html
 make
 VERSION_CODE=$(git rev-parse --short HEAD)
 git stash
