@@ -5,7 +5,7 @@
 
 make
 VERSION_CODE=$(git rev-parse --short HEAD)
-git stash
+#git stash
 mkdir -p ./build
 cp about/*.html ./build/about/
 cp about/resources ./build/about/
@@ -31,4 +31,4 @@ echo "added files"
 git commit -a -m "publish ${VERSION_CODE}"
 git push
 git checkout $branch
-git stash pop
+#git stash pop
