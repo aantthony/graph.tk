@@ -15,7 +15,7 @@ var boundtop = 10;
 var boundbottom = -10;
 var overleft,overtop,overbottom,overright;
 var width,height;
-
+var test=1;
 
 var messages={
     "standalone":"To run this app in fullscreen mode, add it to your home screen.",

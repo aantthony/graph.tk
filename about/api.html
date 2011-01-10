@@ -32,12 +32,12 @@
 
 <h2>Poweful Method</h2>
 <p>Use the following code to generate a graph.</p>
-<code style="white-space:pre"><b>&lt;iframe</b> <i>src=</i><span class="u">"http://aantthony.github.com/"</span> <i>id=</i><span class="u">"my_graph"</span> <i>style=</i><span class="u">"width:500px;height:400px"</span><b>&gt;
+<code style="white-space:pre"><b>&lt;iframe</b> <i>src=</i><span class="u">"http://graph.tk/"</span> <i>id=</i><span class="u">"my_graph"</span> <i>style=</i><span class="u">"width:500px;height:400px"</span><b>&gt;
 &lt;/iframe&gt;</b><br /><b>&lt;script&gt;</b><br />var my_graph=document.getElementById(<strong>"my_graph"</strong>);
                     
 my_graph.onload=<span class="k">function</span>(){
     <span class="k">function</span> g(m){
-        my_graph.contentWindow.postMessage(m,<span class="s">"http://aantthony.github.com"</span>);
+        my_graph.contentWindow.postMessage(m,<span class="s">"http://graph.tk"</span>);
     };
     g(<span class="s">"add:x^3"</span>);
 <span class="c">//  g("block"); - Block movement by user</span>
@@ -47,14 +47,14 @@ my_graph.onload=<span class="k">function</span>(){
 <span class="c">//Methods include: add, block, empty, scale, translate, center</span>
 <b>&lt;/script&gt;</b></code>
 <div>
-<iframe src="http://aantthony.github.com/" id="my_graph" style="width:500px;height:400px">
+<iframe src="http://graph.tk/" id="my_graph" style="width:500px;height:400px">
 </iframe>
 <script>
 var my_graph=document.getElementById("my_graph");
                     
 my_graph.onload=function(){
     function g(m){
-        my_graph.contentWindow.postMessage(m,"http://aantthony.github.com");
+        my_graph.contentWindow.postMessage(m,"http://graph.tk");
     };
     g("add:x^3");
 //  g("block"); - Block movement by user
