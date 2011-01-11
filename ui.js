@@ -799,7 +799,7 @@ app.ui=(function(){
         buttons.appendChild(newfuncbtn);
         
         var alink=document.createElement("a");
-        alink.href="/about/";
+        alink.href="about/";
         alink.target="_blank";
         
         var newfuncbtn=document.createElement("input");
