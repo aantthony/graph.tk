@@ -251,7 +251,7 @@ app.ui=(function(){
 
 	var drawwhiledrag_c=0;
 	function mousedown(e) {
-        if(!allowdrag){return;}
+        if(e.button != 0 || !allowdrag){return;}
 	    lmx=mx=e.x || e.pageX;
 	    lmy=my=e.y || e.pageY;
 	    drag = true;
