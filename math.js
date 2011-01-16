@@ -1,7 +1,6 @@
 /*
 
 
-    Copyright (c) Anthony, Graph.tk and its Collaborators 2010
     http://graph.tk/
     
     graph.tk[/at/ ]gmail[ /dot/ ]com
@@ -240,9 +239,7 @@ function Gamma(x) {
 function psi(x) {
     return random();
 }
-Γ=Gamma;
-ψ=psi;
-π=pi;
+
 function fact(ff) {
     if (ff === 0 || ff == 1) {
         return 1;
@@ -2178,6 +2175,83 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
     }
 	return z;
 };
+
+String.prototype.getLatex=function(){
+    return this.toString();
+}
+Number.prototype.getLatex=function(){
+    return Number(this);
+}
+Array.prototype.getLatex=function(braces){
+    var s=braces?"(":"";
+    var self=this;
+    var _first=true;
+    var endchar="";
+    var afterme="";
+    var second=true;
+    //this.forEach(function(e){
+    for(var i=0;i<this.length;i++){
+        var e=this[i];
+        if(!_first){
+            second=false;
+        }
+        if(_first){
+            if(self.type==eqtype.fraction){
+                s+="\\frac{";
+                endchar="}";
+            }
+            if(self.type==eqtype.discretevector){
+                s+="[";
+                endchar="]";
+            }
+            else if(self.type==eqtype.fn){
+                if(typeof e !="string" && typeof e!="function"){
+                    throw(messages.fnnamenotstring);
+                    return "ERROR";
+                }
+                if(functions.indexOf(e)==-1){
+                    var _found=false;
+                    if(window && window.app && window.app.variables && window.app.variables[e] && typeof window.app.variables[e]=="function"){
+                        _found=true;
+                    }
+                    if(!_found){
+                        throw("Unknown function: "+e);
+                        return "ERROR";
+                    }
+                }
+                afterme="(";
+                endchar=")";
+            }
+            _first=false;
+        }else if(self.type==eqtype.sum){
+            s+="+";
+        }else if(self.type==eqtype.product){
+            s+="\\cdot ";
+        }else if(self.type==eqtype.equality){
+            s+="=";
+        }else if(self.type==eqtype.power){
+            s+="^";
+        }else if(self.type==eqtype.fraction){
+            s+="}{";
+        }else if(self.type==eqtype.fn){
+            if(second){
+                s+=",";
+            }
+        }else{
+            s+=",";
+        }
+        s+=e.getLatex(0);
+        
+        s+=afterme;
+        afterme="";
+    }
+    s+=endchar;
+    endchar="";
+    if(braces){
+        s+=")";
+    }
+    return s;
+};
 String.prototype.getString=function(__ignore,javascript){
     if(javascript && window.app){
         var self=this.toString()
@@ -2278,7 +2352,7 @@ Array.prototype.getString=function(braces,javascript){
     if(braces){
         s+=")";
     }
-    return (s.replace(/(\-\-)+/g,"+").replace(/\+\++/g,"+").replace(/\-\+/g,"-").replace(/\+\-/g,"-"));
+    return s;
 };
 
 
