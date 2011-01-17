@@ -22,6 +22,7 @@ It can currently solve already factorized expressions like: 0=(x^2 /12-log(2))*(
 * Cannot solve x+x=0, but can solve 2x=0.
 
 ### Things planned
+* Access external data? csv, fft, images, stock market data
 * 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted.
 
 ## License
