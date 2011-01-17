@@ -20,7 +20,7 @@ cd ../../
 
 TIME_CODE=$(echo "<?php echo md5(time()); ?>" | php)
 TIME_CODE=${TIME_CODE:0:6}
-
+TIME_CODE=${VERSION_CODE}
 #combine the two into min.js
 #Note: order is important (I think)
 
