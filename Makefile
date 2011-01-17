@@ -1,5 +1,5 @@
 graph: www
-distribution: commit push publsh
+distribution: commit push publish
 www:
 	@chmod +x ./scripts/compile.sh
 	@./scripts/compile.sh
