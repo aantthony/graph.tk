@@ -5,7 +5,7 @@ min
 tmp
 # OS generated files #
 ######################
-.DS_Store?
+.DS_Store
 thumbs.db
 Icon?
 Thumbs.db
