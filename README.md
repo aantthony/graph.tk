@@ -14,6 +14,13 @@ It can currently solve already factorized expressions like: 0=(x^2 /12-log(2))*(
 * http://www.chromeexperiments.com/detail/graph-plotter/
 * http://graph.tk/about
 
+### Stats
+* 23,559 functions graphed.
+
+### Known Bugs
+* Some of the derivitives it finds are incorrect.
+* Cannot solve x+x=0, but can solve 2x=0.
+
 ### Things planned
 * 3D! the whole graph thing rotates in an animation to become a flat plane, and then the 3d function is plotted.
 
