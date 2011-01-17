@@ -2254,7 +2254,7 @@ Array.prototype.getLatex=function(braces){
 };
 String.prototype.getString=function(__ignore,javascript){
     if(javascript && window.app){
-        var self=this.toString()
+        var self=dirty(this.toString());
         if(self=="x"){
             return self;
         }

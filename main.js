@@ -20,7 +20,7 @@ function track(event) {
 
 
 
-randfuncs = "y=x^2@y^2=1-x^2@2e^{-x}@2x+3@\\lambda=3@e^{-\\lambda*x}@\\left|x^2-4\\right|+2@\\frac1x@x^{-2}@x!@\\ln x@\\sum_{n=1}^{\\infinity}\\frac{x^n}{n}@\\sin x@e^x:\\left[−2,2\\right]@\\tan\\left(x\\right)@\\left(x+2\\right)\\left(x-3\\right)^2	diff\\left(0,2,2x\\right)@\\left(x-2\\right)^2@\\sum_{n=1}^{\\infinity}\\frac{\\sin\\left(\\left(2n−1\\right)x\\right)}{2n−1}@\\prod_{n=1}^5\\left(x-n\\right)@\\sum_{n=0}^5n@x^x@\\Gamma\\left(x\\right)@\\frac{x!}{3!-x}@x%3@\\left(x>3\\right)?2x:-3@\\fact\\left(x\\right)@\\frac\\phi x@\\left(x>=0\\right)?m_e*G/\\left(r_e+100000x\\right)^2:undefined@g\\left[0\\right]'\\left(2x\\right)@g\\left[0\\right]\\left(x\\right)+1@\\sqrt x".split("@");
+randfuncs = "y=x^2@y^2=1-x^2@2e^{-x}@2x+3@\\frac{d}{dx}\\left(\\frac{1}{x}\\right)@\\int x.dx@\\frac{d}{dx}\\left(sin\\left(x\\right)\\right)@\\lambda=3@e^{-\\lambda\\cdot x}@\\left|x^2-4\\right|+2@\\frac1x@x^{-2}@x!@\\ln x@\\sum_{n=1}^{\\infinity}\\frac{x^n}{n}@\\sin x@\\tan\\left(x\\right)@\\left(x-2\\right)^2@\\Gamma\\left(x\\right)@\\sqrt x".split("@");
 
 var randfunc_index = 0;
 
@@ -51,7 +51,7 @@ function compile(n){
             }else if(eq[0]=="x"){
                 yfuncs.push(eq[1]);
             }else if(eq[0]!=""){
-                var varname=eq[0];
+                var varname=dirty(eq[0]);
                 vars[varname]=eq[1].eval();
                 if(isNaN(vars[varname])){
                     throw(MessageStrings.nonconstantconstant);
@@ -138,10 +138,10 @@ function compile(n){
                     ret.pt.push(array);
                 }
             }catch(ex){
-                throw(ex);
+                if(__debug(0 && 1,0)){
+                    throw(ex);
+                }
             }
-            
-            
             
             try{
                 var array=[0,0].setType(eqtype.discretevector);
