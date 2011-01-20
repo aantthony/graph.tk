@@ -2243,7 +2243,7 @@ Array.prototype.getLatex=function(braces){
         }
         if(self.type==eqtype.power){
             if(typeof e == "string"){
-                var _s=e.getLatex(1);
+                var _s=e.getLatex(0);
                 if(_s.length>1){
                     s+="{";
                     s+=_s;
@@ -2252,7 +2252,9 @@ Array.prototype.getLatex=function(braces){
                     s+=_s;
                 }
             }else{
-                s+=e.getLatex(1);
+                s+="{";
+                s+=e.getLatex(0);
+                s+="}";
             }
         }else if(e.type==eqtype.fn || e.type==eqtype.fraction || e.type==eqtype.product){
             s+=e.getLatex(0);
