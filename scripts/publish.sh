@@ -25,7 +25,7 @@ cp -r ./min ./build/
 branch=`git branch | grep '\*' | sed 's/\* *//'`
 git checkout gh-pages
 rm index.html
-cp ./build/* ./
+cp -r ./build/ ./
 git add -f index.html
 git add -f *.png
 git add -f about/
