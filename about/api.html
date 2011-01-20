@@ -29,17 +29,21 @@
 
 
 
-
+<p>As soon as the next version is ready (very soon hopefully), <a href="http://graph.tk/">http://graph.tk/</a> will by replaced with the beta version currently available at <a href="http://aantthony.github.com/graph.tk/">http://aantthony.github.com/graph.tk/</a>. The "Powerful Method" API described below is for new version. Sorry for any inconveniences.</p>
 <h2>Poweful Method</h2>
 <p>Use the following code to generate a graph.</p>
 <code style="white-space:pre"><b>&lt;iframe</b> <i>src=</i><span class="u">"http://graph.tk/"</span> <i>id=</i><span class="u">"my_graph"</span> <i>style=</i><span class="u">"width:500px;height:400px"</span><b>&gt;
 &lt;/iframe&gt;</b><br /><b>&lt;script&gt;</b><br />var my_graph=document.getElementById(<strong>"my_graph"</strong>);
-                    
+
+<span class="c">// To make this work at the moment, you will need to change the links from
+// http://graph.tk to http://url3.tk/graph.tk</span>
+
 my_graph.onload=<span class="k">function</span>(){
     <span class="k">function</span> g(m){
         my_graph.contentWindow.postMessage(m,<span class="s">"http://graph.tk"</span>);
     };
-    g(<span class="s">"add:x^3"</span>);
+    g(<span class="s">"add:x^3+1"</span>);
+    g(<span class="s">"add:e^x"</span>);
 <span class="c">//  g("block"); - Block movement by user</span>
     g(<span class="s">"center:0,0"</span>);
 }
@@ -47,16 +51,17 @@ my_graph.onload=<span class="k">function</span>(){
 <span class="c">//Methods include: add, block, empty, scale, translate, center</span>
 <b>&lt;/script&gt;</b></code>
 <div>
-<iframe src="http://graph.tk/" id="my_graph" style="width:500px;height:400px">
+<iframe src="http://url3.tk/graph.tk/" id="my_graph" style="width:500px;height:400px">
 </iframe>
 <script>
 var my_graph=document.getElementById("my_graph");
                     
 my_graph.onload=function(){
     function g(m){
-        my_graph.contentWindow.postMessage(m,"http://graph.tk");
+        my_graph.contentWindow.postMessage(m,"http://url3.tk/graph.tk");
     };
-    g("add:x^3");
+    g("add:x^3+1");
+    g("add:e^x");
 //  g("block"); - Block movement by user
     g("center:0,0");
 }
@@ -68,7 +73,7 @@ my_graph.onload=function(){
 <h2>Old Method</h2>
 <p>Specify the equations via use of the url hash. An example: <a href="http://graph.tk/#y=x^2">http://graph.tk/#y=x^2</a></p>
 <code> <b>&lt;iframe</b> <i>src=</i><span class="u">"http://graph.tk/#y=sin(x)"</span><b>&gt;&lt;/iframe&gt;</b></code>
-<div><iframe src="http://graph.tk/#y=x^2"></iframe></div>
+<div><iframe src="http://url3.tk/graph.tk/#y=sin(x)"></iframe></div>
 
 
 <a href="/about/">&laquo; about graph.tk</a>
