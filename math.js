@@ -2183,6 +2183,7 @@ Number.prototype.getLatex=function(){
     return Number(this);
 }
 Array.prototype.getLatex=function(braces){
+
     var s=braces?"(":"";
     var self=this;
     var _first=true;
@@ -2190,8 +2191,8 @@ Array.prototype.getLatex=function(braces){
     var afterme="";
     var second=true;
     //this.forEach(function(e){
-    for(var i=0;i<this.length;i++){
-        var e=this[i];
+    for(var i=0;i<self.length;i++){
+        var e=self[i];
         if(!_first){
             second=false;
         }
@@ -2240,8 +2241,24 @@ Array.prototype.getLatex=function(braces){
         }else{
             s+=",";
         }
-        s+=e.getLatex(0);
-        
+        if(self.type==eqtype.power){
+            if(typeof e == "string"){
+                var _s=e.getLatex(1);
+                if(_s.length>1){
+                    s+="{";
+                    s+=_s;
+                    s+="}";
+                }else{
+                    s+=_s;
+                }
+            }else{
+                s+=e.getLatex(1);
+            }
+        }else if(e.type==eqtype.fn || e.type==eqtype.fraction || e.type==eqtype.product){
+            s+=e.getLatex(0);
+        }else{
+            s+=e.getLatex(1);
+        }
         s+=afterme;
         afterme="";
     }
