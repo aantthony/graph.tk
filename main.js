@@ -61,7 +61,8 @@ function compile(n){
         }else if(eq[0].length==2 && eq[0].type==eqtype.fn && typeof eq[0][0]=="string" && typeof eq[0][1]=="string"){
             var mm=eq[1].dreplace(eq[0][1],"x").simplify();
             var jsc=mm.getString(0,true);
-            funcdefs[eq[0][0]]=eval("("+"function(x){return "+jsc+";})");
+            funcdefs[eq[0][0]]=new Function("x","return "+jsc);
+            //funcdefs[eq[0][0]]=eval("("+"function(x){return "+jsc+";})");
             funcdefs[eq[0][0]].math=mm;
             changed.push(eq[0][0]);
             
@@ -83,7 +84,7 @@ function compile(n){
 	//compile
 	var ret={"f":function(){throw("Not a function");}};
     //If fun is an array of inverses
-    var builder="(function(ctx){";
+    var builder="";
     ret.pt=[].setType(eqtype.discretevector);
     
     //Singularites
@@ -99,7 +100,8 @@ function compile(n){
             var fn=funcs[i].simplify();
             var jsc=fn.getString(0,true);
             if(first){
-                ret.f=eval("("+"function(x){return "+jsc+";})");
+                //ret.f=eval("("+"function(x){return "+jsc+";})");
+                ret.f=new Function("x","return "+jsc);
                 first=false;
             }
             
@@ -196,12 +198,11 @@ function compile(n){
             }
         }
     }
-    builder+="})";
     ret.math=funcs;
     ret.funcdefs=funcdefs;
     ret.vars=vars;
     ret.dependence=dependence;
-	ret.plot=eval(builder);
+	ret.plot=new Function("ctx",builder);
     if(window && window.app && window.app.refresh){
         window.app.refresh(changed);
     }
