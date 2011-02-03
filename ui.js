@@ -316,8 +316,11 @@ app.ui=(function(){
 	        my = e.pageY;
 	    }
         
-        var delta=(e.wheelDeltaY!=undefined)?e.wheelDeltaY:-e.detail;
-		var ex=Math.exp(delta*scaleconst);
+        var delta=scaleconst*((e.wheelDeltaY!=undefined)?e.wheelDeltaY:-e.detail);
+		if(delta>1.2){
+			delta=1.2;
+		}
+		var ex=Math.exp(delta);
 	    scalex*=ex;
 	    scaley*=ex;
 		/*
