@@ -212,7 +212,21 @@ app.ui=(function(){
                             try{
                                 ctx.arc(scalex*_nx-cx,cy-scaley*_ny,app.config.lineWidth*2,0,Math.PI*2,true);
                                 ctx.fill();
-                                ctx.fillText(utf8_print(pt.simplify(0,0,1).getString(0)),12+scalex*_nx-cx,cy-scaley*_ny);
+                                var pt_simplified=pt.simplify(0,0,1);
+                                var text=undefined;
+                                if(pt_simplified[0]===0 && pt_simplified[1]===0){
+                                    //empty block
+                                }else if(pt_simplified[0]===0){
+                                    text=pt_simplified[1].getString(0);
+                                }else if(pt_simplified[1]===0){
+                                    text=pt_simplified[0].getString(0);
+                                }else{
+                                    text=pt_simplified.getString(0);
+                                }
+                                window.z=pt_simplified;
+                                if(text!=undefined){
+                                    ctx.fillText(utf8_print(text),12+scalex*_nx-cx,cy-scaley*_ny);
+                                }
                             }catch(ex){
                                 app.ui.console.warn("Could not plot dot: ("+_nx+","+_ny+")");
                             }
