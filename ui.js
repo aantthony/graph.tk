@@ -28,6 +28,7 @@ var messages={
     "console":"Show Console",
     "help":"Help Page",
     "png":"Take Screenshot Image",
+    "reload":"Reset the Graph",
     "showhide":"Show/Hide Graph"
 
 };
@@ -554,6 +555,7 @@ app.ui=(function(){
     },"add":function(n){
 		var li=proto.cloneNode(true);
 		li.id="eq-"+n.gid;
+    $(li).find(":checkbox").attr('checked', !n.disabled);
 		if(!ul){
 			ul=document.getElementById("graphs");
 		}
@@ -643,24 +645,52 @@ app.ui=(function(){
             draw();
         }
     },"block":function(block_it){
-        allowdrag=block_it?false:true;
+        if(block_it != undefined) {
+            allowdrag=block_it?false:true;
+        } else {
+            return !!allowdrag;
+        }
+    },"legend":function(show_legend){
+        if(show_legend !== undefined) {
+            $("#funcs").toggle(!!show_legend);
+        } else {
+            return $("#funcs:visible").length > 0
+        }
+    },"get_scale":function() {
+        return [scalex,scaley,scalez];
+    },"set_scale":function(x,y,z){
+        scalex=x||1;
+        scaley=y||x||1;
+        scalez=y||x||1;
+        draw();
     },"scale":function(x,y,z){
         scalex*=x||1;
         scaley*=y||x||1;
         scalez*=y||x||1;
         draw();
+    },"button":function(value,show) {
+      if(show !== undefined) {
+        $(".buttons input[value='" + value + "']").toggle(!!show);
+      } else {
+        return $(".buttons input[value='" + value + "']:visible").length > 0;
+      }
     },"translate":function(x,y,z){
         cx+=x||0;
         cy+=y||0;
         cz+=z||0;
         draw();
+    },"get_camera":function() {
+        return [cx,cy,cz];
+    },"set_camera":function(x,y,z){
+        cx=x;
+        cy=y;
+        cz=z;
+        draw();
     },"center":function(x,y,z){
-    
         cx=scalex*(x||0)-width/2;
         cy=scaley*(y||0)+height/2;
         cz=scalez*(z||0)-width/2;
         draw();
-    
     },"init":function(fullscreen){
 		(new Image()).src="grabbing.gif";
 		canvas=document.createElement("canvas");
@@ -816,6 +846,15 @@ app.ui=(function(){
         newfuncbtn.title=messages.png;
         newfuncbtn.onclick=function(){app.png()};
         buttons.appendChild(newfuncbtn);
+        
+        if(app.view_configured != false) {
+          var newfuncbtn=document.createElement("input");
+          newfuncbtn.value="reload";
+          newfuncbtn.type="button";
+          newfuncbtn.title=messages.reload;
+          newfuncbtn.onclick=function(){location.reload()};
+          buttons.appendChild(newfuncbtn);
+        }
         
         var alink=document.createElement("a");
         alink.href="about/";

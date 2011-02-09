@@ -90,7 +90,7 @@ h3{text-align:center}
     right:0;
 }
 input[value=""]{
-	background-position:0px 21px;
+	background-position:0px 42px;
 	margin-right:6px;
 }
 input[value=".png"]{
@@ -98,6 +98,9 @@ input[value=".png"]{
 }
 input[value=">_"]{
 	background-position:60px 0px;
+}
+input[value="reload"]{
+	background-position:0px 21px;
 }
 #funcs{
     right:0;

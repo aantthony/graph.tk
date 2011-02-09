@@ -11,14 +11,12 @@ var graphs=[];
 function track(event) {
     //Google Analytics. If anyone wants access to the
     //data, I can give your google account permssion.
-	if (window.pageTracker) {
-		setTimeout(function () {
-			pageTracker._trackEvent("Graph", event)
-		}, 20)
-	}
+  if (window.pageTracker) {
+    setTimeout(function () {
+      pageTracker._trackEvent("Graph", event)
+    }, 20)
+  }
 };
-
-
 
 randfuncs = "y=x^2@y^2=1-x^2@2e^{-x}@2x+3@\\frac{d}{dx}\\left(\\frac{1}{x}\\right)@\\int x.dx@\\frac{d}{dx}\\left(sin\\left(x\\right)\\right)@\\lambda=3@e^{-\\lambda\\cdot x}@\\left|x^2-4\\right|+2@\\frac1x@x^{-2}@x!@\\ln x@\\sum_{n=1}^{\\infinity}\\frac{x^n}{n}@\\sin x@\\tan\\left(x\\right)@\\left(x-2\\right)^2@\\Gamma\\left(x\\right)@\\sqrt x".split("@");
 
@@ -282,7 +280,7 @@ function compile(n){
 //function management
 
 
-var Graph=function(n){
+var Graph=function(n,disabled){
 	var latex=n;
 	var auto=0;
 	if(n){
@@ -305,6 +303,7 @@ var Graph=function(n){
 	t.equation=latex;
     //Graph id: random
 	t.gid=random_hash();
+  t.disabled=disabled;
 	t.color=app.ui.colors.free.pop();
     if(t.color==undefined){
         //We ran out of colours!
@@ -323,8 +322,10 @@ app.variables={};
 
 //Updated automatically by shell script.
 app.version="GIT_VERSION";
-app.add=function(n){
-	graphs.push(new Graph(n));
+app.add=function(n,disabled){
+  var graph = new Graph(n,disabled);
+  graph.disabled = disabled;
+	graphs.push(graph);
     app.ui.refresh();
 };
 app.png=function(){
@@ -333,6 +334,18 @@ app.png=function(){
 app.console=function(){
     app.ui.console.toggle();
 };
+app.get_state=function() {
+  var res = {};
+  res.graphs = {};
+  $.each(graphs, function() {
+    res.graphs[this.equation] = !this.disabled ? 1 : 0;
+  });
+  res.scale = $.map(app.ui.get_scale(), function(i) { return parseInt(i); });
+  res.camera = $.map(app.ui.get_camera(), function(i) { return parseInt(i); });
+  res.legend = app.ui.legend() ? 1 : 0;
+  res.block = app.ui.block() ? 1 : 0;
+  return res;
+}
 
 //TODO: a name like mathDidChange would be much more appropriate
 app.refresh=function(changes){
@@ -440,10 +453,33 @@ app.scale=function(x,y,z){
 app.init=function (){
     
     var fullscreen=!window.parent.length;
+  app.view_configured = location.hash.match(/^#json=/);
 	app.ui.init(fullscreen);
     
     if(location.hash!="" && location.hash!="#"){
+      if(location.hash.match(/^#json=/)) {
+        data = JSON.parse(location.hash.substring(6));
+        for(var idx in data.graphs) {
+          app.add(idx, !data.graphs[idx]);
+        }
+        if(data.scale) {
+          app.ui.set_scale.apply(this, data.scale);
+        }
+        if(data.camera) {
+          app.ui.set_camera.apply(this, data.camera);
+        }
+        if(data.block != undefined) {
+          app.ui.block(!!data.block);
+        }
+        if(data.console != undefined) {
+          app.ui.button('>_', data.console);
+        }
+        if(data.legend != undefined) {
+          app.ui.legend(!!data.legend);
+        }
+      } else {
             app.add(location.hash.substring(1));
+      }
     }else if(fullscreen){
         var preferences;
         if(window.localStorage){
