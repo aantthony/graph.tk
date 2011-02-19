@@ -317,7 +317,6 @@ app.ui=(function(){
 	    }
         
         var delta=scaleconst*((e.wheelDeltaY!=undefined)?e.wheelDeltaY:-e.detail);
-		console.log(delta);
         if(delta>1.2){
 			delta=1.2;
 		}else if(delta<-1.2){
