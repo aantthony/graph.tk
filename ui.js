@@ -287,7 +287,7 @@ app.ui=(function(){
         //Last mouse position
 	    lmx = mx;
 	    lmy = my;
-	};
+	}
 	var scaleconst = 0.001;
 	if (/AppleWebKit/.test(navigator.userAgent)) {
 	    scaleconst = 0.0001;
@@ -302,7 +302,7 @@ app.ui=(function(){
 	    scaleconst = 0.03
 	}
 	if (!/Mac OS X/.test(navigator.userAgent)) {
-	    scaleconst = 0.1
+	    scaleconst = 0.01
 	}
 	function mousewheel(e){
         
@@ -317,8 +317,11 @@ app.ui=(function(){
 	    }
         
         var delta=scaleconst*((e.wheelDeltaY!=undefined)?e.wheelDeltaY:-e.detail);
-		if(delta>1.2){
+		console.log(delta);
+        if(delta>1.2){
 			delta=1.2;
+		}else if(delta<-1.2){
+			delta=-1.2;
 		}
 		var ex=Math.exp(delta);
 	    scalex*=ex;
