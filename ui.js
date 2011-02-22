@@ -636,7 +636,7 @@ app.ui=(function(){
 		return li;
 	},
 	"colors":{
-		"free":("#f08,#8f0,#80f,#f08,#880,#088,#808,#0ff,#f80,#f0f,#04f,#0a0,#f00,#07c".split(",")),
+		"free":("#000,#f08,#8f0,#80f,#880,#088,#808,#0ff,#f80,#f0f,#0a0,#f00,#07c".split(",")),
 	},
 	"refresh":function(){
         if(draw){
