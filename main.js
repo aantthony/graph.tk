@@ -440,10 +440,34 @@ if(window.addEventListener){
 }else{
     window.attachEvent("onmessage", message);
 }
-window.addEventListener("hashchange", function(){
+function hashDidChange(){
     app.empty();
-    app.add(location.hash.substring(1));
-}, false);
+    if(location.hash.match(/^#json=/)) {
+        data = JSON.parse(location.hash.substring(6));
+        for(var idx in data.graphs) {
+        app.add(idx, !data.graphs[idx]);
+        }
+        if(data.scale) {
+            app.ui.set_scale.apply(this, data.scale);
+        }
+        if(data.camera) {
+            app.ui.set_camera.apply(this, data.camera);
+        }
+        if(data.block != undefined) {
+            app.ui.block(!!data.block);
+        }
+        if(data.console != undefined) {
+            app.ui.button('>_', data.console);
+        }
+        if(data.legend != undefined) {
+            app.ui.legend(!!data.legend);
+        }
+    } else {
+        app.add(location.hash.substring(1));
+    }
+
+}
+window.addEventListener("hashchange", hashDidChange, false);
 app.translate=function(x,y,z){
     app.ui.translate(Number(x),Number(y),Number(z));
 };
@@ -451,35 +475,12 @@ app.scale=function(x,y,z){
     app.ui.scale(Number(x),Number(y),Number(z));
 };
 app.init=function (){
-    
     var fullscreen=!window.parent.length;
-  app.view_configured = location.hash.match(/^#json=/);
+    app.view_configured = location.hash.match(/^#json=/);
 	app.ui.init(fullscreen);
     
     if(location.hash!="" && location.hash!="#"){
-      if(location.hash.match(/^#json=/)) {
-        data = JSON.parse(location.hash.substring(6));
-        for(var idx in data.graphs) {
-          app.add(idx, !data.graphs[idx]);
-        }
-        if(data.scale) {
-          app.ui.set_scale.apply(this, data.scale);
-        }
-        if(data.camera) {
-          app.ui.set_camera.apply(this, data.camera);
-        }
-        if(data.block != undefined) {
-          app.ui.block(!!data.block);
-        }
-        if(data.console != undefined) {
-          app.ui.button('>_', data.console);
-        }
-        if(data.legend != undefined) {
-          app.ui.legend(!!data.legend);
-        }
-      } else {
-            app.add(location.hash.substring(1));
-      }
+        hashDidChange();
     }else if(fullscreen){
         var preferences;
         if(window.localStorage){

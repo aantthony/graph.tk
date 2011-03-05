@@ -29,13 +29,15 @@ var messages={
     "help":"Help Page",
     "png":"Take Screenshot Image",
     "reload":"Reset the Graph",
-    "showhide":"Show/Hide Graph"
+    "showhide":"Show/Hide Graph",
+    "config":"Configure"
 
 };
 
 app.config={
     "lineWidth":1.5,
-    "pt":true
+    "pt":true,
+    "font":"12px sans-serif"
 };
 app.ui=(function(){
 	var allowdrag=true;//Set using block: and unblock: in the postMessage API.
@@ -119,7 +121,7 @@ app.ui=(function(){
 	    //Draw grid lines
 	
 		
-        ctx.font="12px sans-serif";
+        ctx.font=app.config.font;
         
 	    ctx.strokeStyle = "#888";
         ctx.fillStyle="#888";
@@ -855,6 +857,14 @@ app.ui=(function(){
           newfuncbtn.onclick=function(){location.reload()};
           buttons.appendChild(newfuncbtn);
         }
+        if(app.view_configured==undefined) {
+          var newfuncbtn=document.createElement("input");
+          newfuncbtn.value="config";
+          newfuncbtn.type="button";
+          newfuncbtn.title=messages.config;
+          newfuncbtn.onclick=function(){app.ui.modalConfig()};
+          buttons.appendChild(newfuncbtn);
+        }
         
         var alink=document.createElement("a");
         alink.href="about/";
@@ -964,7 +974,9 @@ app.ui=(function(){
 
 	//Is console visible:
 	var _console=false;
-    
+    ui.modalConfig=function(){
+        alert("Settings Panel Not Implemented Yet");
+    };
 	ui.console={"show":function(){
         con.style.display="block";
         _console=true;

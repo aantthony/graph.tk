@@ -102,6 +102,9 @@ input[value=">_"]{
 input[value="reload"]{
 	background-position:0px 21px;
 }
+input[value="config"]{
+	background-position:-30px 21px;
+}
 #funcs{
     right:0;
 	opacity:1.0;
