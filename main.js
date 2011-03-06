@@ -289,7 +289,7 @@ function compile(n){
                   y=r.sin(f(atan(y/x)))
                   asin(y/r)=f(atan(y/x))
                 */
-                builder+="var rmax=10;var rmin=0;var rinc=(rmax-rmin)/100;for(var r=rmin;r<rmax;r+=rinc){var thtmp=("+jsc+");ctx.line(r*cos(thtmp),r*sin(thtmp));}ctx.stroke();";
+                builder+="var rinc=(rmax-rmin)/width;for(var r=rmin;r<rmax;r+=rinc){var thtmp=("+jsc+");ctx.line(r*cos(thtmp),r*sin(thtmp));}ctx.stroke();";
             }
             
         }

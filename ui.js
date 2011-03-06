@@ -13,6 +13,10 @@ var boundleft = -10;
 var boundright = 10;
 var boundtop = 10;
 var boundbottom = -10;
+
+var rmin=0;
+var rmax=10;
+
 var overleft,overtop,overbottom,overright;
 var width,height;
 var gittest=1;
@@ -110,8 +114,14 @@ app.ui=(function(){
 	    boundright = (width + cx) / scalex;
 	    boundbottom = -(height - cy) / scaley;
 	    boundtop = cy / scaley;
-
-
+        
+        //This can probably be simplified a bit
+        rmax=Math.sqrt(Math.max(boundleft*boundleft+boundbottom*boundbottom,boundbottom*boundbottom+boundright*boundright,boundright*boundright+boundtop*boundtop,boundtop*boundtop+boundleft*boundleft));
+        if(boundleft<0 && boundright>0 && boundtop>0 && boundbottom<0){
+            rmin=0;
+        }else{
+            //TODO: Work out the shotest distance from (0,0) to the screen rectangle.
+        }
 	    gridsize = pow(2, 6 - Math.round(log(scalex) / log(2)));
 	    overleft = gridsize * ~~ (boundleft / gridsize) - gridsize;
 	    overright = gridsize * ~~ (boundright / gridsize) + gridsize;
