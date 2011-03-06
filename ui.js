@@ -266,7 +266,7 @@ app.ui=(function(){
 	};
 
 	function mousemove(e) {
-        if(!allowdrag){return;}
+        if(e.button != 0 || !allowdrag){return;}
 	    e = e || window.event;
 	    if (e.x !== undefined) {
 	        mx = e.x;
