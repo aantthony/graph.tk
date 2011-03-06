@@ -279,8 +279,8 @@ function compile(n){
                   We want to plot all points (x,y) ∈ ([boundleft,boundright],[boundbottom,boundtop])
                   r*(sin(x),cos(y)) ∈ (r*cos[boundleft,boundright],r*sin[boundbottom,boundtop])
                 
-                  x=r.cos(f(r))
-                  y=r.sin(f(r))
+                  x=r.cos(f(r)), y=r.sin(f(r))
+                  
                   
                   f(r)=acos(x/r)
                   y=r.sin(acos(x/r))
