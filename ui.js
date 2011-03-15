@@ -867,7 +867,7 @@ app.ui=(function(){
           newfuncbtn.onclick=function(){location.reload()};
           buttons.appendChild(newfuncbtn);
         }
-        if(app.view_configured==undefined) {
+        if(app.view_configured==undefined && false) {
           var newfuncbtn=document.createElement("input");
           newfuncbtn.value="config";
           newfuncbtn.type="button";
