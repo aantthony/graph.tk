@@ -453,8 +453,8 @@ function p(inp){
     e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.!])/g,"$1*$3");
     
     //TODO: Following line is a bit hacky. Specifications need be made to clear things up.
-    e=e.replace(/([xπyzd])([xπyzd])/g,"$1*$2");
-    
+    e=e.replace(/([xyzπϕ])([xyzπϕ])/g,"$1*$2");
+
 	e=e.replace(/\^([\d]+)\(/g,"^$1:(");
     e=e.replace(/([xe\d∫])\(/g,"$1*(");
     
@@ -1064,8 +1064,13 @@ Number.prototype.eval=function(o){
     return Number(this);
 };
 String.prototype.eval=function(){
-    if(this.toString()=="i"){
+    if(this.toString()==="i"){
         return "i";
+    }
+    
+    var word=dirty(this.toString());
+    if(window[word]!==undefined && typeof window[word]=="number"){
+        return window[word];
     }
     if(!isNaN(this.toString())){
         return Number(this.toString());
