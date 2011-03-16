@@ -307,6 +307,7 @@ var latexchars={
 "sin":"sin:",
 "cos":"cos:",
 "tan":"tan:",
+"times":"*",
 "sec":"sec:",
 "cosec":"cosec:",
 "csc":"csc:",
