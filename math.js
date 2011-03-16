@@ -453,13 +453,13 @@ function p(inp){
     e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.!])/g,"$1*$3");
     
     //TODO: Following line is a bit hacky. Specifications need be made to clear things up.
-    e=e.replace(/([xyzπϕ])([xyzπϕ])/g,"$1*$2");
+    e=e.replace(/([xyzπϕe])([exyzπϕ])/g,"$1*$2");
 
 	e=e.replace(/\^([\d]+)\(/g,"^$1:(");
-    e=e.replace(/([xe\d∫])\(/g,"$1*(");
+    e=e.replace(/([xyzπϕe\d∫])\(/g,"$1*(");
     
     e=e.replace(/∫([^\*])/g,"∫*$1");
-    e=e.replace(/([pixe\d\.])∫/g,"$1*∫");
+    e=e.replace(/([xyzπϕe\d\.])∫/g,"$1*∫");
 	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=])\(/g,"$1:(");
     
 	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=!])/g,")*$1");
