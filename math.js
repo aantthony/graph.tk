@@ -449,7 +449,7 @@ function p(inp){
     //TODO: -- -> +
     e=e.replace(/∞/g,"Infinity");
     e=e.replace(/\.([^\d]|$)/g,"*$1");
-    e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.])/g,"$1*$3");
+    e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.!])/g,"$1*$3");
     
 	e=e.replace(/\^([\d]+)\(/g,"^$1:(");
     e=e.replace(/([xe\d∫])\(/g,"$1*(");
@@ -457,8 +457,7 @@ function p(inp){
     e=e.replace(/([pixe\d\.])∫/g,"$1*∫");
 	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=])\(/g,"$1:(");
     
-	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=])/g,")*$1");
-    
+	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=!])/g,")*$1");
     //multiplicative identity
     e=e.replace(/\*([\)\=]|$)/g,"$1");
     if(e.indexOf("=")!=-1){
@@ -554,6 +553,28 @@ function p(inp){
             terms=[terms,denom];
             terms.type=eqtype.fraction;
         }
+        }else if(e.indexOf("!")!=-1){
+    
+        //TODO: Fix this
+        //DONE: This was fixed March 16, 2011
+        terms.type=eqtype.product;
+        var last=0;
+        for(var i=0;i<e.length;i++){
+            if(e[i]=="!"){
+                var s=e.substring(last,i);
+                if(s==""){
+                    terms[terms.length-1]=["fact",terms[terms.length-1]].setType(eqtype.fn);
+                }else{
+                    terms.push(["fact",p(s)].setType(eqtype.fn));
+                }
+                last=i+1;
+            }
+        }
+        var final=e.substring(last,e.length);
+        if(final!=""){
+            terms.push(p(final));
+        }
+     
     }else if(e.indexOf(":")!=-1){
      //__debug(!__debug_parser,0) || app.ui.console.log(spaces.substring(0,level)+"f>: "+e);
         terms.type=eqtype.fn;
@@ -629,27 +650,7 @@ function p(inp){
         terms.push(base);
         terms.push(p(be[1]));
         
-    }else if(e.indexOf("!")!=-1){
-    
-        //TODO: Fix this
-        terms.type=eqtype.product;
-        var last=0;
-        for(var i=0;i<e.length;i++){
-            if(e[i]=="!"){
-                var s=e.substring(last,i);
-                if(s==""){
-                    terms[terms.length-1]=["fact",terms[terms.length-1]].setType(eqtype.fn);
-                }else{
-                    terms.push(["fact",p(s)].setType(eqtype.fn));
-                }
-                last=i+1;
-            }
-        }
-        var final=e.substring(last,e.length);
-        if(final!=""){
-            terms.push(p(final));
-        }
-        
+       
     }else{
         var parsednumber=NaN;
         if(!isNaN(parsednumber=Number(e))){
