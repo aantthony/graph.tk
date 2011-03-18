@@ -386,9 +386,10 @@ app.variables={};
 //Updated automatically by shell script.
 app.version="GIT_VERSION";
 app.add=function(n,disabled){
-  var graph = new Graph(n,disabled);
-  graph.disabled = disabled;
+    var graph = new Graph(n,disabled);
+    graph.disabled = disabled;
 	graphs.push(graph);
+    track("New");
     app.ui.refresh();
 };
 app.png=function(){
