@@ -1,7 +1,7 @@
 {
   "name": "Graph.tk",
   "description": "Plot mathematical functions with this graphing utility",
-  "version": "0.0.0.1",
+  "version": "0.0.1.0",
   "icons": {
     "128": "icon_128.png"
   },
