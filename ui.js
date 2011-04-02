@@ -587,16 +587,22 @@ app.ui=(function(){
                 }
             }
         },false);
+        
+        b_.style.backgroundColor=n.color;
+        
+        //The below code is for focusing on the mathquill when clicking to the right of it. It doesn't work with the latest mathquill. (2011-04-03)
 		//inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
-		b_.style.backgroundColor=n.color;
+		
         //b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
-        //delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
+        
         /*li.addEventListener("mouseup",function(e){
 			$(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
 			$(inputbox).trigger({ type: "keydown", which: 39 });
             $(inputbox).focus();
 		},false);
         */
+        
+        delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
         
 		$(inputbox).mathquill("editable");
 		//$(inputbox).mathquill("redraw");
