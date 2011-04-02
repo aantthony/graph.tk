@@ -119,7 +119,7 @@ input[value="config"]{
 #funcs ul li:last-child .b{
 	border-bottom:none;
 }
-#funcs ul li:first-child .delete{
+#funcs ul li:only-child .delete{
     display:none;
 }
 
