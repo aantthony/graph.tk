@@ -253,6 +253,9 @@ function fact(ff) {
         return Gamma(ff + 1);
     }
 }
+function doublefact(x){
+    return pow(2,(x/2-1/4*cos(pi*x)+1/4))*pow(pi,(1/4*cos(pi*x)-1/4))*Gamma(x/2+1);
+}
 function bellb(x) {
     if (x == ~~x && x < blln.length) {
         return blln[x];
@@ -465,6 +468,8 @@ function p(inp){
 	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=!])/g,")*$1");
     //multiplicative identity
     e=e.replace(/\*([\)\=]|$)/g,"$1");
+    //Double factorial
+    e=e.replace(/!!/g,"‼");
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
@@ -558,7 +563,29 @@ function p(inp){
             terms=[terms,denom];
             terms.type=eqtype.fraction;
         }
-        }else if(e.indexOf("!")!=-1){
+    }else if(e.indexOf("‼")!=-1){
+    
+        //TODO: Fix this
+        //DONE: This was fixed March 16, 2011
+        terms.type=eqtype.product;
+        var last=0;
+        for(var i=0;i<e.length;i++){
+            if(e[i]=="‼"){
+                var s=e.substring(last,i);
+                if(s==""){
+                    terms[terms.length-1]=["doublefact",terms[terms.length-1]].setType(eqtype.fn);
+                }else{
+                    terms.push(["doublefact",p(s)].setType(eqtype.fn));
+                }
+                last=i+1;
+            }
+        }
+        var final=e.substring(last,e.length);
+        if(final!=""){
+            terms.push(p(final));
+        }
+     
+    }else if(e.indexOf("!")!=-1){
     
         //TODO: Fix this
         //DONE: This was fixed March 16, 2011
@@ -1712,6 +1739,12 @@ Array.prototype.inverses=function(){
             right=right[1];
             got_anywhere=true;
         }
+    }else if(right.type==eqtype.fn){
+        //l=f(a)
+        //f^-1(l) = f^-1(f(a))=a
+        left=known_inverses[right[0]].dreplace("x",left);
+        //MEOW
+        right=right[1];
     }else{
         return "right.type is someting else: "+right.type+": "+right;
     }
@@ -2386,7 +2419,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
+functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
 
 window._i=33;
 var known_derivatives={
@@ -2401,6 +2434,7 @@ var known_derivatives={
     "asin":p("1/sqrt(1-x^2)"),
     "acos":p("-1/sqrt(1-x^2)"),
     "fact":p("Γ(x+1)*ψ(x+1)"),
+    "doublefact":p("0.25*x!!*(2*ψ(x/2+1)+pi*log(2/pi)*sin(pi*x)+log(4))"),
     "Gamma":p("Γ(x)*ψ(x)"),
     "Γ":p("Γ(x)*ψ(x)")
 };

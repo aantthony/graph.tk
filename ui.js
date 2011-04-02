@@ -219,7 +219,7 @@ app.ui=(function(){
                         ctx.beginPath();
                         var _nx=pt[0].eval();
                         var _ny=pt[1].eval();
-                        console.log(pt);
+                        //console.log(pt);
                         //Stupid Firefox!
                         if(!isNaN(_nx) && !isNaN(_ny) && _ny<overtop && _ny>overbottom && _nx<overright && _nx>overleft){
                             try{
