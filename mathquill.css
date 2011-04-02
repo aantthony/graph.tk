@@ -17,11 +17,14 @@
     url(font/Symbola.svg#webfont7MzkO3xs) format("svg");
 }
 
-.mathquill-editable {
+.mathquill-editable, .mathquill-embedded-latex .mathquill-editable {
   display: -moz-inline-box;
   display: inline-block;
   border: 1px solid gray;
   padding: 2px;
+}
+.mathquill-embedded-latex .mathquill-editable {
+  margin: 1px;
 }
 .mathquill-textbox {
   overflow-x: auto;
@@ -55,26 +58,43 @@
 .mathquill-editable .cursor.blink {
   visibility: hidden;
 }
-.mathquill-textbox:after, .mathquill-rendered-math .empty:after {
+.mathquill-editable.empty:after, .mathquill-textbox:after, .mathquill-rendered-math .empty:after {
   visibility: hidden;
   content: 'c';
 }
-.mathquill-editable .cursor:only-child:after, .mathquill-editable .textarea:only-child:after, .mathquill-editable .textarea+.cursor:last-child:after {
+/*separated from above because unrecognized pseudoclasses invalidate the entire selector*/
+.mathquill-editable .cursor:only-child:after,
+.mathquill-editable .textarea+.cursor:last-child:after {
   visibility: hidden;
   content: 'c';
 }
 
-.mathquill-editable .selection, .mathquill-editable .selection .mathquill-rendered-math, .mathquill-editable .selection sup, .mathquill-editable .selection sub {
-  background-color: #ADF;
+.mathquill-editable .selection,
+.mathquill-editable .selection .mathquill-rendered-math,
+.mathquill-editable .selection sup, .mathquill-editable .selection sub {
+  background: #B4D5FE;
+  background: Highlight;
+  color: HighlightText;
+  border-color: HighlightText;
 }
-.mathquill-editable .selection.blur, .mathquill-editable .selection.blur .mathquill-rendered-math, .mathquill-editable .selection.blur sup, .mathquill-editable .selection.blur sub {
-  background-color: #CCC;
+.mathquill-editable .selection.blur,
+.mathquill-editable .selection.blur .mathquill-rendered-math,
+.mathquill-editable .selection.blur sup,.mathquill-editable .selection.blur sub {
+  background: #CCC;
+  background: rgba(0, 0, 0, .2);
+  color: black;
+  border-color: black;
 }
-.mathquill-editable .selection .selection.blur, .mathquill-editable .selection .selection.blur sup, .mathquill-editable .selection .selection.blur sub {
-  background-color: #ABF;
+.mathquill-editable .selection .selection.blur,
+.mathquill-editable .selection .selection.blur sup,
+.mathquill-editable .selection .selection.blur sub {
+  background: #ABF;
 }
-.mathquill-editable .selection.blur .selection.blur, .mathquill-editable .selection.blur .selection.blur sup, .mathquill-editable .selection.blur .selection.blur sub {
-  background-color: #DDD;
+.mathquill-editable .selection.blur .selection.blur,
+.mathquill-editable .selection.blur .selection.blur sup,
+.mathquill-editable .selection.blur .selection.blur sub {
+  background: #AAA;
+  background: rgba(0, 0, 0, .2);
 }
 
 .mathquill-textbox, .mathquill-rendered-math {
@@ -89,6 +109,7 @@
   line-height: 1;
   display: -moz-inline-box;
   display: inline-block;
+  -moz-user-select: none;
 }
 .mathquill-rendered-math var, .mathquill-rendered-math .nonSymbola {
   font-family: "Times New Roman", serif;
@@ -100,14 +121,23 @@
   display: inline-block;
   margin: 0;
   padding: 0;
+  border-color: black;
+}
+.mathquill-editable.hasCursor,
+.mathquill-rendered-math .latex-command-input.hasCursor {
+  border-color: ActiveBorder;
 }
 .mathquill-editable.hasCursor, .mathquill-editable .hasCursor {
-  outline: 2px solid rgb(205,235,255);
-  outline: 2px solid rgba(0,155,255,.2);
+  -webkit-box-shadow: #68B4DF 0 0 3px 2px;
+  -moz-box-shadow: #68B4DF 0 0 3px 2px;
+  box-shadow: #68B4DF 0 0 3px 2px;
 }
 
 .mathquill-rendered-math .empty {
-  background-color: lightgray;
+  background: #ccc;
+}
+.mathquill-rendered-math.empty {
+  background: transparent;
 }
 
 .mathquill-rendered-math .text {
@@ -137,10 +167,14 @@
 .mathquill-rendered-math sub {
   vertical-align: -.4em;
 }
-.mathquill-rendered-math sup.limit, .mathquill-rendered-math sub.limit {
+.mathquill-rendered-math sup.nthroot {
+  margin-right: -.7em;
+}
+.mathquill-rendered-math sup.limit, .mathquill-rendered-math sub.limit,
+.mathquill-rendered-math sup.nthroot {
   font-size: 80%;
 }
-.mathquill-rendered-math sup.limit {
+.mathquill-rendered-math sup.limit, .mathquill-rendered-math sup.nthroot {
   vertical-align: .8em;
 }
 .mathquill-rendered-math sub.limit {
@@ -153,10 +187,12 @@
 .mathquill-rendered-math .unary-operator {
   padding-left: .2em;
 }
-.mathquill-rendered-math sup .binary-operator, .mathquill-rendered-math sub .binary-operator {
+.mathquill-rendered-math sup .binary-operator,
+.mathquill-rendered-math sub .binary-operator {
   padding: 0 .1em;
 }
-.mathquill-rendered-math sup .unary-operator, .mathquill-rendered-math sub .unary-operator {
+.mathquill-rendered-math sup .unary-operator,
+.mathquill-rendered-math sub .unary-operator {
   padding-left: .1em;
 }
 
@@ -176,11 +212,11 @@
   display: block;
 }
 .mathquill-rendered-math .numerator {
-  border-bottom: 1px solid #222; /* black is too black, contrasts with antialised text */
+  border-bottom: 1px solid; /* black is too black, contrasts with antialised text */
   padding: 0 .1em;
 }
 .mathquill-rendered-math .denominator {
-  border-top: 1px solid #222;
+  border-top: 1px solid;
   float: right; /* take out of normal flow to manipulate baseline */
   width: 100%;
 }
@@ -209,7 +245,7 @@
   content: '\\';
 }
 .mathquill-rendered-math .latex-command-input.empty {
-  background-color: transparent;
+  background: transparent;
 }
 
 .mathquill-rendered-math .sqrt-prefix {
@@ -218,7 +254,7 @@
   top: 2px;
 }
 .mathquill-rendered-math .sqrt-stem {
-  border-top: 1px solid black;
+  border-top: 1px solid;
   margin-top: 1px;
   padding-left: 2px;
   padding-right: .2em;

@@ -575,5 +575,6 @@ app.init=function (){
     
     //app.add("x^2");
 };
-
-app.init();
+if(!/noboot$/.test(location.search)){
+    app.init();
+}

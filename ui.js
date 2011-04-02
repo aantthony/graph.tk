@@ -587,19 +587,22 @@ app.ui=(function(){
                 }
             }
         },false);
-		inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
+		//inputbox.addEventListener("mouseup",function(e){e.stopPropagation();},false);
 		b_.style.backgroundColor=n.color;
-        b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
-        delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
-        li.addEventListener("mouseup",function(e){
+        //b_.addEventListener("mouseup",function(e){e.stopPropagation();},false);
+        //delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
+        /*li.addEventListener("mouseup",function(e){
 			$(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
 			$(inputbox).trigger({ type: "keydown", which: 39 });
             $(inputbox).focus();
 		},false);
+        */
         
 		$(inputbox).mathquill("editable");
-		$(inputbox).mathquill("redraw");
-        inputbox.onchange=function(){
+		//$(inputbox).mathquill("redraw");
+        
+        $(inputbox).bind("keydown keyup",
+        function(){
             for(var i=0;i<graphs.length;i++){
                 if(graphs[i].gid==n.gid){
                     
@@ -639,7 +642,7 @@ app.ui=(function(){
                     break;
                 }
             }
-        };
+        });
 		if(!n.auto){
             $(inputbox).trigger({ type: "keydown", ctrlKey: true, which: 65 });
 			$(inputbox).focus();
@@ -740,6 +743,8 @@ app.ui=(function(){
         ptd.id="ptd";
 		ptd.className="monospace";
 		ptd.appendChild(document.createTextNode("(0,0)"));
+        //DEBUG
+        ptd.style.display="none";
 		document.body.appendChild(ptd);
         if(!fullscreen){
             ptd.style.display="none";
@@ -764,7 +769,7 @@ app.ui=(function(){
         
 		conin=document.getElementById("conin");
         $(conin).mathquill("editable");
-		$(conin).mathquill("redraw");
+		//$(conin).mathquill("redraw");
         
 		conin.addEventListener("keydown",function(event){
 			if(event.which==13){
@@ -1001,7 +1006,7 @@ app.ui=(function(){
 	},"toggle":function(){
         if(!_console){
             app.ui.console.show();
-            conin.getElementsByTagName("textarea")[0].focus();
+            $(conin).focus();
             return;
 		}
         app.ui.console.hide();
