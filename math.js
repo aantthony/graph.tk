@@ -563,28 +563,6 @@ function p(inp){
             terms=[terms,denom];
             terms.type=eqtype.fraction;
         }
-    }else if(e.indexOf("‼")!=-1){
-    
-        //TODO: Fix this
-        //DONE: This was fixed March 16, 2011
-        terms.type=eqtype.product;
-        var last=0;
-        for(var i=0;i<e.length;i++){
-            if(e[i]=="‼"){
-                var s=e.substring(last,i);
-                if(s==""){
-                    terms[terms.length-1]=["doublefact",terms[terms.length-1]].setType(eqtype.fn);
-                }else{
-                    terms.push(["doublefact",p(s)].setType(eqtype.fn));
-                }
-                last=i+1;
-            }
-        }
-        var final=e.substring(last,e.length);
-        if(final!=""){
-            terms.push(p(final));
-        }
-     
     }else if(e.indexOf("!")!=-1){
     
         //TODO: Fix this
@@ -598,6 +576,28 @@ function p(inp){
                     terms[terms.length-1]=["fact",terms[terms.length-1]].setType(eqtype.fn);
                 }else{
                     terms.push(["fact",p(s)].setType(eqtype.fn));
+                }
+                last=i+1;
+            }
+        }
+        var final=e.substring(last,e.length);
+        if(final!=""){
+            terms.push(p(final));
+        }
+     
+    }else if(e.indexOf("‼")!=-1){
+    
+        //TODO: Fix this
+        //DONE: This was fixed March 16, 2011
+        terms.type=eqtype.product;
+        var last=0;
+        for(var i=0;i<e.length;i++){
+            if(e[i]=="‼"){
+                var s=e.substring(last,i);
+                if(s==""){
+                    terms[terms.length-1]=["doublefact",terms[terms.length-1]].setType(eqtype.fn);
+                }else{
+                    terms.push(["doublefact",p(s)].setType(eqtype.fn));
                 }
                 last=i+1;
             }
