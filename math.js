@@ -21,7 +21,7 @@
     
     
 Todo: use a function object array instead of just an array/object model.
-
+Todo: Improve CAS model
 Notes: addition/summation and multiplication should be considered an operation that takes 0 or more aguments.
 There is no division. 
 
