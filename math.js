@@ -105,6 +105,8 @@ var R_E = 6378100;
 var r_e = 6378100;
 var h = 6.626068e-34;
 var log2pi = 1.8378770664093453;
+
+
 var e = Math.E;
 var pi = Math.PI;
 var phi = (1 + Math.sqrt(5)) / 2;
@@ -1094,26 +1096,29 @@ String.prototype.eval=function(){
     if(this.toString()==="i"){
         return "i";
     }
-    
-    var word=dirty(this.toString());
-    if(window[word]!==undefined && typeof window[word]=="number"){
-        return window[word];
-    }
     if(!isNaN(this.toString())){
+        console.log("NUMBER IN HERE: "+this.toString());
         return Number(this.toString());
     }
-    if(window.app){
-    if(app.variables[this.toString()]){
-		if(typeof app.variables[this.toString()]!="function"){
-			return app.variables[this.toString()].eval();
+    var word=dirty(this.toString());
+    
+    if(window.app && app.variables[word]){
+		if(typeof app.variables[word]!="function"){
+			return app.variables[word].eval();
 		}else{
 			return NaN;
 		}
     }
+    
+    if(window[word]!==undefined && typeof window[word]=="number"){
+        return window[word];
     }
-    if(window[this.toString()]){
-		if(typeof window[this.toString()]!="function"){
-			return eval(this.toString());
+    
+    
+    if(window[word]){
+		if(typeof window[word]!="function"){
+			//return eval(word);
+            return window[word];
 		}else{
 			return NaN;
 		}
@@ -2320,6 +2325,9 @@ String.prototype.getString=function(__ignore,javascript){
         var self=dirty(this.toString());
         if(self=="x"){
             return self;
+        }
+        if(app.variables[self]){
+            return "app.variables["+JSON.stringify(self)+"]";
         }
         if(window[self]){
             return self;
