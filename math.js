@@ -2349,7 +2349,7 @@ Array.prototype.getLatex=function(braces){
 String.prototype.getString=function(__ignore,javascript){
     if(javascript && window.app){
         var self=dirty(this.toString());
-        if(self=="x"){
+        if(self=="x"||self=="y"){
             return self;
         }
         if(app.variables[self]){
