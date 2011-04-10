@@ -147,7 +147,30 @@ var sqrt = Math.sqrt;
 var pow = Math.pow;
 
 
-//sin^n (x)
+//Hyperbolic functions
+
+function cosh(x){
+    return 0.5*(exp(x)+exp(-x));
+}
+function sinh(x){
+    return 0.5*(exp(x)-exp(-x));
+}
+function tanh(x){
+    return (exp(x)+exp(-x))/(exp(x)-exp(-x));
+}
+function sech(x){
+    return 1/cosh(x);
+}
+function cosech(x){
+    return 1/sech(x);
+}
+function coth(x){
+    return 1/tanh(x);
+}
+
+
+function ln_n(n,x){return pow(ln(x),n);}
+
 function sin_n(n,x){return pow(sin(x),n);}
 function cos_n(n,x){return pow(cos(x),n);}
 function tan_n(n,x){return pow(tan(x),n);}
@@ -155,7 +178,13 @@ function cot_n(n,x){return pow(cot(x),n);}
 function sec_n(n,x){return pow(sec(x),n);}
 function csc_n(n,x){return pow(csc(x),n);}
 function log_n(n,x){return pow(log(x),n);}
-function ln_n(n,x){return pow(ln(x),n);}
+
+function cosh_n(n,x){return pow(cosh(x),n);}
+function sinh_n(n,x){return pow(cosh(x),n);}
+function tanh_n(n,x){return pow(cosh(x),n);}
+function coth_n(n,x){return pow(coth(x),n);}
+function sech_n(n,x){return pow(sech(x),n);}
+function csch_n(n,x){return pow(csch(x),n);}
 
 function logb(b, v) {
     return ln(v) / ln(b);
@@ -335,6 +364,13 @@ var latexchars={
 'gt':">",
 "left|":"abs:(",
 "right|":")",
+"cosh":"cosh",
+"sinh":"sinh",
+"tanh":"tanh",
+"coth":"coth",
+"sech":"sech",
+"csch":"csch",
+"cosech":"cosech",
 "sin":"sin:",
 "cos":"cos:",
 "tan":"tan:",
@@ -1800,7 +1836,7 @@ Array.prototype.inverses=function(){
 function clean(n){
     // de-latexify a string.
     n=n.replace(/\\?(sin|cos|tan|sec|cosec|csc|cotan|cot)\^([^\{]|\{[^\}]+\})/g,"$1^$2:");
-    n=n.replace(/\\?(sin|cos|tan|sec|cosec|csc|cotan|cot)([^\:\^])/g,"$1:$2");
+    n=n.replace(/\\?(sin|cos|tan|sec|cosec|csc|cotan|cot)([^\:\^h])/g,"$1:$2");
     n=n.replace(/\\?(log)_([^\{]|\{[^\}]+\})/g,"$1_$2:");
     for(var i in latexchars){
         if(latexchars.hasOwnProperty(i)){
@@ -2453,7 +2489,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="sin,cos,tan,sec,cot,csc,cosec,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
+functions="sin,cos,tan,sec,cot,csc,cosec,cosh,sinh,tanh,cosech,csch,sech,coth,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
 
 window._i=33;
 var known_derivatives={
@@ -2463,6 +2499,10 @@ var known_derivatives={
     "cos":p("-sin(x)"),
     "tan":p("1/(cos(x)*cos(x))"),
     "exp":p("exp(x)"),
+    "cosh":p("sinh(x)"),
+    "sinh":p("cosh(x)"),
+    "tanh":p("1/cosh^2(x)"),
+    "coth":p("-cosech^2(x)"),
     "floor":p("shaw(x)"),
     "u":p("delta(x)"),
     "asin":p("1/sqrt(1-x^2)"),
