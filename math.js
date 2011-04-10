@@ -156,7 +156,7 @@ function sinh(x){
     return 0.5*(exp(x)-exp(-x));
 }
 function tanh(x){
-    return (exp(x)+exp(-x))/(exp(x)-exp(-x));
+    return (exp(x)-exp(-x))/(exp(x)+exp(-x));
 }
 function sech(x){
     return 1/cosh(x);
@@ -166,6 +166,17 @@ function cosech(x){
 }
 function coth(x){
     return 1/tanh(x);
+}
+
+//Inverse hyperbolic functions
+function acosh(x){
+    return log(x+sqrt(x*x-1));
+}
+function asinh(x){
+    return log(x+sqrt(x*x+1));
+}
+function atanh(x){
+    return 0.5*log((1+x)/(1-x));
 }
 
 
@@ -2489,7 +2500,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="sin,cos,tan,sec,cot,csc,cosec,cosh,sinh,tanh,cosech,csch,sech,coth,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
+functions="sin,cos,tan,sec,cot,csc,cosec,acosh,asinh,atanh,cosh,sinh,tanh,cosech,csch,sech,coth,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
 
 window._i=33;
 var known_derivatives={
