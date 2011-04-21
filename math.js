@@ -534,7 +534,11 @@ function p(inp){
     e=e.replace(/([xyzπϕ])([exyzπϕ])/g,"$1*$2");
 
 	e=e.replace(/\^([\d]+)\(/g,"^$1:(");
+    
+    e=e.replace(/max\(/g,"(max)(");
+    
     e=e.replace(/([xyzπϕ\d∫])\(/g,"$1*(");
+    e=e.replace(/\(max\)/g,"max");
     
     e=e.replace(/∫([^\*])/g,"∫*$1");
     e=e.replace(/([xyzπϕ\d\.])∫/g,"$1*∫");
