@@ -708,7 +708,7 @@ function p(inp){
             terms=b;
             
         }else{
-            var match=/^log_([\d\.\+\-e]+)$/(be[0]);
+            var match=/^log_([\d\.\+\-e]+)$/.exec(be[0]);
             if(match){
                 var fn_=["log",p(be[1])].setType(eqtype.fn);
                 terms.type=eqtype.fraction;
