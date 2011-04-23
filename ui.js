@@ -289,7 +289,7 @@ app.ui=(function(){
 		*/
 		var px=(mx+cx)/scalex;
 		var py=(cy-my)/scaley;
-		ptd.firstChild.nodeValue="("+px.toFixed(4)+","+py.toFixed(4)+")";
+		ptd.firstChild.nodeValue="("+px.toPrecision(6)+","+py.toPrecision(6)+")";
 	}
 	function mousemove(e) {
         if(e.button != 0 || !allowdrag){return;}
