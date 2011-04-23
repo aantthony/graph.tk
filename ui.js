@@ -274,7 +274,23 @@ app.ui=(function(){
 	        drawwhiledrag_c++;
 	    }
 	};
-
+	function updatePTD(mx,my){
+		/*
+			sx=scalex*px-cx
+			
+			(sx+cx)/scalex=px
+			
+			
+			
+			sy=cy-scaley*py
+			
+			(cy-sy)/scaley=py
+		
+		*/
+		var px=(mx+cx)/scalex;
+		var py=(cy-my)/scaley;
+		ptd.firstChild.nodeValue="("+px.toFixed(4)+","+py.toFixed(4)+")";
+	}
 	function mousemove(e) {
         if(e.button != 0 || !allowdrag){return;}
 	    e = e || window.event;
@@ -296,7 +312,7 @@ app.ui=(function(){
 			}
 	
 	    }
-        
+		updatePTD(mx,my);
         //Last mouse position
 	    lmx = mx;
 	    lmy = my;
@@ -362,6 +378,7 @@ app.ui=(function(){
 			cx=ex*(mx+cx)-mx;
 			cy+=my+ex*(cy-my)-cy;
 		}
+		updatePTD(mx,my);
 	    draw();
         
         //Prevent browser from scrolling page
@@ -749,9 +766,7 @@ app.ui=(function(){
         ptd.id="ptd";
 		ptd.className="monospace";
 		ptd.appendChild(document.createTextNode("(0,0)"));
-        //DEBUG
-        ptd.style.display="none";
-		document.body.appendChild(ptd);
+        document.body.appendChild(ptd);
         if(!fullscreen){
             ptd.style.display="none";
         }
