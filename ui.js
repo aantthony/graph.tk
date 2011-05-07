@@ -333,6 +333,9 @@ app.ui=(function(){
 	if (!/Mac OS X/.test(navigator.userAgent)) {
 	    scaleconst = 0.01
 	}
+    if (/Mac OS X 10_7/.test(navigator.userAgent)) {
+	    scaleconst = -0.02
+	}
 	function mousewheel(e){
         
         if(!allowdrag){return;}
