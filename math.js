@@ -205,6 +205,10 @@ function u(x) {
     //unit step function
     return (x>=0)?(x?1:0.5):(0);
 }
+function u_d(x){
+	//discrete unit step function
+    return (x>=0)?1:0;
+}
 function delta(x){
     if(x==0){
         return Infinity;
@@ -753,7 +757,7 @@ function p(inp){
         //^ is a BINARY operator that goes from right to left.
         //  1^2^3 = 1^(2^(3))
         if(be.length!=2){
-            throw (messages.expchain);
+            throw (MessageStrings.expchain);
             return;
         }
         var base=p(be[0]);
@@ -1204,7 +1208,14 @@ String.prototype.eval=function(){
 };
 Array.prototype.eval=function(){
     if(!this.length){
-        __debug(__debug(0,1)||app.ui.console.warn("Empty! in .eval(): "+this.type),0);
+		if(this.type==eqtype.sum){
+			return 0;
+		}else if(this.type==eqtype.product){
+			return 1;
+		}else{
+			__debug(__debug(0,1)||app.ui.console.warn("Empty! in .eval(): "+this.type),0);
+		}
+        
     }
     if(this.canEval()){
         return eval(this.getString(1,1));
@@ -1325,7 +1336,13 @@ Array.prototype.differentiate=function(times){
         var fnd;
         if(fnd=known_derivatives[this[0]]){
             return [fnd.dreplace(/^x$/,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
-        }else{
+        }else if((fnd=known_partial_derivatives[this[0]]) && this[1].type==eqtype.discretevector){
+			var a=this[1][0];
+			var b=this[1][1]||0;
+			var da=a.differentiate();
+			var db=b.differentiate();
+			return fnd.dreplace("a",a).dreplace("b",b).dreplace("da",da).dreplace("db",db);
+		}else{
             if(window && window.app && window.app.variables && window.app.variables[this[0]] && typeof window.app.variables[this[0]]=="function"){
                 return [window.app.variables[this[0]].math.differentiate().dreplace(/^x$/,this[1]),this[1].differentiate()].setType(eqtype.product).simplify();
                 //throw("chain rule");
@@ -2333,7 +2350,7 @@ Array.prototype.getLatex=function(braces){
             }
             else if(self.type==eqtype.fn){
                 if(typeof e !="string" && typeof e!="function"){
-                    throw(messages.fnnamenotstring);
+                    throw(MessageStrings.fnnamenotstring);
                     return "ERROR";
                 }
                 if(functions.indexOf(e)==-1){
@@ -2450,7 +2467,7 @@ Array.prototype.getString=function(braces,javascript){
             }
             else if(self.type==eqtype.fn){
                 if(typeof e !="string" && typeof e!="function"){
-                    throw(messages.fnnamenotstring);
+                    throw(MessageStrings.fnnamenotstring);
                     return "ERROR";
                 }
                 if(functions.indexOf(e)==-1){
@@ -2504,7 +2521,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="sin,cos,tan,sec,cot,csc,cosec,acosh,asinh,atanh,cosh,sinh,tanh,cosech,csch,sech,coth,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
+functions="u_d,sin,cos,tan,sec,cot,csc,cosec,acosh,asinh,atanh,cosh,sinh,tanh,cosech,csch,sech,coth,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
 
 window._i=33;
 var known_derivatives={
@@ -2530,6 +2547,16 @@ var known_derivatives={
     "Gamma":p("Γ(x)*ψ(x)"),
     "Γ":p("Γ(x)*ψ(x)")
 };
+
+var known_partial_derivatives={
+	/*
+	 0≤a-b: H(a-b)=1
+	 x=a-b
+	x<0: 
+	*/
+    "max":p("u_d(a-b)*da+(1-u_d(a-b))*db")
+};
+
 var known_inverses={
     "sqrt":p("x^2"),
     "log":p("e^x"),
