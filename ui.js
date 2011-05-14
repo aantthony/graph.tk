@@ -156,24 +156,8 @@ app.ui=(function(){
         //Like overleft, but in units of 4*gridsize
         var dblleft=gridsize*4 * ~~ (boundleft / (4*gridsize)) - 4*gridsize;
         var dblleft=gridsize*4 * ~~ (boundbottom / (4*gridsize)) - 4*gridsize;
-        for(var x=dblleft; x<=overright; x+=gridsize*4){
-            if(x!=0){
-            ctx.beginPath();
-            ctx.arc(scalex*x-cx,cy-scaley*0,2,0,Math.PI*2,true);
-            ctx.fill();
-            ctx.fillText(x.toFixed(3).replace(/\.?0+$/,""),scalex*x-cx,14+cy-scaley*0);
-            }
-            
-        }
-        for(var y=dblleft; y<=overright; y+=gridsize*4){
-            if(y!=0){
-            ctx.beginPath();
-            ctx.arc(-cx,cy-scaley*y,2,0,Math.PI*2,true);
-            ctx.fill();
-            ctx.fillText(y.toFixed(3).replace(/\.?0+$/,""),10-cx,4+cy-scaley*y);
-            }
-            
-        }
+
+        
         
 
         ctx.lineWidth = 0.4;
@@ -209,6 +193,7 @@ app.ui=(function(){
         
 
         ctx.lineWidth=app.config.lineWidth;
+		var alreadydrawnpoints=[];
         graphs.forEach(function(e){
             if(!e.disabled){
                 ctx.strokeStyle=ctx.fillStyle=e.color;
@@ -219,38 +204,62 @@ app.ui=(function(){
                         ctx.beginPath();
                         var _nx=pt[0].eval();
                         var _ny=pt[1].eval();
-                        //console.log(pt);
-                        //Stupid Firefox!
-                        if(!isNaN(_nx) && !isNaN(_ny) && _ny<overtop && _ny>overbottom && _nx<overright && _nx>overleft){
-                            try{
-                                ctx.arc(scalex*_nx-cx,cy-scaley*_ny,app.config.lineWidth*2,0,Math.PI*2,true);
-                                ctx.fill();
-                                var pt_simplified=pt.simplify(0,0,1);
+						if(alreadydrawnpoints.indexOf(_nx+","+_ny)===-1){
+							alreadydrawnpoints.push(_nx+","+_ny);
+						
+                        	//console.log(pt);
+                        	//Stupid Firefox!
+                        	if(!isNaN(_nx) && !isNaN(_ny) && _ny<overtop && _ny>overbottom && _nx<overright && _nx>overleft){
+                            	try{
+                                	ctx.arc(scalex*_nx-cx,cy-scaley*_ny,app.config.lineWidth*2,0,Math.PI*2,true);
+                                	ctx.fill();
+                                	var pt_simplified=pt.simplify(0,0,1);
                                 var text=undefined;
-                                if(pt_simplified[0]===0 && pt_simplified[1]===0){
-                                    //empty block
-                                }else if(pt_simplified[0]===0){
-                                    text=pt_simplified[1].getString(0);
-                                }else if(pt_simplified[1]===0){
-                                    text=pt_simplified[0].getString(0);
-                                }else{
-                                    text=pt_simplified.getString(0);
-                                }
-                                window.z=pt_simplified;
-                                if(text!=undefined){
-                                    ctx.fillText(utf8_print(text),12+scalex*_nx-cx,cy-scaley*_ny);
-                                }
-                            }catch(ex){
-                                app.ui.console.warn("Could not plot dot: ("+_nx+","+_ny+")");
-                            }
-                        }
+                                	if(pt_simplified[0]===0 && pt_simplified[1]===0){
+                                    	//empty block
+                                	}else if(pt_simplified[0]===0){
+                                    	text=pt_simplified[1].getString(0);
+                                	}else if(pt_simplified[1]===0){
+                                    	text=pt_simplified[0].getString(0);
+                                	}else{
+                                    	text=pt_simplified.getString(0);
+                                	}
+                                	window.z=pt_simplified;
+                                	if(text!=undefined){
+                                    	ctx.fillText(utf8_print(text),12+scalex*_nx-cx,cy-scaley*_ny);
+                                	}
+                            	}catch(ex){
+                                	app.ui.console.warn("Could not plot dot: ("+_nx+","+_ny+")");
+                            	}
+                        	}
+						}
                     });
                 }
             }
         });
 	    //}catch(ex){}
-
-
+		ctx.fillStyle="#888";
+		for(var x=dblleft; x<=overright; x+=gridsize*4){
+			
+            if(x!=0 && alreadydrawnpoints.indexOf(x+","+0)==-1){
+				alreadydrawnpoints.push(x+","+0);
+            	ctx.beginPath();
+            	ctx.arc(scalex*x-cx,cy-scaley*0,2,0,Math.PI*2,true);
+            	ctx.fill();
+            	ctx.fillText(x.toFixed(3).replace(/\.?0+$/,""),scalex*x-cx,14+cy-scaley*0);
+            }
+            
+        }
+        for(var y=dblleft; y<=overright; y+=gridsize*4){
+            if(y!=0 && alreadydrawnpoints.indexOf(0+","+y)==-1){
+				alreadydrawnpoints.push(0+","+y);
+            	ctx.beginPath();
+            	ctx.arc(-cx,cy-scaley*y,2,0,Math.PI*2,true);
+            	ctx.fill();
+            	ctx.fillText(y.toFixed(3).replace(/\.?0+$/,""),10-cx,4+cy-scaley*y);
+            }
+            
+        }
 
 	}
 
