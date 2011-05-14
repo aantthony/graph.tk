@@ -640,12 +640,6 @@ app.ui=(function(){
         function(){
             for(var i=0;i<graphs.length;i++){
                 if(graphs[i].gid==n.gid){
-                    
-                    
-                    
-        
-                   
-        
                     var l__=$(inputbox).mathquill("latex");
 					
                     graphs[i].equation=l__;
@@ -659,7 +653,7 @@ app.ui=(function(){
                     }
                     warn_.firstChild.nodeValue="";
                     warn_.style.display="none";
-                    for(k in c){
+                    for(var k in c){
                         if(c.hasOwnProperty(k)){
                             graphs[i][k]=c[k];
                         }
@@ -673,6 +667,7 @@ app.ui=(function(){
                     graphs[i].xs=c.xs;
                     graphs[i].ys=c.ys;
                     */
+                    
                     draw();
                     break;
                 }
