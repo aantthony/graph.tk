@@ -2183,7 +2183,8 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
         }
         this[0]=this[0].simplify();
     }else if(this.type==eqtype.product){
-        for(var i=0;i<this.length;i++){
+		//This is the line that messes up (d/dx)(1/(x^x))
+		for(var i=0;i<this.length;i++){
             
             this[i]=this[i].simplify();
             if(this[i]===0){
@@ -2271,6 +2272,7 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
                 this.push(_fract[1]);
             }
             if(this.type!=eqtype.product){
+				//TODO: Is this the right thing to do?
                 return this.simplify();
             }
             
