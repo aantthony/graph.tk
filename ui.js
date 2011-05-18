@@ -32,7 +32,6 @@ var messages={
     "console":"Show Console",
     "help":"Help Page",
     "png":"Take Screenshot Image",
-    "reload":"Reset the Graph",
     "showhide":"Show/Hide Graph",
     "config":"Configure"
 
@@ -892,14 +891,6 @@ app.ui=(function(){
         newfuncbtn.onclick=function(){app.png()};
         buttons.appendChild(newfuncbtn);
         
-        if(app.view_configured != false) {
-          var newfuncbtn=document.createElement("input");
-          newfuncbtn.value="reload";
-          newfuncbtn.type="button";
-          newfuncbtn.title=messages.reload;
-          newfuncbtn.onclick=function(){location.reload()};
-          buttons.appendChild(newfuncbtn);
-        }
         if(app.view_configured==undefined && false) {
           var newfuncbtn=document.createElement("input");
           newfuncbtn.value="config";
