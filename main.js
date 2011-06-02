@@ -495,6 +495,7 @@ app.get_state=function() {
   $.each(graphs, function() {
     res.graphs[this.equation] = !this.disabled ? 1 : 0;
   });
+
   res.scale = $.map(app.ui.get_scale(), function(i) { return parseInt(i); });
   res.camera = $.map(app.ui.get_camera(), function(i) { return parseInt(i); });
   res.legend = app.ui.legend() ? 1 : 0;
@@ -618,7 +619,7 @@ function hashDidChange(){
             app.ui.legend(!!data.legend);
         }
     } else {
-        app.add(location.hash.substring(1));
+        app.add(location.hash.substring(1).replace("%20"," "));
     }
 
 }
@@ -643,6 +644,7 @@ app.init=function (){
             if(preferences){
                 try{
                     preferences=JSON.parse(preferences);
+
                 }catch(ex){}
             }
         }
