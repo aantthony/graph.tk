@@ -578,6 +578,9 @@ function message(m){
         case "empty":
             app.empty();
             break;
+		case "bounds":
+			app.ui.bounds(s[1],s[2],s[3],s[4]);
+			break;
         case "scale":
             app.ui.scale(s[1],s[2],s[3]);
             break;

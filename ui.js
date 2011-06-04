@@ -712,7 +712,25 @@ app.ui=(function(){
         scaley*=y||x||1;
         scalez*=y||x||1;
         draw();
-    },"button":function(value,show) {
+    },"bounds":function(x1,x2,y1,y2,z1,z2){
+		
+		/*
+		The trick to this was using the average to set the center (see center()) and 
+		setting the scale using only x2-x1 and y2-y1 otherwise we divide by 0.
+		
+		
+		Solve for: cx, cy, scalex, scaley from the boundleft equation and center() function
+		*/
+		
+		scalex = width /(x2-x1);
+		scaley = height/(y2-y1);
+		
+		cx=0.5*scalex*(x1+x2)-width/2;
+		cy=0.5*scaley*(y1+y2)+height/2;
+		
+		draw();
+	
+	},"button":function(value,show) {
       if(show !== undefined) {
         $(".buttons input[value='" + value + "']").toggle(!!show);
       } else {
