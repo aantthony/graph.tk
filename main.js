@@ -603,9 +603,11 @@ if(window.addEventListener){
 function hashDidChange(){
     app.empty();
     if(location.hash.match(/^#json=/)) {
-        data = JSON.parse(location.hash.substring(6));
+        data = JSON.parse(decodeURIComponent(location.hash.substring(6)));
         for(var idx in data.graphs) {
-        app.add(idx, !data.graphs[idx]);
+			if(data.graphs.hasOwnProperty(idx)){
+	        	app.add(idx, !data.graphs[idx]);
+			}
         }
         if(data.scale) {
             app.ui.set_scale.apply(this, data.scale);
