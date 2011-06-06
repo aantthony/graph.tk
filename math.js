@@ -2529,6 +2529,7 @@ window._i=33;
 var known_derivatives={
     "sqrt":p("1/(2*sqrt(x))"),
     "log":p("1/x"),
+    "ln":p("1/x"),
     "sin":p("cos(x)"),
     "cos":p("-sin(x)"),
     "tan":p("1/(cos(x)*cos(x))"),
