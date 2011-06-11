@@ -33,6 +33,8 @@ git add -f *.ico
 git add -f manifest.manifest
 git add -f *.gif
 git add -f min
+echo "graph.tk" > ./CNAME
+git add CNAME
 echo "added files"
 git commit -m "publish ${VERSION_CODE}"
 git push
