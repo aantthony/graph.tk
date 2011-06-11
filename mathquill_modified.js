@@ -319,6 +319,7 @@ function createRoot(jQ, root, textbox, editable) {
 
   //trigger virtual textInput event (see Wiki page "Keyboard Events")
   function textInput() {
+    if (skipTextInput) return;
     var text = textarea.val();
     if (!text) return;
     textarea.val('');
@@ -330,7 +331,7 @@ function createRoot(jQ, root, textbox, editable) {
     }
   }
 
-  var lastKeydn = {}; //see Wiki page "Keyboard Events"
+  var lastKeydn = {}, skipTextInput = false; //see Wiki page "Keyboard Events"
   jQ.bind('focus.mathquill blur.mathquill', function(e) {
     textarea.trigger(e);
   }).bind('keydown.mathquill', function(e) { //see Wiki page "Keyboard Events"
@@ -360,6 +361,7 @@ function createRoot(jQ, root, textbox, editable) {
     //after keypress event, trigger virtual textInput event if text was
     //input to textarea
     //  (see Wiki page "Keyboard Events")
+    skipTextInput = false;
     setTimeout(textInput);
   }).bind('mousedown.mathquill', function(e) {
     cursor.seek($(e.target), e.pageX, e.pageY).blink = $.noop;
@@ -378,7 +380,10 @@ function createRoot(jQ, root, textbox, editable) {
   }).bind('cut', function() {
     if (cursor.selection)
       cursor.deleteSelection();
+  }).bind('copy', function() {
+    skipTextInput = true;
   }).bind('paste', function() {
+    skipTextInput = true;
     setTimeout(function() {
       cursor.writeLatex(textarea.val()).clearSelection();
     });
@@ -810,7 +815,7 @@ _.redraw = function() {
   });
 };
 
-LatexCmds.sqrt = LatexCmds['âˆš'] = SquareRoot;
+LatexCmds.sqrt = LatexCmds['√'] = SquareRoot;
 
 function NthRoot(replacedFragment) {
   SquareRoot.call(this, replacedFragment);
@@ -1382,7 +1387,7 @@ LatexCmds.vartheta = //AMS and LaTeX
   bind(Variable,'\\vartheta ','&#977;');
 
 //Greek constants, look best in un-italicised Times New Roman
-LatexCmds.pi = LatexCmds['Ï€'] = bind(NonSymbolaSymbol,'\\pi ','&pi;');
+LatexCmds.pi = LatexCmds['π'] = bind(NonSymbolaSymbol,'\\pi ','&pi;');
 LatexCmds.lambda = bind(NonSymbolaSymbol,'\\lambda ','&lambda;');
 
 //uppercase greek letters
@@ -1539,7 +1544,7 @@ BigSymbol.prototype = new Symbol; //so instanceof will work
 LatexCmds.sum = LatexCmds.summation = bind(BigSymbol,'\\sum ','&sum;');
 LatexCmds.prod = LatexCmds.product = bind(BigSymbol,'\\prod ','&prod;');
 LatexCmds.coprod = LatexCmds.coproduct = bind(BigSymbol,'\\coprod ','&#8720;');
-LatexCmds.int = LatexCmds.integral = LatexCmds['âˆ«'] = bind(BigSymbol,'\\int ','&int;');
+LatexCmds.int = LatexCmds.integral = LatexCmds['∫'] = bind(BigSymbol,'\\int ','&int;');
 
 
 
@@ -2417,8 +2422,10 @@ _.detach = function() {
 $.fn.mathquill = function(cmd, latex) {
   switch (cmd) {
   case 'redraw':
-    this.find(':not(:has(:first))')
-      .data(jQueryDataKey).cmd.redraw();
+    this.find(':not(:has(:first))').each(function() {
+      var data = $(this).data(jQueryDataKey);
+      if (data && data.cmd) Cursor.prototype.redraw.call(data.cmd);
+    });
     return this;
   case 'revert':
     return this.each(function() {
