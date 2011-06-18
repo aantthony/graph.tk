@@ -61,8 +61,10 @@ function compile(n){
     
     //Variables changed in the process of this compile()
     var changed=[];
-    
-    if(eq.type==eqtype.equality){
+	if(eq===undefined){
+		
+	}
+    else if(eq.type==eqtype.equality){
         if(typeof eq[0]=="string"){
             if(eq[0]=="y"){
                 //y=f(x)
