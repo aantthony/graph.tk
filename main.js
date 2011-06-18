@@ -663,8 +663,8 @@ if(window.addEventListener){
 }
 function hashDidChange(){
     app.empty();
-    if(location.hash.match(/^#json=/)) {
-        data = JSON.parse(decodeURIComponent(location.hash.substring(6)));
+    if((location.hash || location.search).match(/^#json=/)) {
+        data = JSON.parse(decodeURIComponent((location.hash || location.search).substring(6)));
         for(var idx in data.graphs) {
 			if(data.graphs.hasOwnProperty(idx)){
 	        	app.add(idx, !data.graphs[idx]);
@@ -686,7 +686,7 @@ function hashDidChange(){
             app.ui.legend(!!data.legend);
         }
     } else {
-        app.add(location.hash.substring(1).replace("%20"," "));
+        app.add(decodeURIComponent((location.hash || location.search).substring(1)));
     }
 
 }
@@ -699,10 +699,10 @@ app.scale=function(x,y,z){
 };
 app.init=function (){
     var fullscreen=!window.parent.length;
-    app.view_configured = location.hash.match(/^#json=/);
+    app.view_configured = (location.hash || location.search).match(/^#json=/);
 	app.ui.init(fullscreen);
     
-    if(location.hash!="" && location.hash!="#"){
+    if((location.hash || location.search).length>1){
         hashDidChange();
     }else if(fullscreen){
         var preferences;
