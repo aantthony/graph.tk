@@ -488,7 +488,7 @@ var latexchars={
 
 var obj={};
 //TODO: Maybe discretevector should be removed and assumed that all un .type'ed arrays are a discretevector by default.
-var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15};
+var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15,"lessthan":16,"greaterthan":17,"range":18};
 var __debug_parser=0;
 var __debug_mode=1;
 function __debug(x,y){
@@ -557,6 +557,20 @@ function p(inp){
             return [p(eq[0]),p(eq[1])].setType(eqtype.equality);
         }
         throw("Too many '='s");
+        return;
+    }else if(e.indexOf("<")!=-1){
+		var eq=e.split("<");
+        if(eq.length==2){
+            return [p(eq[0]),p(eq[1])].setType(eqtype.lessthan);
+        }
+        throw("Too many '<'s");
+        return;
+    }else if(e.indexOf(">")!=-1){
+		var eq=e.split(">");
+        if(eq.length==2){
+            return [p(eq[0]),p(eq[1])].setType(eqtype.greaterthan);
+        }
+        throw("Too many '>'s");
         return;
     }
     //---Recursive Parentheses parse
@@ -2074,9 +2088,11 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
     //simplifying might not be beneficial for all things.
     
     //For the time being, it shall be considered destructive.
-    if(this.type==eqtype.equality){
-        this[0]=this[0].simplify();
-        this[1]=this[1].simplify();
+ 
+	if(this.type==eqtype.equality || this.type==eqtype.lessthan || this.type==eqtype.greaterthan){
+		for(var i=0;i<this.length;i++){
+			this[i]=this[i].simplify();
+		}
         return this;
     }
     
@@ -2496,7 +2512,11 @@ Array.prototype.getString=function(braces,javascript){
             s+=",";
         }else if(self.type==eqtype.equality){
             s+="=";
-        }else if(self.type==eqtype.power){
+		}else if(self.type==eqtype.lessthan){
+			s+="<";
+	    }else if(self.type==eqtype.greaterthan){
+			s+=">";
+		}else if(self.type==eqtype.power){
             s+="^";
         }else if(self.type==eqtype.fraction){
             s+="/";
