@@ -52,8 +52,6 @@ var MessageStrings={
 };
 Number.prototype.format=function(digits) {
     var num=Number(this);
-    e = Math.E;
-    pi = Math.PI;
     if (!num) {
         return "0";
     } else if (num == pi) {
