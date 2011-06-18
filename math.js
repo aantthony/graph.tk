@@ -2547,7 +2547,7 @@ Array.prototype.getString=function(braces,javascript){
 };
 
 
-functions="u_d,sin,cos,tan,sec,cot,csc,cosec,acosh,asinh,atanh,cosh,sinh,tanh,cosech,csch,sech,coth,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int".split(",");
+functions="u_d,sin,cos,tan,sec,cot,csc,cosec,acosh,asinh,atanh,cosh,sinh,tanh,cosech,csch,sech,coth,log,exp,pow,Gamma,sinc,sqrt,W,fact,bellb,Zeta,u,doublefact,signum,asin,acos,atan,arcsin,arccos,arctan,tg,ln,abs,floor,round,ceil,atan2,random,min,max,clear,text,shaw,delta,Γ,ψ,diff,int,ζ".split(",");
 
 window._i=33;
 var known_derivatives={
