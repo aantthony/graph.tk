@@ -489,6 +489,7 @@ var latexchars={
 
 var obj={};
 //TODO: Maybe discretevector should be removed and assumed that all un .type'ed arrays are a discretevector by default.
+//		Yes, but we will keep it for now because it would be helpful in finding bugs where the type is not set.
 var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15,"lessthan":16,"greaterthan":17,"range":18};
 var __debug_parser=0;
 var __debug_mode=1;
@@ -2109,7 +2110,7 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
         }
     }
     
-    if(this.canEval && this.canEval()===true){
+    if((this.type!=eqtype.discretevector) && this.canEval && this.canEval()===true){
         return this.eval();
     }
 	for(var i=0;i<this.length;i++){
