@@ -481,7 +481,6 @@ function compile(n){
                 */
                 builder+="var tinc=1/max(width,height);for(var theta=0;theta<(2*pi);theta+=tinc){var rtmp=("+jsc+");ctx.line(rtmp*cos(theta),rtmp*sin(theta));}ctx.line("+jsc+",0);";
             	
-
 				if(fn.type==eqtype.greaterthan){
 					builder+="ctx.line(boundright+2,0);ctx.line(boundright+2,boundbottom-2);ctx.line(boundleft-2,boundbottom-2);ctx.line(boundleft-2,boundtop+2);ctx.line(boundright+2,boundtop+2);ctx.line(boundright+2,0);";
 					builder+="ctx.globalAlpha=0.2;ctx.fill();ctx.globalAlpha=1.0;";

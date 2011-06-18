@@ -2082,6 +2082,7 @@ Array.prototype.takeDenom=function(){
 };
 
 
+
 Array.prototype.simplify=function (onlyeval,___retry,hard){
     //NOTE: this code may be destructive to the array.
     //It should not be destructive to the array, because sometimes
