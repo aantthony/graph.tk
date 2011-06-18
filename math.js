@@ -2194,6 +2194,7 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
                 i--;
             }
         }
+/*
         var replacements_base=[];
         var replacements_exp=[];
         var to_splice=[];//IN ORDER
@@ -2241,6 +2242,9 @@ Array.prototype.simplify=function (onlyeval,___retry,hard){
             //   this[i]=[replacements_base[i],replacements_exp[i]].setType(eqtype.power);
             }
         }
+*/
+
+		
         for(var i=0;i<this.length;i++){
             var _prod=1;
 			/*while(i<this.length && (typeof (this[i]=this[i].simplify()) =="number")){
