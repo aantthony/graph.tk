@@ -435,8 +435,11 @@ function compile(n){
             var fn=tfuncs[i].simplify();
             
             //Get javascript expression.
-            var jsc=fn.getString(0,true);
-			
+            if(fn.type==eqtype.lessthan || fn.type==eqtype.greaterthan){
+				var jsc=fn[0].getString(0,true);
+			}else{
+	            var jsc=fn.getString(0,true);
+			}
 			//A little messy:
             jsc=jsc.replace(/app\.variables\[\"(x|y|z|r|theta)\"\]/g,"$1");
 
@@ -476,9 +479,17 @@ function compile(n){
 					tinc: reciprcal of pixels along max *circle* (ellipse to complicated) around screen area?
 					
                 */
-                builder+="var tinc=1/max(width,height);for(var theta=0;theta<(2*pi);theta+=tinc){var rtmp=("+jsc+");ctx.line(rtmp*cos(theta),rtmp*sin(theta));}ctx.line("+jsc+",0);ctx.stroke();";
-            }
-			console.log(builder);
+                builder+="var tinc=1/max(width,height);for(var theta=0;theta<(2*pi);theta+=tinc){var rtmp=("+jsc+");ctx.line(rtmp*cos(theta),rtmp*sin(theta));}ctx.line("+jsc+",0);";
+            	
+				if(fn.type==eqtype.greaterthan){
+					builder+="ctx.line(boundright+2,0);ctx.line(boundright+2,boundbottom-2);ctx.line(boundleft-2,boundbottom-2);ctx.line(boundleft-2,boundtop+2);ctx.line(boundright+2,boundtop+2);ctx.line(boundright+2,0);";
+					builder+="ctx.globalAlpha=0.2;ctx.fill();ctx.globalAlpha=1.0;";
+				}else if(fn.type==eqtype.lessthan){
+					builder+="ctx.line(0,0);";
+					builder+="ctx.globalAlpha=0.2;ctx.fill();ctx.globalAlpha=1.0;";
+				}
+				builder+="ctx.stroke()";
+			}
             
         }
     
