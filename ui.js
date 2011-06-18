@@ -635,7 +635,7 @@ app.ui=(function(){
 		$(inputbox).mathquill("editable");
 		//$(inputbox).mathquill("redraw");
         
-        $(inputbox).bind("keydown keyup",
+        $(inputbox).bind("keyup",
         function(){
             for(var i=0;i<graphs.length;i++){
                 if(graphs[i].gid==n.gid){
