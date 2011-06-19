@@ -64,7 +64,7 @@ input[type=button]{
 	margin-top:3px;
 	margin-bottom:4px;
 }
-h3{text-align:center}
+h3{text-align:center;padding-top:1em}
 .buttons{
     position:relative;
 	border-top:1px solid #ececec;
