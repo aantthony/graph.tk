@@ -987,24 +987,24 @@ Array.prototype.dependence=function(){
             dep.push(this[0]);
         }
         if(this[1].dependence){
-        var n=this[1].dependence();
-        for(var b=0;b<n.length;b++){
-            if(dep.indexOf(n[b])==-1){
-                dep.push(n[b]);
-            }
-        }
+        	var n=this[1].dependence();
+        	for(var b=0;b<n.length;b++){
+            	if(dep.indexOf(n[b])==-1){
+                	dep.push(n[b]);
+            	}
+        	}
         }
         return dep;
         
     }
     for(var i=0;i<this.length;i++){
         if(this[i].dependence){
-        var n=this[i].dependence();
-        for(var b=0;b<n.length;b++){
-            if(dep.indexOf(n[b])==-1){
-                dep.push(n[b]);
-            }
-        }
+        	var n=this[i].dependence();
+        	for(var b=0;b<n.length;b++){
+            	if(dep.indexOf(n[b])==-1){
+                	dep.push(n[b]);
+            	}
+        	}
         }
     }
     return dep;
