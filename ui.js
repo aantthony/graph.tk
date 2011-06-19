@@ -92,6 +92,7 @@ app.ui=(function(){
 	var drag;
 
 	//BUG: should be 64
+	
 	var scalex = 64.3;
 	var scaley = scalex;//not always
     var scalez = scalex;//not always
