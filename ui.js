@@ -50,7 +50,7 @@ app.config={
 		webkitVersion=Number(webkitVersion[1]);
 		if(webkitVersion>=534.46){
 			app.config.minorGridStyle="#eee";
-			app.config.majorGridStyle="#888";
+			app.config.majorGridStyle="#aaa";
 		}
 	}
 })();
@@ -93,7 +93,7 @@ app.ui=(function(){
 
 	//BUG: should be 64
 	
-	var scalex = 64.3;
+	var scalex = 65.7;
 	var scaley = scalex;//not always
     var scalez = scalex;//not always
 
