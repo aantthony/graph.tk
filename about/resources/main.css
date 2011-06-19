@@ -84,6 +84,9 @@ footer{
     border-top:none;
 }
 ol,ul{margin-left:2em}
+li{
+	margin-top:0.5em;
+}
 .header{
     width:900px;
     margin:auto;
