@@ -40,8 +40,20 @@ var messages={
 app.config={
     "lineWidth":1.5,
     "pt":true,
-    "font":"12px sans-serif"
+    "font":"12px sans-serif",
+	"minorGridStyle":"#bbb",
+	"majorGridStyle":"#555"
 };
+(function(){
+	var webkitVersion;
+	if(webkitVersion=/AppleWebKit\/([\d\.]+)/.exec(navigator.userAgent)){
+		webkitVersion=Number(webkitVersion[1]);
+		if(webkitVersion>=534.46){
+			app.config.minorGridStyle="#eee";
+			app.config.majorGridStyle="#888";
+		}
+	}
+})();
 app.ui=(function(){
 	var allowdrag=true;//Set using block: and unblock: in the postMessage API.
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
@@ -132,7 +144,7 @@ app.ui=(function(){
 		
         ctx.font=app.config.font;
         
-	    ctx.strokeStyle = "#888";
+	    ctx.strokeStyle = app.config.minorGridStyle;
         ctx.fillStyle="#888";
 	    ctx.lineWidth = 0.1;
         var n=0;
@@ -157,7 +169,7 @@ app.ui=(function(){
         var dblleft=gridsize*4 * ~~ (boundbottom / (4*gridsize)) - 4*gridsize;
 
         
-        
+        ctx.strokeStyle = app.config.majorGridStyle;
 
         ctx.lineWidth = 0.4;
 		for (var x = overleft; x <= overright; x += gridsize) {
@@ -950,7 +962,6 @@ app.ui=(function(){
 		ctx.move=function(px,py,pz){
 			return ctx.moveTo(scalex*px-cx,cy-scaley*py);
 		};
-        
 		ctx.line=function(px,py,pz){
 			return ctx.lineTo(scalex*px-cx,cy-scaley*py);
 		};
