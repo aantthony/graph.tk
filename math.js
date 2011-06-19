@@ -532,7 +532,7 @@ function p(inp){
     //TODO: -- -> +
     e=e.replace(/∞/g,"Infinity");
     e=e.replace(/\.([^\d]|$)/g,"*$1");
-    e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\.!])/g,"$1*$3");
+    e=e.replace(/([\d]+(\.[\d]+)?)([^\+\-\*\/\^\:\(\)\d\=\<\>\.!])/g,"$1*$3");
     
     //TODO: Following line is a bit hacky. Specifications need be made to clear things up.
     e=e.replace(/([xyzπϕ])([exyzπϕ])/g,"$1*$2");
@@ -546,9 +546,9 @@ function p(inp){
     
     e=e.replace(/∫([^\*])/g,"∫*$1");
     e=e.replace(/([xyzπϕ\d\.])∫/g,"$1*∫");
-	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=])\(/g,"$1:(");
+	e=e.replace(/([^\+\-\*\/\^\:\(\)\d\=\<\>])\(/g,"$1:(");
     
-	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=!])/g,")*$1");
+	e=e.replace(/\)([^\+\-\*\/\^\:\(\)\=\<\>!])/g,")*$1");
     //multiplicative identity
     e=e.replace(/\*([\)\=]|$)/g,"$1");
     //Double factorial
