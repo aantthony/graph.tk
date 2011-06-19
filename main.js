@@ -419,7 +419,7 @@ function compile(n){
 					builder+="ctx.line(boundright+2,boundtop+2);ctx.line(boundright+2,boundbottom-2);";
 					builder+="ctx.globalAlpha=0.2;ctx.fill();ctx.globalAlpha=1.0;";
 				}else if(fn.type==eqtype.lessthan){
-					builder+="var thtmp=("+jsc+");ctx.line(rmax*cos(thtmp),boundtop+2);ctx.line(boundleft-2,rmax*cos(thtmp),boundtop+2);ctx.line(boundright+2,boundtop+2);ctx.line(boundright+2,0);";
+					builder+="var thtmp=("+jsc+")%(2*pi);if(thtmp>7*pi/4){ctx.line(boundright+2,boundbottom-2);}if(thtmp>5*pi/4){ctx.line(boundleft-2,boundbottom-2);}if(thtmp>pi/4){ctx.line(boundleft-2,boundtop+2);ctx.line(boundright+2,boundtop+2);}ctx.line(boundright+2,0);ctx.line(0,0);";
 					builder+="ctx.globalAlpha=0.2;ctx.fill();ctx.globalAlpha=1.0;";
 				}
 				builder+="ctx.stroke();";
