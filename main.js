@@ -485,7 +485,7 @@ function compile(n){
 					builder+="ctx.line(boundright+2,0);ctx.line(boundright+2,boundbottom-2);ctx.line(boundleft-2,boundbottom-2);ctx.line(boundleft-2,boundtop+2);ctx.line(boundright+2,boundtop+2);ctx.line(boundright+2,0);";
 					builder+="ctx.globalAlpha=0.2;ctx.fill();ctx.globalAlpha=1.0;";
 				}else if(fn.type==eqtype.lessthan){
-					builder+="ctx.line(0,0);";
+					builder+="var theta=0;ctx.line("+jsc+"*cos(theta),"+jsc+"*sin(theta));";
 					builder+="ctx.globalAlpha=0.2;ctx.fill();ctx.globalAlpha=1.0;";
 				}
 				builder+="ctx.stroke()";
