@@ -706,7 +706,7 @@ app.ui=(function(){
         if(block_it != undefined) {
             allowdrag=block_it?false:true;
         } else {
-            return !!allowdrag;
+            return !allowdrag;
         }
     },"legend":function(show_legend){
         if(show_legend !== undefined) {
