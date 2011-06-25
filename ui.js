@@ -1031,16 +1031,16 @@ app.ui=(function(){
 		
 		//		 .bind("resize",resize);
 		if(window.addEventListener){
-			document.body.addEventListener("gesturechange",gesturechange);
-			document.body.addEventListener("gesturestart",gesturestart);
-			document.body.addEventListener("gestureend",gestureend);
+			document.body.addEventListener("gesturechange",gesturechange, false);
+			document.body.addEventListener("gesturestart",gesturestart, false);
+			document.body.addEventListener("gestureend",gestureend, false);
 			
-			document.body.addEventListener("touchmove",touchmove);
-			document.body.addEventListener("touchstart",touchstart);
-			document.body.addEventListener("touchend",touchend);
+			document.body.addEventListener("touchmove",touchmove, false);
+			document.body.addEventListener("touchstart",touchstart, false);
+			document.body.addEventListener("touchend",touchend, false);
 			
-			window.addEventListener("mousewheel",mousewheel);
-			window.addEventListener("DOMMouseScroll",mousewheel);
+			window.addEventListener("mousewheel",mousewheel, false);
+			window.addEventListener("DOMMouseScroll",mousewheel, false);
 
 			con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
 			con.addEventListener("DOMMouseScroll",function(e){e.stopPropagation();},false);
