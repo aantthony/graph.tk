@@ -337,6 +337,77 @@ app.ui=(function(){
 	    lmx = mx;
 	    lmy = my;
 	}
+	var gestureBegin_scalex=1;
+	var gestureBegin_scaley=1;
+	function gesturestart(e){
+		gestureBegin_scalex=scalex;
+		gestureBegin_scaley=scaley;
+		
+		e.preventDefault();
+		return false;
+	}
+	function gestureend(e){
+		e.preventDefault();
+		return false;
+	}
+	function gesturechange(e){
+		var ex=e.scale;
+		scalex=gestureBegin_scalex*ex;
+		scaley=gestureBegin_scaley*ex;
+		/*
+		
+		var mx = ?;
+		var my = ?;
+		var dx=mx+cx;
+		var dy=my-cy;
+		if((dx*dx+dy*dy)>1000){
+            //Move camera towards the point if
+            //the squared distance to the origin is more than 1000.
+			cx=ex*(mx+cx)-mx;
+			cy+=my+ex*(cy-my)-cy;
+		}
+		
+		*/
+		
+		updatePTD(mx,my);
+	    draw();
+	
+		e.preventDefault();
+		return false;
+	}
+	function touchmove(e){
+		if(e.touches.length!=1){
+			return;
+		}
+		var s=e.touches[0];
+		mousemove({x:s.screenX,y:s.screenY,button:0});
+		e.preventDefault();
+		return false;
+	}
+	function touchstart(e){
+		if(e.touches.length!=1){
+			return;
+		}
+		drag=true;
+		if (!drawwhiledrag_c) {
+	        setTimeout(drawwhiledrag, 1000);
+	        drawwhiledrag_c++;
+	    }
+		
+		var s=e.touches[0];
+		lmx=s.screenX;
+		lmy=s.screenY;
+	}
+	function touchend(e){
+		if(e.touches.length!=1){
+			return;
+		}
+		drag=false;
+		perform_translation();
+		draw();
+		e.preventDefault();
+		return false;
+	}
 	var scaleconst = 0.001;
 	if (/AppleWebKit/.test(navigator.userAgent)) {
 	    scaleconst = 0.0001;
@@ -948,14 +1019,35 @@ app.ui=(function(){
 		proto = _proto.cloneNode(true);
 		proto.removeAttribute("id");
 
-		canvas.onmousedown=mousedown;
+		$(canvas).bind("mousedown",mousedown);
+		// Touches
 		
-		document.body.addEventListener("mouseup",function(){if(!allowdrag){return;}drag=false;perform_translation();canvas.style.cursor = "default";draw()},false);
-		document.body.addEventListener("mousemove",mousemove,false);
-		   	   window.addEventListener("mousewheel",mousewheel,false);
-               window.addEventListener("DOMMouseScroll",mousewheel,false);
-               window.addEventListener("resize",resize,false);
-        con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
+		//Bind events:
+		$(document.body).bind("mouseup",function(){if(!allowdrag){return;}drag=false;perform_translation();canvas.style.cursor = "default";draw()})
+						.bind("mousemove",mousemove)
+					//	.bind("gesturestart", gesturestart)
+					//	.bind("gesturechange",gesturechange)
+					//	.bind("gestureend",	  gestureend);
+		
+		//		 .bind("resize",resize);
+		if(window.addEventListener){
+			document.body.addEventListener("gesturechange",gesturechange);
+			document.body.addEventListener("gesturestart",gesturestart);
+			document.body.addEventListener("gestureend",gestureend);
+			
+			document.body.addEventListener("touchmove",touchmove);
+			document.body.addEventListener("touchstart",touchstart);
+			document.body.addEventListener("touchend",touchend);
+			
+			window.addEventListener("mousewheel",mousewheel);
+			window.addEventListener("DOMMouseScroll",mousewheel);
+
+			con.addEventListener("mousewheel",function(e){e.stopPropagation();},false);
+			con.addEventListener("DOMMouseScroll",function(e){e.stopPropagation();},false);
+		}else{
+			window.onmousewheel=window.DOMMouseScroll=mousewheel;
+			con.onmousewheel=window.onDOMMouseScroll=function(e){e.stopPropagation();};
+		}
 		document.body.removeChild(document.body.firstChild);
 		//we may have to implement scaling if browsers don't work properly
         if(webkit){
