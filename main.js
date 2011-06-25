@@ -729,6 +729,9 @@ function hashDidChange(){
         if(data.console != undefined) {
             app.ui.button('>_', data.console);
         }
+        if(data.reload != undefined) {
+            app.ui.button('reload', data.reload);
+        }
         if(data.legend != undefined) {
             app.ui.legend(!!data.legend);
         }
