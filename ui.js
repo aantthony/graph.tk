@@ -58,9 +58,7 @@ app.ui=(function(){
 	var allowdrag=true;//Set using block: and unblock: in the postMessage API.
 	var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
     if(/(iPhone)/i.test(navigator.userAgent)){
-        if(!navigator.standalone){
-           alert(messages.standalone);
-        }
+	
     }
 	var draw;
 	var ctx;
