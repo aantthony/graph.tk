@@ -934,15 +934,10 @@ app.ui=(function(){
         
         var alink=document.createElement("a");
         alink.href="about/";
+        alink.innerHTML = "&nbsp;";
+        alink.className = 'help_button';
         alink.target="_blank";
         
-        var newfuncbtn=document.createElement("input");
-        newfuncbtn.value="";
-        newfuncbtn.style.textDecoration="none";
-        newfuncbtn.type="button";
-        newfuncbtn.title=messages.help;
-        
-        alink.appendChild(newfuncbtn);
         buttons.appendChild(alink);
         
         funcs.appendChild(buttons);
