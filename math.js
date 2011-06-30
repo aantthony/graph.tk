@@ -501,7 +501,7 @@ function __debug(x,y){
 }
 var spaces="                     ";
 var level=0;
-function p(inp){
+function p_old(inp){
     if(typeof inp=="number" || !isNaN(inp)){
         return Number(inp);
     }else if(typeof inp=="object"){
@@ -556,21 +556,21 @@ function p(inp){
     if(e.indexOf("=")!=-1){
         var eq=e.replace("==","[equals][equals]").split("=").map(function(e){return e.replace("[equals][equals]","==");});
         if(eq.length==2){
-            return [p(eq[0]),p(eq[1])].setType(eqtype.equality);
+            return [p_old(eq[0]),p_old(eq[1])].setType(eqtype.equality);
         }
         throw("Too many '='s");
         return;
     }else if(e.indexOf("<")!=-1){
 		var eq=e.split("<");
         if(eq.length==2){
-            return [p(eq[0]),p(eq[1])].setType(eqtype.lessthan);
+            return [p_old(eq[0]),p_old(eq[1])].setType(eqtype.lessthan);
         }
         throw("Too many '<'s");
         return;
     }else if(e.indexOf(">")!=-1){
 		var eq=e.split(">");
         if(eq.length==2){
-            return [p(eq[0]),p(eq[1])].setType(eqtype.greaterthan);
+            return [p_old(eq[0]),p_old(eq[1])].setType(eqtype.greaterthan);
         }
         throw("Too many '>'s");
         return;
@@ -581,7 +581,7 @@ function p(inp){
 		e=e.replace(/\([^\(\)]*\)/g,function(n){
             fail=false;
 			var h=random_hash();
-			obj[h]=p(n.substring(1,n.length-1));
+			obj[h]=p_old(n.substring(1,n.length-1));
 			return "aaaa"+h+"aaaa";
 		});
         if(fail){
@@ -600,7 +600,7 @@ function p(inp){
         terms.type=eqtype.discretevector;
         var be=e.split(",");
         be.forEach(function(zz){
-            terms.push(p(zz));
+            terms.push(p_old(zz));
         });
     
     }else if((e.indexOf("+")!=-1) || (e.indexOf("-")!=-1)){
@@ -611,10 +611,10 @@ function p(inp){
             if(term_op.indexOf(e[i])!=-1){
                 var s=e.substring(last,i);
                 if(nextisinverse){
-                    terms.push(p(s).multiply(-1));
+                    terms.push(p_old(s).multiply(-1));
                     nextisinverse=false;
                 }else{
-                    terms.push(p(s));
+                    terms.push(p_old(s));
                 }
                 if(e[i]=="-"){
                     nextisinverse=true;
@@ -623,9 +623,9 @@ function p(inp){
             }
         }
         if(nextisinverse){
-            terms.push(p(e.substring(last,e.length)).multiply(-1));
+            terms.push(p_old(e.substring(last,e.length)).multiply(-1));
         }else{
-            terms.push(p(e.substring(last,e.length)));
+            terms.push(p_old(e.substring(last,e.length)));
         }
         
         
@@ -640,10 +640,10 @@ function p(inp){
             if(prod_op.indexOf(e[i])!=-1){
                 var s=e.substring(last,i);
                 if(nextisinverse){
-                    denom.push(p(s));
+                    denom.push(p_old(s));
                     nextisinverse=false;
                 }else{
-                    terms.push(p(s));
+                    terms.push(p_old(s));
                 }
                 if(e[i]=="/"){
                     nextisinverse=true;
@@ -652,9 +652,9 @@ function p(inp){
             }
         }
         if(nextisinverse){
-            denom.push(p(e.substring(last,e.length)));
+            denom.push(p_old(e.substring(last,e.length)));
         }else{
-            terms.push(p(e.substring(last,e.length)));
+            terms.push(p_old(e.substring(last,e.length)));
         }
         if(denom.length){
             terms=[terms,denom];
@@ -672,14 +672,14 @@ function p(inp){
                 if(s==""){
                     terms[terms.length-1]=["fact",terms[terms.length-1]].setType(eqtype.fn);
                 }else{
-                    terms.push(["fact",p(s)].setType(eqtype.fn));
+                    terms.push(["fact",p_old(s)].setType(eqtype.fn));
                 }
                 last=i+1;
             }
         }
         var final=e.substring(last,e.length);
         if(final!=""){
-            terms.push(p(final));
+            terms.push(p_old(final));
         }
      
     }else if(e.indexOf("‼")!=-1){
@@ -694,14 +694,14 @@ function p(inp){
                 if(s==""){
                     terms[terms.length-1]=["doublefact",terms[terms.length-1]].setType(eqtype.fn);
                 }else{
-                    terms.push(["doublefact",p(s)].setType(eqtype.fn));
+                    terms.push(["doublefact",p_old(s)].setType(eqtype.fn));
                 }
                 last=i+1;
             }
         }
         var final=e.substring(last,e.length);
         if(final!=""){
-            terms.push(p(final));
+            terms.push(p_old(final));
         }
      
     }else if(e.indexOf(":")!=-1){
@@ -728,12 +728,12 @@ function p(inp){
         }else{
             var match=/^log_([\d\.\+\-e]+)$/.exec(be[0]);
             if(match){
-                var fn_=["log",p(be[1])].setType(eqtype.fn);
+                var fn_=["log",p_old(be[1])].setType(eqtype.fn);
                 terms.type=eqtype.fraction;
                 terms.push(fn_);
-                terms.push(["log", p(match[1])].setType(eqtype.fn));
+                terms.push(["log", p_old(match[1])].setType(eqtype.fn));
             }else{
-                var fname=p(be[0]);
+                var fname=p_old(be[0]);
                 if(fname.type==eqtype.power){
                     var basefn=fname[0].simplify();
                     var power=fname[1].simplify();
@@ -746,7 +746,7 @@ function p(inp){
                     
                     if( 1 || is_it_a_trig_function){
                         terms.type=eqtype.power;
-                        terms.push([basefn,p(be[1])].setType(eqtype.fn));
+                        terms.push([basefn,p_old(be[1])].setType(eqtype.fn));
                         terms.push(power);
                     }
                     
@@ -756,10 +756,10 @@ function p(inp){
                 }else if(typeof fname!="string"){
                     terms.type=eqtype.product;
                     terms.push(fname);
-                    terms.push(p(be[1]));
+                    terms.push(p_old(be[1]));
                 }else{
                     terms.push(fname);
-                    terms.push(p(be[1]));
+                    terms.push(p_old(be[1]));
                 }
             }
         }
@@ -774,10 +774,10 @@ function p(inp){
             throw (MessageStrings.expchain);
             return;
         }
-        var base=p(be[0]);
+        var base=p_old(be[0]);
         terms.type=eqtype.power;
         terms.push(base);
-        terms.push(p(be[1]));
+        terms.push(p_old(be[1]));
         
        
     }else{
@@ -789,14 +789,14 @@ function p(inp){
             if(match){
                 alert("old code: "+e);
                 terms.type=eqtype.product;
-                terms.push(p(match[1]));
+                terms.push(p_old(match[1]));
                 terms.push(match[3]);
             }else{
                 var vars=e.split(".");
                 if(vars.length>1){
                     terms.type=eqtype.product;
                     vars.forEach(function(v){
-                        terms.push(p(v));
+                        terms.push(p_old(v));
                     });
                 }else{
                     return e;
