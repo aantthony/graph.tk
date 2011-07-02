@@ -108,9 +108,19 @@ function p(inp){
 console.log(p("1+2"));
 */
 
+var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15,"lessthan":16,"greaterthan":17,"range":18};
+
+
 
 function p_internal(s){
+	if(!isNaN(s)){
+		return Number(s);
+	}else if(s===""){
+		return undefined;
+	}
+	
 	var terms=[];
+	terms.type=eqtype.sum;
 	var sl=s.length;
 	var type={
 		unknown:0,
@@ -118,7 +128,7 @@ function p_internal(s){
 		number:2,
 		variable:3
 	};
-	var current=type.unkown;
+	var current=type.unknown;
 	var test=[undefined,
 		"~!^&*-+=<>/",
 		"1234567890."
@@ -142,14 +152,21 @@ function p_internal(s){
 			}else if(current===type.variable){
 				last=(String(s.substring(start,i)));
 			}else if(current===type.operator){
-				//eq.push([s.substring(start,i), last]);
 				var no=s.substring(start,i);
 				console.log("reached *, term=["+last);
-			
+				// lastlast^last*
+				if(o=="^"){
+					last=[term.pop(),last];
+					last.type=eqtype.power;
+				}else{
+					
+				}
+				
 				if(typeof term==="object"){
 					term.push(last)
 				}else{
 					term=[last];
+					term.type=eqtype.product;
 				}
 				
 				if(no=="+"){
@@ -166,28 +183,52 @@ function p_internal(s){
 				o=no;
 			}
 			start=i;
-			current=3;
-			for(var n=1;n<3;n++){
-				if(test[n].indexOf(s[i])!=-1){
-					current=n;
-					break;
+			if(i<s.length){
+				current=3;
+				for(var n=1;n<3;n++){
+					if(test[n].indexOf(s[i])!=-1){
+						current=n;
+						break;
+					}
 				}
+				console.log(current,s[i])
 			}
 		}
 	}
-	if(start!=sl){
+	if(start!=sl || 1){
+		console.log("more!",s,current);
 		if(current===type.number){
 			last=(Number(s.substring(start)));
 		}else if(current===type.variable){
 			last=(String(s.substring(start)));
+		}else if(current===undefined){
+			
 		}else{
 			throw("Error: Expression ended in operator: "+s.substring(start))
 		}
-		terms.push(last);
+		
+		
+		if(o=="^"){
+			last=[term.pop(),last];
+			last.type=eqtype.power;
+		}
+		
+		if(typeof term==="object"){
+			term.push(last)
+		}else{
+			term=[last];
+			term.type=eqtype.product;
+		}
+		
+		while(term.length===1){
+				term=term[0];
+		}
+		terms.push(term);
+		
 	}
 	//Parse operators:
 	//sum first:
-	
+	console.log(["parse",s,terms.getString()]);
 	return terms;
 }
 
@@ -240,4 +281,112 @@ function p(inp){
 }
 
 
+String.prototype.getString=function(__ignore,javascript){
+    if(javascript && window.app){
+        var self=dirty(this.toString());
+        if(self=="x"||self=="y"){
+            return self;
+        }
+        if(app.variables[self]){
+            return "app.variables["+JSON.stringify(self)+"]";
+        }
+        if(window[self]){
+            return self;
+        }
+        return "app.variables["+JSON.stringify(self)+"]";
+    }
+    return this.toString();
+};
+Number.prototype.getString=function(){
+    return this.toString();
+};
+
+Array.prototype.getString=function(braces,javascript){
+    var s=braces?"(":"";
+    var self=this;
+    var _first=true;
+    var endchar="";
+    var afterme="";
+    var second=true;
+    //this.forEach(function(e){
+    for(var i=0;i<this.length;i++){
+        var e=this[i];
+        if(!_first){
+            second=false;
+        }
+        if(_first){
+            if(javascript && self.type==eqtype.power){
+                s+="pow(";
+                endchar=")";
+            }
+            if(!javascript && self.type==eqtype.pm){
+                s+="±";
+            }
+            else if(braces && self.type==eqtype.discretevector){
+                s+="[";
+                endchar="]";
+            }
+            else if(self.type==eqtype.fn){
+                if(typeof e !="string" && typeof e!="function"){
+                    throw(MessageStrings.fnnamenotstring);
+                    return "ERROR";
+                }
+                if(functions.indexOf(e)==-1){
+                    var _found=false;
+                    if(window && window.app && window.app.variables && window.app.variables[e] && typeof window.app.variables[e]=="function"){
+                        _found=true;
+                    }
+                    if(!_found){
+                        throw("Unknown function: "+e);
+                        return "ERROR";
+                    }
+                }
+                afterme="(";
+                endchar=")";
+            }
+            _first=false;
+        }else if(self.type==eqtype.sum){
+            s+="+";
+        }else if(self.type==eqtype.product){
+            s+="*";
+        }else if(javascript && self.type==eqtype.power){
+            s+=",";
+        }else if(self.type==eqtype.equality){
+            s+="=";
+		}else if(self.type==eqtype.lessthan){
+			s+="<";
+	    }else if(self.type==eqtype.greaterthan){
+			s+=">";
+		}else if(self.type==eqtype.power){
+            s+="^";
+        }else if(self.type==eqtype.fraction){
+            s+="/";
+        }else if(self.type==eqtype.fn){
+            if(second){
+                s+=",";
+            }
+        }else{
+            s+=",";
+        }
+        if(e.type==eqtype.discretevector){
+            s+=e.getString(0,javascript);
+        }else{
+            s+=e.getString(10,javascript);
+        }
+        
+        s+=afterme;
+        afterme="";
+    }
+    s+=endchar;
+    endchar="";
+    if(braces){
+        s+=")";
+    }
+    return s;
+};
+
 console.log(p("1+2*3+1+1"));
+
+function check(n){
+	return [(p(n).getString(0,1)),(n)];
+}
