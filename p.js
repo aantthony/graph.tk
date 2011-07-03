@@ -185,8 +185,6 @@ var p_internal=(function (){
 	function(e){return parenmustbe.indexOf(e)!=-1;},
 	function(e){return varcannotbe.indexOf(e)==-1;}
 	];
-	window.r=regex;
-	window.o=ochars;
 	
 	function precedence(v){
 		if(!operators[v]){
@@ -255,7 +253,7 @@ var p_internal=(function (){
 		}
 		
 		function next_token(token){
-			console.log(token.v.s, names[token.t]);
+			//console.log(token.v.s, names[token.t]);
 			// Read a token.
 			// If the token is a number, then add it to the output queue.
 			if(token.t==types.number || token.t==types.variable){
@@ -466,6 +464,9 @@ var p_internal=(function (){
 			next_rpn(the_operator);
 
 		}
+		if(rpn_stack.length!==1){
+			throw("Stack not the right size!")
+		}
 		return rpn_stack[0];
 		return output.map(function(o){return o.v}).join(" ");
 	}
@@ -475,8 +476,26 @@ var p_internal=(function (){
 })();
 
 
-
+function p(x){
+	return p_internal(x);
+}
 
 function check(n){
 	return [(p(n).getString(0,1)),(n)];
+}
+function test(){
+	
+	var tests=["x^2+3*(x+3)","1+((((((((((((((3)))))))))))*3/32)))"]
+
+	var start=new Date();
+	for(var i=0;i<10000;i++){
+		tests.forEach(function(e){
+			p(e);
+		});
+	}
+
+	var end=new Date();
+	console.log("Test performed in "+(end-start)+"ms");
+
+
 }
