@@ -108,7 +108,9 @@ Array.prototype.getString=function(braces,javascript){
     return s;
 };
 String.prototype.__defineGetter__("s",function(){return JSON.stringify(String(this));});
-function p_internal(s){
+
+
+var p_internal=(function(){
 	var types={
 		number:1,
 		operator:2,
@@ -116,264 +118,291 @@ function p_internal(s){
 		variable:4
 	};
 	var names=["none","num","op","paren","var"];
-	var current_type=0;
-	var i=0,len=s.length;
+
+
+	var left=0;
+	var right=1;
+
+	var operators=		[[","],		["=","+=","-=","*=","/=","%=","&=","^=","|="],	["?:"],	["||"],	["&&"],["|"],["\u22BB"],["&"],["==","!=","!==","==="],[">>","<<"],["+","-"],["*","/","%"],["!","~"],["++","++","()","[]",".","->"],["::"]];
+	var operators_assoc=[0,			1,	1,												0,		0,		0, 0, 0, 0, 0, 0, 0, 1, 0, 0];
 	
-	var regex=[0,/[\d\.]/,
-	/[\!\~\^\&\*\-\+\=\/]/,/[\(\)\[\]]/,
-   /[^\!\~\^\&\*\-\+\=\/\d\.\(\)\[\]]/
-	];
-	var current_token=s[0];
-	current_type=4;
-	for(var t=1;t<4;t++){
-		if(regex[t].test(current_token)){
-			current_type=t;
-			break;
+	var _ochars = operators.map(function(e){return e.join("")}).join("");
+	var ochars="";
+	for(var ochar_i=_ochars.length-1;ochar_i>=0;ochar_i--){
+		
+		if(ochars.indexOf(_ochars[ochar_i])==-1){
+			ochars+=_ochars[ochar_i];
 		}
 	}
-	var output=[];
-	var stack=[];
-	function precedence(v){
-		var p=[
-			["::"],
-			["++","++","()","[]",".","->"],
-			["!","~"],
-			["*","/","%"],
-			["+","-"],
-			[">>","<<"],
-			["==","!=","!==","==="],
-			["&"],
-			["^"],
-			["|"],
-			["&&"],
-			["||"],
-			["?:"],
-			["=","+=","-=","*=","/=","%=","&=","^=","|="],
-			["throw"],
-			[","]
-			
+	_ochars=undefined;
+	/*var regex=[0,/[\d\.]/,
+		/[\!\~\^\&\*\-\+\=\/]/,/[\(\)\[\]]/,
+	   /[^\!\~\^\&\*\-\+\=\/\d\.\(\)\[\]]/
 		];
-		for(var i=0,len=p.length;i<len;i++){
-			if(p[i].indexOf(v)!=-1){
+		*/
+	var regex=[0,
+	function(e){return "1234567890.".indexOf(e)!==-1;},
+	function(e){return ochars.indexOf(e)!==-1;},
+	function(e){return ochars.indexOf(e)!==1;}
+	]
+	
+	function precedence(v){
+
+		for(var i=0,len=operators.length;i<len;i++){
+			if(operators[i].indexOf(v)!=-1){
 				return i;
 			}
 		}
-		throw("Precedence not known!");
+		throw("Precedence of "+v+" not known!");
+	}
+
+	function associativity(v){
+
+		for(var i=0,len=operators.length;i<len;i++){
+			if(operators[i].indexOf(v)!=-1){
+				return operators_assoc[i];
+			}
+		}
+		throw("Associativity of "+v+" not known!");
 	}
 	
-	var left=0;
-	var right=1;
-	function associativity(v){
-		return left;
-	}
-	function next_token(token){
-		console.log(token.v.s, names[token.t]);
-		// Read a token.
-		// If the token is a number, then add it to the output queue.
-		if(token.t==types.number){
-			output.push(token);
-		}
-		// If the token is a function token, then push it onto the stack.
-		if(token.t===types.func){
-			stack.push(token);
-		}
-		// If the token is a function argument separator (e.g., a comma):
-		if(token.t===types.comma){
-			
-			// Until the token at the top of the stack is a left parenthesis,
-			while(stack[stack.length-1].v!="("){
-			
-				// If no left parentheses are encountered,
-				if(!stack.length){
-					// either the separator was misplaced or parentheses were mismatched.
-					throw("either the separator was misplaced or parentheses were mismatched.")
-				}
-				// pop operators off the stack onto the output queue.
-				output.push(stack.pop());
+	return function (s){
+		
+		var current_type=0;
+		var i=0,len=s.length;
+
+		var current_token=s[0];
+		current_type=4;
+		for(var t=1;t<4;t++){
+			if(regex[t](current_token)){
+				current_type=t;
+				break;
 			}
-			
-			
 		}
-		// If the token is an operator
-		if(token.t===types.operator){
-			//, o1, then:
-			var o1=token;
-			
-			var o1associative=associativity(o1.v);
-			var o1precedence=precedence(o1.v);
-			// ("o2" is assumed to exist)
-			var o2;
-			
-			// while
-			while(
+		var output=[];
+		var stack=[];
+
+		
+		function next_token(token){
+			//console.log(token.v.s, names[token.t]);
+			// Read a token.
+			// If the token is a number, then add it to the output queue.
+			if(token.t==types.number || token.t==types.variable){
+				output.push(token);
+			}
+			// If the token is a function token, then push it onto the stack.
+			if(token.t===types.func){
+				stack.push(token);
+			}
+			// If the token is a function argument separator (e.g., a comma):
+			if(token.t===types.comma){
+
+				// Until the token at the top of the stack is a left parenthesis,
+				while(stack[stack.length-1].v!="("){
+
+					// If no left parentheses are encountered,
+					if(!stack.length){
+						// either the separator was misplaced or parentheses were mismatched.
+						throw("either the separator was misplaced or parentheses were mismatched.")
+					}
+					// pop operators off the stack onto the output queue.
+					output.push(stack.pop());
+				}
+
+
+			}
+			// If the token is an operator
+			if(token.t===types.operator){
+				//, o1, then:
+				var o1=token;
 				
-				//there is an operator token, o2, at the top of the stack
-				(stack.length && (o2 = stack[stack.length-1]).t===types.operator)
-				//and
-				&&
-			// either
-			 (
-				(
-				//o1 is left-associative
-				o1associative==left
-				
+				var o1precedence=precedence(o1.v);
+				//var o1associative=associativity(o1.v);
+				var o1associative=operators_assoc[o1precedence];
+				// ("o2" is assumed to exist)
+				var o2;
+
+				// while
+				while(
+
+					//there is an operator token, o2, at the top of the stack
+					(stack.length && (o2 = stack[stack.length-1]).t===types.operator)
 					//and
 					&&
 					
-				//its precedence is
+				// either
+				 (
+					(
+					//o1 is left-associative
+					o1associative==left
+
+						//and
+						&&
+
+						//its precedence is
+						o1precedence
+
+						//less than or equal to
+						<=
+
+						//that of o2,
+						precedence(o2.v)
+					)
+				//or
+				||
+					(
+					//o1 is right-associative
+					o1associative!=left
+					
+					//and
+					&&
+					
+					//its precedence is
 					o1precedence
+
+					//less than
+					<
 					
-					//less than or equal to
-					<=
-					
-					//that of o2,
+					//that of o2
 					precedence(o2.v)
-				)
-			//or
-			||
-				(
-				//o1 is right-associative
-				o1associative!=left
-				//and
-				&&
-				//its precedence is
-				o1precedence
-				
-				//less than
-				<
-				precedence(o2.v)
-				)
-				
-			 )
-			
-			){
-				// pop o2 off the stack, onto the output queue;
-				output.push(stack.pop());
-			}
-			
-			// push o1 onto the stack.
-			stack.push(o1);
-		}
-		
-		// If the token is a left parenthesis,
-		if(token.v=="("){
-			//then push it onto the stack.
-			stack.push(token);
-		}
-		// If the token is a right parenthesis:
-		if(token.v==")"){
-			// Until the token at the top of the stack is a left parenthesis,
-			while(stack[stack.length-1].v!="("){
-			
-				// If the stack runs out without finding a left parenthesis, then
-				if(!stack.length){
-					//there are mismatched parentheses.
-					throw("there are mismatched parentheses");
+					)
+
+				 )
+
+				){
+					// pop o2 off the stack, onto the output queue;
+					output.push(stack.pop());
 				}
-				// pop operators off the stack onto the output queue.
-				output.push(stack.pop());
+
+				// push o1 onto the stack.
+				stack.push(o1);
 			}
-			
-			// Pop the left parenthesis from the stack, but not onto the output queue.
-			if(stack.pop().v!="("){
-				throw("Pop the left parenthesis from the stack: Not found!")
+
+			// If the token is a left parenthesis,
+			if(token.v=="("){
+				//then push it onto the stack.
+				stack.push(token);
 			}
-			
-			// If the token at the top of the stack is a function token, pop it onto the output queue.
-			if(stack[stack.length-1].t===types.func){
-				output.push(stack.pop);
-			}
-			
-		}
-		
-	};
-	
-	while(i<len){
-		i++;
-		var c;
-		if(!(i<len)){
-			next_token({v:current_token,t:current_type});
-			//send it
-			current_token="";
-			break;
-		}else if(regex[current_type].test(c=s[i])){
-			current_token+=c;
-		}else{
-			//console.log("change detected at "+s[i]);
-			//We've got a token!
-			
-			//send it
-			next_token({v:current_token,t:current_type});
-			
-			//move on
-			if(current_type===types.operator || current_type===types.paren){
-				
-				//console.log("just finished op: ",current_token.s, names[current_type]);
-				//console.log("now @ "+c);
-				//Just finished an operator.
-				
-				//send operator: Wait no, don't send it.
-				
-				current_type=4;
-				for(var t=1;t<4;t++){
-					if(regex[t].test(c)){
-						current_type=t;
-						break;
+			// If the token is a right parenthesis:
+			if(token.v==")"){
+				// Until the token at the top of the stack is a left parenthesis,
+				while(stack[stack.length-1].v!="("){
+
+					// If the stack runs out without finding a left parenthesis, then
+					if(!stack.length){
+						//there are mismatched parentheses.
+						throw("there are mismatched parentheses");
 					}
+					// pop operators off the stack onto the output queue.
+					output.push(stack.pop());
 				}
-				//console.log("just found out that ",c.s," is a "+names[current_type]);
-				
-					
-			}else{
 
-				if(regex[types.operator].test(c)){
-					//We've got an operator!
-					
-					current_type=types.operator;
-					//DO NOT SEND OPERATOR TOKEN YET.
-					
-				}else if(regex[types.paren].test(c)){
-					
-					current_type=types.paren;
-					
-				}else{
-					//Let's assume multiplication
-
-					console.error("Operator was expected between ",current_token.s," and ",c.s);
+				// Pop the left parenthesis from the stack, but not onto the output queue.
+				if(stack.pop().v!="("){
+					throw("Pop the left parenthesis from the stack: Not found!")
 				}
-				
-				
-				
+
+				// If the token at the top of the stack is a function token, pop it onto the output queue.
+				if(stack[stack.length-1].t===types.func){
+					output.push(stack.pop);
+				}
+
 			}
-			current_token=c;
-			
-		}
-		
-	}
-	if(current_token.length){
-		
-		console.warn("final token: ",current_token);
-	}
-	
-	
-// When there are no more tokens to read:
 
-	// While there are still operator tokens in the stack:
-	while(stack.length){
-		var the_operator;
-		// If the operator token on the top of the stack is a parenthesis, then
-		if((the_operator=stack.pop()).t===types.paren){
-			
-			//there are mismatched parentheses.
-			throw("there are mismatched parentheses.");
-			
+		};
+
+		while(i<len){
+			i++;
+			var c;
+			if(!(i<len)){
+				next_token({v:current_token,t:current_type});
+				//send it
+				current_token="";
+				break;
+			}else if(regex[current_type](c=s[i])){
+				current_token+=c;
+			}else{
+				//console.log("change detected at "+s[i]);
+				//We've got a token!
+
+				//send it
+				next_token({v:current_token,t:current_type});
+
+				//move on
+				if(current_type===types.operator || current_type===types.paren){
+
+					//console.log("just finished op: ",current_token.s, names[current_type]);
+					//console.log("now @ "+c);
+					//Just finished an operator.
+
+					//send operator: Wait no, don't send it.
+
+					current_type=4;
+					for(var t=1;t<4;t++){
+						if(regex[t](c)){
+							current_type=t;
+							break;
+						}
+					}
+					//console.log("just found out that ",c.s," is a "+names[current_type]);
+
+
+				}else{
+
+					if(regex[types.operator](c)){
+						//We've got an operator!
+
+						current_type=types.operator;
+						//DO NOT SEND OPERATOR TOKEN YET.
+
+					}else if(regex[types.paren](c)){
+
+						current_type=types.paren;
+
+					}else{
+						//Let's assume multiplication
+
+						console.error("Operator was expected between ",current_token.s," and ",c.s);
+					}
+
+
+
+				}
+				current_token=c;
+
+			}
+
 		}
-		//Pop the operator onto the output queue.
-		output.push(the_operator);
-		
+		if(current_token.length){
+
+			console.warn("final token: ",current_token);
+		}
+
+
+	// When there are no more tokens to read:
+
+		// While there are still operator tokens in the stack:
+		while(stack.length){
+			var the_operator;
+			// If the operator token on the top of the stack is a parenthesis, then
+			if((the_operator=stack.pop()).t===types.paren){
+
+				//there are mismatched parentheses.
+				throw("there are mismatched parentheses.");
+
+			}
+			//Pop the operator onto the output queue.
+			output.push(the_operator);
+
+		}
+		return output.map(function(o){return o.v}).join(" ");
 	}
-	return output;
-}
+	
+	
+	
+})();
+
+
 
 
 function check(n){
