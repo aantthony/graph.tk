@@ -502,67 +502,8 @@ function __debug(x,y){
 var spaces="                     ";
 var level=0;
 
-function p_internal(s){
-	console.log("parse: "+s);
-	var eq=[];
-	var sl=s.length;
-	var type={
-		unknown:0,
-		operator:1,
-		number:2,
-		variable:3
-	};
-	var current=type.unkown;
-	var test=[undefined,
-		/[\~\!\^\&\*\-\+\=\<\>\/]/,
-		/[0-9\.]/,
-		/[^0-9\~\!\^\&\*\-\+\=\<\>\/]/
-	];
-	var start=0;
-	for(var i=0;i<sl;i++){
-		if(s[i]=="(" || s[i]=="["){
-			var other_end_match=s.lastIndexOf(s[i]=="["?"]":")");
-			var parenthesis=p_internal(s.substring(i+1,other_end_match));
-			eq.push(parenthesis);
-			i=other_end_match+1;
-			start=i;
-			current=undefined;
-		}
-		if(current && test[current].test(s[i])){
-			
-		}else{
-			if(current===type.number){
-				eq.push(Number(s.substring(start,i)));
-				console.log("num: "+s.substring(start,i));
-			}else if(current===type.variable){
-				eq.push(String(s.substring(start,i)));
-				console.log("var: "+s.substring(start,i));
-			}else if(current===type.operator){
-				eq.push(s.substring(start,i));
-				console.log("ope: "+s.substring(start,i));
-			}
-			start=i;
-			current=3;
-			for(var n=1;n<3;n++){
-				if(test[n].test(s[i])){
-					current=n;
-					break;
-				}
-			}
-			console.log("detect now on: "+current);
-			i++;
-		}
-	}
-	if(current===type.number){
-		eq.push(Number(s.substring(start)));
-	}else if(current===type.variable){
-		eq.push(String(s.substring(start)));
-	}else{
-		throw("Error: Expression ended in operator: "+s.substring(start))
-	}
-	
-	return eq;
-}
+
+
 
 function p(inp){
 	if(typeof inp==="number" || !isNaN(inp)){
