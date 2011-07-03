@@ -1,3 +1,4 @@
+//TODO: Stop using ^ for power, if we want the parser to parse a superset of JS
 
 var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15,"lessthan":16,"greaterthan":17,"range":18};
 
