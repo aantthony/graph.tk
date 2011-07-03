@@ -110,7 +110,7 @@ Array.prototype.getString=function(braces,javascript){
 String.prototype.__defineGetter__("s",function(){return JSON.stringify(String(this));});
 
 
-var p_internal=(function(){
+var p_internal=(function (){
 	var types={
 		number:1,
 		operator:2,
@@ -123,9 +123,43 @@ var p_internal=(function(){
 	var left=0;
 	var right=1;
 
-	var operators=		[[","],		["=","+=","-=","*=","/=","%=","&=","^=","|="],	["?:"],	["||"],	["&&"],	["|"],	["\u22BB"],	["&"],	["==","!=","!==","==="],[">>","<<"],["+","-"],	["*","/","%"],	["!","~"],	["++","++","()","[]",".","->"],["::"]];
-	var operators_assoc=[0,			1,	1,											0,		0,		0,		0,		0,			0,		0,						0,			0,			1,				0,			0							  ,0];
-	
+//	var operators=		[[","],		["=","+=","-=","*=","/=","%=","&=","^=","|="],	["?:"],	["||"],	["&&"],	["|"],	["\u22BB"],	["&"],	["==","!=","!==","==="],[">>","<<"],["+","-"],	["*","/","%"],["^"],		["!","~"],	["++","++",".","->"],["::"]];
+//	var operators_assoc=[0,			1,												1,		0,		0,		0,		0,		0,			0,		0,						0,			0,			1,			 ,1/* TODO*/,	0,			0				    ,0];
+//	var operators_args=	[2,			2,	]
+	var operators={};
+	var op_precedence=0;
+	function op(v,assoc,arg_c){
+		var memsave=[assoc,op_precedence++,arg_c];
+		if(typeof v==="object"){
+			for(var i=0;i<v.length;i++){
+				operators[v[i]]=memsave;
+			}
+		}else{
+			operators[v]=memsave;
+		}
+	}
+	var L=left;
+	var R=right;
+	[
+[","],
+[["=","+=","-=","*=","/=","%=","&=","^=","|="],R],
+[["||"]],
+[["&&"]],
+[["|"]],
+[["\u22BB"]],
+[["&"]],
+[["==","!=","!==","==="]],
+[[">>","<<"]],
+[["+","-"]],
+[["*","/","%"]],
+[["^"]],
+[["!","~"],R,1],
+[["++","++",".","->"],L,1],
+[["::"]]	
+	].forEach(function(o){
+		op(o[0],o[1]||L,o[2]||2);
+	});
+	/*
 	var _ochars = operators.map(function(e){return e.join("")}).join("");
 	var ochars="";
 	for(var ochar_i=_ochars.length-1;ochar_i>=0;ochar_i--){
@@ -135,36 +169,32 @@ var p_internal=(function(){
 		}
 	}
 	_ochars=undefined;
+	*/
+	ochars=":>-.+~!^%/*<=&⊻|?,";
 	/*var regex=[0,/[\d\.]/,
 		/[\!\~\^\&\*\-\+\=\/]/,/[\(\)\[\]]/,
 	   /[^\!\~\^\&\*\-\+\=\/\d\.\(\)\[\]]/
 		];
 		*/
+	var nummustbe="1234567890.";
+	var parenmustbe="(['\"])";
+	var varcannotbe=ochars+parenmustbe+nummustbe;
 	var regex=[0,
-	function(e){return "1234567890.".indexOf(e)!==-1;},
+	function(e){return nummustbe.indexOf(e)!==-1;},
 	function(e){return ochars.indexOf(e)!==-1;},
-	function(e){return ochars.indexOf(e)!==1;}
-	]
+	function(e){return parenmustbe.indexOf(e)!=-1;},
+	function(e){return varcannotbe.indexOf(e)==-1;}
+	];
+	window.r=regex;
+	window.o=ochars;
 	
 	function precedence(v){
-
-		for(var i=0,len=operators.length;i<len;i++){
-			if(operators[i].indexOf(v)!=-1){
-				return i;
-			}
+		if(!operators[v]){
+			throw("Precedence of "+v+" not known!");
 		}
-		throw("Precedence of "+v+" not known!");
+		return operators[v][1];
 	}
 
-	function associativity(v){
-
-		for(var i=0,len=operators.length;i<len;i++){
-			if(operators[i].indexOf(v)!=-1){
-				return operators_assoc[i];
-			}
-		}
-		throw("Associativity of "+v+" not known!");
-	}
 	
 	return function (s){
 		
@@ -181,14 +211,55 @@ var p_internal=(function(){
 		}
 		var output=[];
 		var stack=[];
-
+		var rpn_stack=[];
+		function next_rpn(token){
+			// While there are input tokens left
+			
+			
+			// Read the next token from input.
+			
+			
+			// If the token is a value
+			
+			if(token.t===types.number || token.t===types.variable){
+				
+				// Push it onto the stack.
+				rpn_stack.push(token.v);
+			}
+			// Otherwise, 
+			else{
+				//the token is an operator (operator here includes both operators, and functions).
+				
+				// It is known a priori that the operator takes n arguments.
+				var n=operators[token.v][2];
+				// If there are fewer than n values on the stack
+				if(rpn_stack.length<n){
+					
+					// (Error) The user has not input sufficient values in the expression.
+					throw("The user has not input sufficient values in the expression")
+					
+				// Else,
+				}else{
+					// Pop the top n values from the stack.
+					
+					var values=rpn_stack.splice(-n);
+					// Evaluate the operator, with the values as arguments.
+					//var evaled=("("+values[0]+token.v+values[1]+")");
+					values.type=token.v;
+					// Push the returned results, if any, back onto the stack.
+					rpn_stack.push(values);
+				}
+			}
+			// 			
+			output.push(token);
+		}
 		
 		function next_token(token){
-			//console.log(token.v.s, names[token.t]);
+			console.log(token.v.s, names[token.t]);
 			// Read a token.
 			// If the token is a number, then add it to the output queue.
 			if(token.t==types.number || token.t==types.variable){
-				output.push(token);
+				next_rpn(token);
 			}
 			// If the token is a function token, then push it onto the stack.
 			if(token.t===types.func){
@@ -206,7 +277,7 @@ var p_internal=(function(){
 						throw("either the separator was misplaced or parentheses were mismatched.")
 					}
 					// pop operators off the stack onto the output queue.
-					output.push(stack.pop());
+					next_rpn(stack.pop());
 				}
 
 
@@ -218,7 +289,7 @@ var p_internal=(function(){
 				
 				var o1precedence=precedence(o1.v);
 				//var o1associative=associativity(o1.v);
-				var o1associative=operators_assoc[o1precedence];
+				var o1associative=operators[o1.v][0];
 				// ("o2" is assumed to exist)
 				var o2;
 
@@ -271,7 +342,7 @@ var p_internal=(function(){
 
 				){
 					// pop o2 off the stack, onto the output queue;
-					output.push(stack.pop());
+					next_rpn(stack.pop());
 				}
 
 				// push o1 onto the stack.
@@ -294,7 +365,7 @@ var p_internal=(function(){
 						throw("there are mismatched parentheses");
 					}
 					// pop operators off the stack onto the output queue.
-					output.push(stack.pop());
+					next_rpn(stack.pop());
 				}
 
 				// Pop the left parenthesis from the stack, but not onto the output queue.
@@ -303,8 +374,8 @@ var p_internal=(function(){
 				}
 
 				// If the token at the top of the stack is a function token, pop it onto the output queue.
-				if(stack[stack.length-1].t===types.func){
-					output.push(stack.pop);
+				if(stack.length && stack[stack.length-1].t===types.func){
+					next_rpn(stack.pop);
 				}
 
 			}
@@ -392,9 +463,10 @@ var p_internal=(function(){
 
 			}
 			//Pop the operator onto the output queue.
-			output.push(the_operator);
+			next_rpn(the_operator);
 
 		}
+		return rpn_stack[0];
 		return output.map(function(o){return o.v}).join(" ");
 	}
 	
