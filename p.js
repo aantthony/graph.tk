@@ -1,117 +1,11 @@
-//TODO: Stop using ^ for power, if we want the parser to parse a superset of JS
+!(function (window, undefined) {
+	
+	
+//DONE: Stop using ^ for power, if we want the parser to parse a superset of JS
 
-var eqtype={"product":1,"sum":2,"number":3,"discretevector":6,"continuousvector":7,"power":8,"fn":9,"fraction":10,"derivative":11,"integral":12,"equality":13,"pm":14,"operatorfactor":15,"lessthan":16,"greaterthan":17,"range":18};
-
-
-
-
-String.prototype.getString=function(__ignore,javascript){
-    if(javascript && window.app){
-        var self=dirty(this.toString());
-        if(self=="x"||self=="y"){
-            return self;
-        }
-        if(app.variables[self]){
-            return "app.variables["+JSON.stringify(self)+"]";
-        }
-        if(window[self]){
-            return self;
-        }
-        return "app.variables["+JSON.stringify(self)+"]";
-    }
-    return this.toString();
-};
-Number.prototype.getString=function(){
-    return this.toString();
-};
-
-Array.prototype.getString=function(braces,javascript){
-    var s=braces?"(":"";
-    var self=this;
-    var _first=true;
-    var endchar="";
-    var afterme="";
-    var second=true;
-    //this.forEach(function(e){
-    for(var i=0;i<this.length;i++){
-        var e=this[i];
-        if(!_first){
-            second=false;
-        }
-        if(_first){
-            if(javascript && self.type==eqtype.power){
-                s+="pow(";
-                endchar=")";
-            }
-            if(!javascript && self.type==eqtype.pm){
-                s+="±";
-            }
-            else if(braces && self.type==eqtype.discretevector){
-                s+="[";
-                endchar="]";
-            }
-            else if(self.type==eqtype.fn){
-                if(typeof e !="string" && typeof e!="function"){
-                    throw(MessageStrings.fnnamenotstring);
-                    return "ERROR";
-                }
-                if(functions.indexOf(e)==-1){
-                    var _found=false;
-                    if(window && window.app && window.app.variables && window.app.variables[e] && typeof window.app.variables[e]=="function"){
-                        _found=true;
-                    }
-                    if(!_found){
-                        throw("Unknown function: "+e);
-                        return "ERROR";
-                    }
-                }
-                afterme="(";
-                endchar=")";
-            }
-            _first=false;
-        }else if(self.type==eqtype.sum){
-            s+="+";
-        }else if(self.type==eqtype.product){
-            s+="*";
-        }else if(javascript && self.type==eqtype.power){
-            s+=",";
-        }else if(self.type==eqtype.equality){
-            s+="=";
-		}else if(self.type==eqtype.lessthan){
-			s+="<";
-	    }else if(self.type==eqtype.greaterthan){
-			s+=">";
-		}else if(self.type==eqtype.power){
-            s+="^";
-        }else if(self.type==eqtype.fraction){
-            s+="/";
-        }else if(self.type==eqtype.fn){
-            if(second){
-                s+=",";
-            }
-        }else{
-            s+=",";
-        }
-        if(e.type==eqtype.discretevector){
-            s+=e.getString(0,javascript);
-        }else{
-            s+=e.getString(10,javascript);
-        }
-        
-        s+=afterme;
-        afterme="";
-    }
-    s+=endchar;
-    endchar="";
-    if(braces){
-        s+=")";
-    }
-    return s;
-};
-String.prototype.__defineGetter__("s",function(){return JSON.stringify(String(this));});
+var eqtype={"product":"*","sum":"+","discretevector":"[]","continuousvector":"(v)","power":"**","fn":"()","fraction":"/","derivative":"(d/dx)","integral":"∫","equality":"==","pm":"±","operatorfactor":15,"lessthan":"<","greaterthan":">","range":"[r]"};
 
 
-var p_internal=(function (){
 	var types={
 		number:1,
 		operator:2,
@@ -143,20 +37,21 @@ var p_internal=(function (){
 	var R=right;
 	[
 [","],
-[["=","+=","-=","*=","/=","%=","&=","^=","|="],R],
-[["||"]],
-[["&&"]],
-[["|"]],
-[["\u22BB"]],
-[["&"]],
-[["==","!=","!==","==="]],
-[[">>","<<"]],
-[["+","-"]],
-[["*","/","%"]],
-[["^"]],
+[["=","+=","-=","*=","/=","%=","&=","^=","|=","**="],R],
+["||"],
+["&&"],
+["|"],
+["^"],
+["&"],
+["==","!=","!==","==="],
+[">>","<<"],
+["+","-"],
+["*","/","%"],
+["**"],
 [["!","~"],R,1],
+["+-",R,1],
 [["++","++",".","->"],L,1],
-[["::"]]	
+["::"]	
 	].forEach(function(o){
 		op(o[0],o[1]||L,o[2]||2);
 	});
@@ -171,14 +66,14 @@ var p_internal=(function (){
 	}
 	_ochars=undefined;
 	*/
-	ochars=":>-.+~!^%/*<=&⊻|?,";
+	var ochars=":>-.+~!^%/*<=&⊻|?,−";
 	/*var regex=[0,/[\d\.]/,
 		/[\!\~\^\&\*\-\+\=\/]/,/[\(\)\[\]]/,
 	   /[^\!\~\^\&\*\-\+\=\/\d\.\(\)\[\]]/
 		];
 		*/
 	var nummustbe="1234567890.";
-	var parenmustbe="(['\"])";
+	var parenmustbe="([{}'\"])";
 	var varcannotbe=ochars+parenmustbe+nummustbe;
 	var regex=[0,
 	function(e){return nummustbe.indexOf(e)!==-1;},
@@ -195,7 +90,7 @@ var p_internal=(function (){
 	}
 
 	
-	return function (s){
+	function p_internal(s){
 		
 		var current_type=0;
 		var i=0,len=s.length;
@@ -235,18 +130,19 @@ var p_internal=(function (){
 				if(rpn_stack.length<n){
 					
 					// (Error) The user has not input sufficient values in the expression.
-					throw("The user has not input sufficient values in the expression")
+					throw("The user has not input sufficient values in the expression. The "+token.v+" operator requires exactly "+n+" operands, whereas only "+rpn_stack.length+" were supplied ("+rpn_stack+")")
 					
 				// Else,
 				}else{
 					// Pop the top n values from the stack.
+				/*	var values=rpn_stack.splice(-n);
 					
-					var values=rpn_stack.splice(-n);
 					// Evaluate the operator, with the values as arguments.
 					//var evaled=("("+values[0]+token.v+values[1]+")");
 					values.type=token.v;
 					// Push the returned results, if any, back onto the stack.
 					rpn_stack.push(values);
+				*/
 				}
 			}
 			// 			
@@ -443,8 +339,7 @@ var p_internal=(function (){
 			}
 
 		}
-		if(current_token.length){
-
+		if(current_token && current_token.length){
 			console.warn("final token: ",current_token);
 		}
 
@@ -466,37 +361,125 @@ var p_internal=(function (){
 
 		}
 		if(rpn_stack.length!==1){
-			throw("Stack not the right size!")
+			console.warn("Stack not the right size!")
 		}
 		return rpn_stack[0];
 		return output.map(function(o){return o.v}).join(" ");
 	}
 	
-	
-	
-})();
 
-
-function p(x){
-	return p_internal(x);
-}
-
-function check(n){
-	return [(p(n).getString(0,1)),(n)];
-}
-function test(){
-	
-	var tests=["x^2+3*(x+3)","1+((((((((((((((3)))))))))))*3/32)))"]
-
-	var start=new Date();
-	for(var i=0;i<10000;i++){
-		tests.forEach(function(e){
-			p(e);
-		});
+window.M=function(x){
+	var expr=p_internal(x);
+	if(typeof expr === "string"){
+		expr=[expr];
 	}
-
-	var end=new Date();
-	console.log("Test performed in "+(end-start)+"ms");
-
-
+	Array.prototype.push.apply(this,expr);
+	this.type=expr.type;
 }
+M.prototype=[];
+
+function Math_setProtoType(type,v){
+	Array.prototype.push.apply(this,v);
+	this.type=type;	
+}
+Math_setProtoType.prototype=M.prototype;
+M.prototype.simplify=function(){
+	return this;
+}
+M.toString=function(){
+	return "function M() {\n    [awesome code]\n}";
+};
+M.toString.toString=function(){
+	return "function toString() {\n    [native code]\n}";
+};
+M.toString.toString.toString=M.toString.toString;
+
+M.prototype.toString=function(braces,javascript){
+    var s=braces?"(":"";
+    var self=this;
+    var _first=true;
+    var endchar="";
+    var afterme="";
+    var second=true;
+    //this.forEach(function(e){
+    for(var i=0;i<this.length;i++){
+        var e=this[i];
+        if(!_first){
+            second=false;
+        }
+        if(_first){
+            if(javascript && self.type==eqtype.power){
+                s+="pow(";
+                endchar=")";
+            }
+            if(!javascript && self.type==eqtype.pm){
+                s+="±";
+            }
+            else if(braces && self.type==eqtype.discretevector){
+                s+="[";
+                endchar="]";
+            }
+            else if(self.type==eqtype.fn){
+                if(typeof e !="string" && typeof e!="function"){
+                    throw(MessageStrings.fnnamenotstring);
+                    return "ERROR";
+                }
+                if(functions.indexOf(e)==-1){
+                    var _found=false;
+                    if(window && window.app && window.app.variables && window.app.variables[e] && typeof window.app.variables[e]=="function"){
+                        _found=true;
+                    }
+                    if(!_found){
+                        throw("Unknown function: "+e);
+                        return "ERROR";
+                    }
+                }
+                afterme="(";
+                endchar=")";
+            }
+            _first=false;
+        }else if(self.type==eqtype.sum){
+            s+="+";
+        }else if(self.type==eqtype.product){
+            s+="*";
+        }else if(javascript && self.type==eqtype.power){
+            s+=",";
+        }else if(self.type==eqtype.equality){
+            s+="=";
+		}else if(self.type==eqtype.lessthan){
+			s+="<";
+	    }else if(self.type==eqtype.greaterthan){
+			s+=">";
+		}else if(self.type==eqtype.power){
+            s+="**";
+        }else if(self.type==eqtype.fraction){
+            s+="/";
+        }else if(self.type==eqtype.fn){
+            if(second){
+                s+=",";
+            }
+        }else{
+            s+=",";
+        }
+        if(e.type==eqtype.discretevector){
+            s+=e.toString(0,javascript);
+        }else{
+            s+=e.toString(10,javascript);
+        }
+        
+        s+=afterme;
+        afterme="";
+    }
+    s+=endchar;
+    endchar="";
+    if(braces){
+        s+=")";
+    }
+    return s;
+};
+
+
+
+
+
+})(window);
