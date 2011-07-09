@@ -21,7 +21,7 @@ var overleft,overtop,overbottom,overright;
 var width,height;
 var gittest=1;
 
-var messages={
+var default_messages={
     "standalone":"To run this app in fullscreen mode, add it to your home screen.",
     "excanvasfail":"Explorer Canvas failed: quitting.",
     "badbrowser":"Browser not supported",
@@ -59,7 +59,7 @@ app.ui=(function(){
   var webkit=/[Ww]eb[kK]it/.test(navigator.userAgent);
     if(/(iPhone)/i.test(navigator.userAgent)){
         if(!navigator.standalone){
-           alert(messages.standalone);
+           alert(app.ui.messages.standalone);
         }
     }
   var draw;
@@ -599,11 +599,23 @@ app.ui=(function(){
   }
   
   var ui={
+    "messages":default_messages,
+    "buttons": {},
+    "update_locale": function() {
+      for(var key in app.ui.buttons) {
+        if(app.ui.buttons[key] && app.ui.messages[key]) {
+          app.ui.buttons[key].title=app.ui.messages[key];
+        }
+      }
+      $("#example_text").text(app.ui.messages['example']);
+      $("#type_text").text(app.ui.messages['type']);
+      $("#version_text").text(app.ui.messages['version']);
+    },
     "remove":function(n){
-        if(!ul){
-      ul=document.getElementById("graphs");
-    }
-        ul.removeChild(n);
+      if(!ul){
+        ul=document.getElementById("graphs");
+      }
+      ul.removeChild(n);
     },"png":function(render){
       if(render === false) {
         return canvas.toDataURL("image/png");
@@ -664,7 +676,7 @@ app.ui=(function(){
                         var c=compile(l__);
                     }catch(ex){
                          
-                        warn_.firstChild.nodeValue=messages.error+": "+JSON.stringify(ex).toString();
+                        warn_.firstChild.nodeValue=app.ui.messages.error+": "+JSON.stringify(ex).toString();
                         warn_.style.display="block";
                         return;
                     }
@@ -790,10 +802,10 @@ app.ui=(function(){
                 if(canvas.getContext){
                     ctx = canvas.getContext("2d");
                 }else{
-                    alert(messages.excanvasfail);
+                    alert(app.ui.messages.excanvasfail);
                 }
             }else if(!ctx){
-                alert(messages.badbrowser);
+                alert(app.ui.messages.badbrowser);
                 return;
             }
     }
@@ -892,7 +904,7 @@ app.ui=(function(){
     var _proto_input=document.createElement("input");
     _proto_input.type="checkbox";
     _proto_input.checked="checked";
-        _proto_input.title=messages.showhide;
+        _proto_input.title=app.ui.messages.showhide;
     _proto_div.appendChild(_proto_input);
     
     
@@ -909,38 +921,43 @@ app.ui=(function(){
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value="+";
         newfuncbtn.type="button";
-        newfuncbtn.title=messages.add;
+        newfuncbtn.title=app.ui.messages.add;
         newfuncbtn.onclick=function(){app.add()};
+        app.ui.buttons.add = newfuncbtn;
         buttons.appendChild(newfuncbtn);
         
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value=">_";
         newfuncbtn.type="button";
-        newfuncbtn.title=messages.console;
+        newfuncbtn.title=app.ui.messages.console;
         newfuncbtn.onclick=function(){app.console()};
+        app.ui.buttons.console = newfuncbtn;
         buttons.appendChild(newfuncbtn);
         
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value=".png";
         newfuncbtn.type="button";
-        newfuncbtn.title=messages.png;
+        newfuncbtn.title=app.ui.messages.png;
         newfuncbtn.onclick=function(){app.png()};
+        app.ui.buttons.png = newfuncbtn;
         buttons.appendChild(newfuncbtn);
         
         var newfuncbtn=document.createElement("input");
         newfuncbtn.value="reload";
         newfuncbtn.type="button";
-        newfuncbtn.title=messages.reload;
+        newfuncbtn.title=app.ui.messages.reload;
         newfuncbtn.style.display='none';
         newfuncbtn.onclick=function(){location.reload()};
+        app.ui.buttons.reload = newfuncbtn;
         buttons.appendChild(newfuncbtn);
         
         if(app.view_configured==undefined && false) {
           var newfuncbtn=document.createElement("input");
           newfuncbtn.value="config";
           newfuncbtn.type="button";
-          newfuncbtn.title=messages.config;
+          newfuncbtn.title=app.ui.messages.config;
           newfuncbtn.onclick=function(){app.ui.modalConfig()};
+          app.ui.buttons.config = newfuncbtn;
           buttons.appendChild(newfuncbtn);
         }
         
@@ -949,6 +966,9 @@ app.ui=(function(){
         alink.innerHTML = "&nbsp;";
         alink.className = 'help_button';
         alink.target="_blank";
+        alink.title=app.ui.messages.help;
+        app.ui.buttons.help = alink;
+
         
         buttons.appendChild(alink);
         

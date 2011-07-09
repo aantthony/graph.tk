@@ -683,6 +683,9 @@ function message(m){
         case "translate":
             app.ui.translate(s[1],s[2],s[3]);
             break;
+        case "locale":
+            app.locale = s[1];
+            app.locale_updated();
         case "empty":
             app.empty();
             break;
@@ -708,6 +711,7 @@ if(window.addEventListener){
 }else{
     window.attachEvent("onmessage", message);
 }
+
 function hashDidChange(){
     app.empty();
     if((location.hash || location.search).match(/^#json=/)) {
@@ -716,6 +720,9 @@ function hashDidChange(){
           if(data.graphs.hasOwnProperty(idx)){
                 app.add(idx, !data.graphs[idx]);
           }
+        }
+        if(data.locale) {
+          app.locale = data.locale;
         }
         if(data.scale) {
             app.ui.set_scale.apply(this, data.scale);
@@ -747,10 +754,24 @@ app.translate=function(x,y,z){
 app.scale=function(x,y,z){
     app.ui.scale(Number(x),Number(y),Number(z));
 };
+app.locale_updated = function(locale) {
+  if(locale) { app.locale = locale; }
+  if(!app.locale) { return; };
+  var script = document.createElement('script');
+  script.src = 'langs/' + app.locale.toLowerCase() + '.js';
+  document.getElementsByTagName('head')[0].appendChild(script);
+};
 app.init=function (){
     var fullscreen=!window.parent.length;
+    
+    if(window && window.parent != window) {
+      window.parent.postMessage('locale check');
+    }
+    app.locale = $.map(['language', 'browserLanguage', 'systemLanguage', 'userLanguage'], function(key) { return window.navigator && window.navigator[key] })[0];
+    
     app.view_configured = (location.hash || location.search).match(/^#json=/);
-  app.ui.init(fullscreen);
+    app.ui.init(fullscreen);
+    app.locale_updated();
     
     if((location.hash || location.search).length>1){
         hashDidChange();
@@ -773,11 +794,13 @@ app.init=function (){
     logo.style.float="left";
     div.appendChild(logo);
     
-    div.appendChild(document.createTextNode("graph.tk - "+messages.version+" "+app.version));
+    var elem = document.createElement('span');
+    elem.innerHTML = "graph.tk - <span id='version_text'>"+app.ui.messages.version+"</span> "+app.version;
+    div.appendChild(elem);
     //div.style.height="4em";
     var span=document.createElement("span");
     span.className="mathquill-rendered-math mathquill-editable";
-    span.innerHTML='<br />'+messages.example+': '+messages.type+' <span class="textarea"><textarea></textarea></span><span class="fraction"><span class="numerator"><var>d</var></span><span class="denominator"><var>d</var><var>x</var></span><span style="width:0">&nbsp;</span></span><span><span class="paren" style="font-size: 1.89542em; ">(</span><span class=""><span class="fraction"><span class="numerator"><span>1</span></span><span class="denominator"><var>x</var></span><span style="width:0">&nbsp;</span></span></span><span class="paren" style="font-size: 1.89542em; ">)</span></span>';
+    span.innerHTML='<br /><span id="example_text">'+app.ui.messages.example+'</span>: <span id="type_text">'+app.ui.messages.type+'</span> <span class="textarea"><textarea></textarea></span><span class="fraction"><span class="numerator"><var>d</var></span><span class="denominator"><var>d</var><var>x</var></span><span style="width:0">&nbsp;</span></span><span><span class="paren" style="font-size: 1.89542em; ">(</span><span class=""><span class="fraction"><span class="numerator"><span>1</span></span><span class="denominator"><var>x</var></span><span style="width:0">&nbsp;</span></span></span><span class="paren" style="font-size: 1.89542em; ">)</span></span>';
     div.appendChild(span);
     app.ui.console.log(div,true);
     
