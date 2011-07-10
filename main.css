@@ -50,7 +50,7 @@ li:hover .delete{visibility:visible}
     border:8px solid #eee;
     opacity:0.97;
 }
-input[type=button]:hover{
+input[type=button]:hover,a.help_button:hover{
 	opacity:1.0;
 }
 input[type=button]{
@@ -91,7 +91,16 @@ h3{text-align:center;padding-top:1em}
     top:0;
     right:0;
 }
-input[value=""]{
+a.help_button{
+	background:url(buttons.png);
+	border:none;
+	opacity:0.7;
+	width:30px;
+	height:21px;
+	color:rgba(0,0,0,0.0);
+	margin-left:4px;
+	margin-top:3px;
+	margin-bottom:4px;
 	background-position:0px 42px;
 	margin-right:6px;
 }
