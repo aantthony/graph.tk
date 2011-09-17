@@ -14,6 +14,7 @@ var boundright = 10;
 var boundtop = 10;
 var boundbottom = -10;
 
+
 var rmin=0;
 var rmax=10;
 
