@@ -9,8 +9,10 @@ git stash
 rm -rf build
 mkdir -p ./build/
 mkdir -p ./build/min
+mkdir -p ./build/langs
 mkdir -p ./build/about
 mkdir -p ./build/about/resources
+cp langs/*.js ./build/langs/
 cp about/*.html ./build/about/
 cp about/resources/* ./build/about/resources/
 cp release.html ./build/index.html
@@ -33,6 +35,7 @@ git add -f *.ico
 git add -f manifest.manifest
 git add -f *.gif
 git add -f min
+git add -f langs
 echo "graph.tk" > ./CNAME
 git add CNAME
 echo "added files"
