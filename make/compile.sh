@@ -40,11 +40,11 @@ echo "created: min/${TIME_CODE}.js"
 #fixes /delete.png or css_dir/delete.png problem, by making all delete.png references go to /delete.png now
 cat \
 	css/*.css \
-	| sed s/buttons\.png/\\/buttons\.png/ \
-	| sed s/sw\.png/\\/sw\.png/ \
+	| sed s/buttons\.png/\\/css\\/buttons\.png/ \
+	| sed s/sw\.png/\\/css\\/sw\.png/ \
 	> ./min/${TIME_CODE}.css
 echo "created: min/${TIME_CODE}.css"
-#rm -rf ./tmp
+rm -rf ./tmp
 
 sed s/CSS_FILE/min\\/${TIME_CODE}.css/ \
 	index.template.html \

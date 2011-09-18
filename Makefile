@@ -1,7 +1,7 @@
 graph: www
 www: clean shaders compile
 online: www commit push publish
-.PHONY: clean shaders
+.PHONY: clean shaders debug
 clean:
 	@./make/clean.sh
 compile:
