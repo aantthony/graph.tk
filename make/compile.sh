@@ -13,13 +13,15 @@ TIME_CODE=${VERSION_CODE}
 
 cat \
 	src/intro.js \
+	src/1.debug.js \
 	src/outro.js \
 	| sed s/__debug_mode\=1/__debug_mode\=0/ |sed s/GIT_VERSION/${VERSION_CODE}/ \
 	>./tmp/graph.js
-cd ./make/packer
-perl ./jsPacker.pl -i ../../tmp/graph.js -e62 -q -s -f -o ../../tmp/graph_packed.js
-cd ../../
-
+#cd ./make/packer
+#perl ./jsPacker.pl -i ../../tmp/graph.js -e62 -q -s -f -o ../../tmp/graph_packed.js
+#cd ../../
+cp tmp/graph.js tmp/graph_packed.js
+uglifyjs tmp/graph.js > tmp/graph_packed.js
 #combine the two into min.js
 #Note: order is important (I think)
 
