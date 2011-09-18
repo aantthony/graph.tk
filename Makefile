@@ -1,5 +1,5 @@
 graph: www
-www: clean compile
+www: clean shaders compile
 online: www commit push publish
 clean:
 	@./make/clean.sh
@@ -13,4 +13,7 @@ push:
 	@true
 publish:
 	@./make/publish.sh
-
+debug:
+	@./make/debug.sh
+shaders: shaders/*
+	@./make/shaders.sh
