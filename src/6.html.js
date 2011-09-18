@@ -1,4 +1,5 @@
 $(function() {
+	var renderer;
 	document.body.removeChild(document.getElementById("loading"));
 	var html = {
 		canvas: document.createElement("canvas"),
@@ -30,9 +31,15 @@ $(function() {
 		buttons.appendChild(b);
 		return button;
 	}
-	button("+");
-	button(">_");
-	button(".png");
+	button("+", "Add a function", function() {
+		
+	});
+	button(">_", "Math Console", function() {
+		
+	});
+	button(".png", "Make screenshot", function() {
+		
+	});
 	var help_button = document.createElement("a");
 	help_button.target="_blank";
 	help_button.className="help_button";
@@ -51,27 +58,39 @@ $(function() {
 		
 		html.canvas.addEventListener("mousemove", function(e) {
 			if(drag_start_x!==undefined){
-				cam_long = drag_start_cam_long+radians_per_pixel_x*(e.x-drag_start_x);
-				cam_lat = drag_start_cam_lat+radians_per_pixel_y*(e.y-drag_start_y);
-				drawScene();
-				
+				renderer.cam_long = drag_start_cam_long+radians_per_pixel_x*(e.x-drag_start_x);
+				renderer.cam_lat = drag_start_cam_lat+radians_per_pixel_y*(e.y-drag_start_y);
+				renderer.update();
 			}
 		});
 		html.canvas.addEventListener("mousedown", function(e) {
 			drag_start_x=e.x;
 			drag_start_y=e.y;
-			drag_start_cam_long=cam_long;
-			drag_start_cam_lat=cam_lat;
+			drag_start_cam_long=renderer.cam_long;
+			drag_start_cam_lat=renderer.cam_lat;
 			if(!D3){
 				html.canvas.style.cursor = "url(css/grabbing.gif), grabbing";
 			}
 			
 		});
+		
 		html.canvas.addEventListener("mouseup", function(e){
 			drag_start_x=drag_start_y=undefined;
 			html.canvas.style.cursor="";
 		});
 		
 	}());
-	webGLStart(html.canvas);
+	while(renderers.length){
+		if(renderers[0].start(html.canvas)){
+			renderer=renderers[0];
+			renderers=true;
+			break;
+		}else{
+			renderers.splice(0,1);
+		}
+	}
+	
+	if(renderers!==true){
+		throw("Could not initialise any renderer!");
+	}
 })
