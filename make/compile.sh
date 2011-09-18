@@ -34,6 +34,7 @@ cat \
 	lib/glMatrix-0.9.5.min.js \
 	lib/mathquill.min.js \
 	./tmp/graph_packed.js \
+	| uglifyjs --no-copyright --unsafe \
 	> min/${TIME_CODE}.js
 echo "created: min/${TIME_CODE}.js"
 
