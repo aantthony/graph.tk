@@ -34,8 +34,7 @@ echo "created: min/${TIME_CODE}.js"
 
 #fixes /delete.png or css_dir/delete.png problem, by making all delete.png references go to /delete.png now
 cat \
-	mathquill.css \
-	main.css \
+	css/*.css \
 	| sed s/buttons\.png/\\/buttons\.png/ \
 	| sed s/sw\.png/\\/sw\.png/ \
 	> ./min/${TIME_CODE}.css
