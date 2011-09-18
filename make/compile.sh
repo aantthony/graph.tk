@@ -30,6 +30,7 @@ cp tmp/graph.js tmp/graph_packed.js
 
 cat \
 	lib/jquery.js \
+	lib/math.js \
 	lib/glMatrix-0.9.5.min.js \
 	lib/mathquill.min.js \
 	./tmp/graph_packed.js \

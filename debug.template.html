@@ -22,33 +22,12 @@
 	</noscript>
 </h3>
 
-<script id="shader-fs" type="x-shader/x-fragment">
-    #ifdef GL_ES
-    precision highp float;
-    #endif
-
-    void main(void) {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    }
-</script>
-
-<script id="shader-vs" type="x-shader/x-vertex">
-    attribute vec3 aVertexPosition;
-
-    uniform mat4 uMVMatrix;
-    uniform mat4 uPMatrix;
-
-    void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-    }
-</script>
-
-
 
 <script type="text/javascript">
 document.getElementById("loading").appendChild(document.createTextNode("Loading..."));
 </script>
 <script type="text/javascript" src="lib/jquery.js"></script>
+<script type="text/javascript" src="lib/math.js"></script>
 <script type="text/javascript" src="lib/glMatrix-0.9.5.min.js"></script>
 <!--[if IE]><script type="text/javascript" src="lib/excanvas.compiled.js"></script><![endif]-->
 <script type="text/javascript" src="lib/mathquill.min.js"></script>
