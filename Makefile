@@ -1,5 +1,7 @@
-graph: www
-online: commit push publish
+graph: clean www
+online: clean commit push publish
+clean:
+	@./make/clean.sh
 www:
 	@./make/compile.sh
 commit:

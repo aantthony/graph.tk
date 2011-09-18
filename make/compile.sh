@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #This script will shrink all of the javascript code into one minified js file
 
-./scripts/clean.sh
 #packer - main.js
 mkdir -p tmp
 mkdir -p min
@@ -17,7 +16,7 @@ cat \
 	src/outro.js \
 	| sed s/__debug_mode\=1/__debug_mode\=0/ |sed s/GIT_VERSION/${VERSION_CODE}/ \
 	>./tmp/graph.js
-cd ./scripts/packer
+cd ./make/packer
 perl ./jsPacker.pl -i ../../tmp/graph.js -e62 -q -s -f -o ../../tmp/graph_packed.js
 cd ../../
 
