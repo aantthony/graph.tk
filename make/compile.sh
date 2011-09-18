@@ -33,7 +33,6 @@ cat \
 	lib/glMatrix-0.9.5.min.js \
 	lib/mathquill.min.js \
 	./tmp/graph_packed.js \
-	| uglifyjs \
 	> min/${TIME_CODE}.js
 echo "created: min/${TIME_CODE}.js"
 
@@ -44,7 +43,7 @@ cat \
 	| sed s/sw\.png/\\/sw\.png/ \
 	> ./min/${TIME_CODE}.css
 echo "created: min/${TIME_CODE}.css"
-rm -rf ./tmp
+#rm -rf ./tmp
 
 sed s/CSS_FILE/min\\/${TIME_CODE}.css/ \
 	index.template.html \
