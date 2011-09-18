@@ -1,8 +1,9 @@
-graph: clean www
-online: clean commit push publish
+graph: www
+www: clean compile
+online: www commit push publish
 clean:
 	@./make/clean.sh
-www:
+compile:
 	@./make/compile.sh
 commit:
 	@git commit -a -m "Upload to http://graph.tk/"
