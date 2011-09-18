@@ -24,9 +24,8 @@ cd ../../
 #Note: order is important (I think)
 
 cat \
-	graph_packed.js \
-	jquery.js \
-	mathquill.js \
+	lib/jquery.js \
+	lib/mathquill.min.js \
 	./tmp/graph_packed.js \
 	> min/${TIME_CODE}.js
 echo "created: min/${TIME_CODE}.js"
