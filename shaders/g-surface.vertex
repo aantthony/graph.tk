@@ -1,3 +1,8 @@
+
+#ifdef GL_ES
+precision highp float;
+#endif
+/*
 attribute vec3 aVertexPosition;
 attribute vec3 aVertexNormal;
 
@@ -5,6 +10,32 @@ uniform mat4 uMVMatrix;
 uniform mat4 uPMatrix;
 
 void main(void) {
-	vec3 _dump = aVertexNormal;
+	vec3 donothing = aVertexNormal;
     gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+}
+*/
+
+attribute vec3 aVertexPosition;
+attribute vec3 aVertexNormal;
+
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat3 uNMatrix;
+
+
+varying vec3 vLightWeighting;
+
+
+void main(void){
+	vec3 uAmbientColor = vec3(0.4,0.4,0.4);
+	vec3 uPointLightingColor = vec3(1.0,1.0,1.0);
+	vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+	gl_Position = uPMatrix * mvPosition;
+	vec3 uPointLightingLocation = vec3(0.0,0.0,1.0);
+	vec3 lightDirection = normalize(uPointLightingLocation - mvPosition.xyz);
+
+	vec3 transformedNormal = uNMatrix * normalize(aVertexNormal);
+	float directionalLightWeighting = max(abs(dot(transformedNormal, lightDirection)), 0.0);
+	vLightWeighting = uAmbientColor + uPointLightingColor * directionalLightWeighting;
+	
 }
