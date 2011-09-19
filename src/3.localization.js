@@ -1,6 +1,7 @@
 
 (function() {
 	var already = {};
+	var i;
 	for(i in window){
 		already[i]=true;
 	}

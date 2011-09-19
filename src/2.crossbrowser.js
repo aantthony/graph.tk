@@ -9,3 +9,16 @@ window.requestAnimFrame = window.requestAnimFrame || (function() {
 	};
 })();
 
+
+Object.prototype.forEach=function(f){
+	var self=this;
+	return Object.keys(this).forEach(function(x) {
+		return f(x,self[x]);
+	});
+};
+
+
+function expose(f){
+	window[f.name]=f;
+	return f;
+};

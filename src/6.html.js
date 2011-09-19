@@ -68,7 +68,7 @@ $(function() {
 			drag_start_y=e.y;
 			drag_start_cam_long=renderer.cam_long;
 			drag_start_cam_lat=renderer.cam_lat;
-			if(!D3){
+			if(!window.D3){
 				html.canvas.style.cursor = "url(css/grabbing.gif), grabbing";
 			}
 			

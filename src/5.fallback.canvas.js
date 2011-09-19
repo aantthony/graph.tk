@@ -5,19 +5,16 @@ renderers.push(function() {
 		}
 	};
 	
+	function initCanvas(canvas){
+		canvas.pMatrix = [];
+	}
 	
 	
 	renderer.start = function (canvas) {
-		if(!initGL(canvas)){
+		if(!initCanvas(canvas)){
 			return false;
 		}
-		initShaders();
-		initBuffers();
-
-		gl.clearColor(1.0, 1.0, 1.0, 1.0);
-		gl.enable(gl.DEPTH_TEST);
-
-		drawScene();
+		
 		return true;
 	}
 	
