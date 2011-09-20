@@ -121,10 +121,14 @@ renderers.push(function() {
 
 		surfaceProgram.vertexNormalAttribute = gl.getAttribLocation(surfaceProgram, "aVertexNormal");
 
+		surfaceProgram.heightAttribute = gl.getAttribLocation(surfaceProgram, "aHeight");
+		
 		surfaceProgram.pMatrixUniform = gl.getUniformLocation(surfaceProgram, "uPMatrix");
 		surfaceProgram.mvMatrixUniform = gl.getUniformLocation(surfaceProgram, "uMVMatrix");
         surfaceProgram.nMatrixUniform = gl.getUniformLocation(surfaceProgram, "uNMatrix");
 		surfaceProgram.colorUniform = gl.getUniformLocation(surfaceProgram, "uColor");
+		
+		surfaceProgram.pointLightingLocationUniform = gl.getUniformLocation(surfaceProgram, "uPointLightingLocation");
 		
 		shaders=null;
 		
@@ -150,24 +154,88 @@ renderers.push(function() {
 	var majorGridVertexPositionBuffer;
 	var axesVertexPositionBuffer;
 	var minorGridVertexPositionBuffer;
+	var surfaceVertexPositionBuffer;
+	
+	var N=256;
+	
+	function createSurfaceVertexPositionBuffer(){
+		surfaceVertexPositionBuffer = gl.createBuffer();
+		var verts = [];
+		var xi,yi;
+		var r=5.0;
+		var rN=2.0*r/N;
+		var xf0 = -r;
+		var yf0 = -r;
+		
+		for(xi=0;xi<N;xi++){
+			for(yi=0;yi<N;yi++){
+				var xf=xi*rN+xf0;
+				var yf=yi*rN+yf0;
+				verts.push(xf,yf);
+			}
+		}
+		
+		
+		var tverts=[verts[0],verts[1]];
+		for(xi=0;xi<N-1;xi++){
+			
+			
+				var vb = 2*((xi+1)*N);
+				tverts.push(verts[vb],verts[vb+1]);
+				
+			for(yi=1;yi<N;yi++){
+				var va = 2*(xi*N+yi);
+				var vb = 2*((xi+1)*N+yi);
+				tverts.push(verts[va],verts[va+1]);
+				tverts.push(verts[vb],verts[vb+1]);
+			}
+				xi++;
+				if(xi+1>=N){
+					break;
+				}
+				var vb = 2*((xi+1)*N+N-1);
+				tverts.push(verts[vb],verts[vb+1]);
+				
+			for(yi=N-2;yi>=0;yi--){
+				var va = 2*(xi*N+yi);
+				var vb = 2*((xi+1)*N+yi);
+				tverts.push(verts[va],verts[va+1]);
+				tverts.push(verts[vb],verts[vb+1]);
+			}
+			
+		}
+		gl.bindBuffer(gl.ARRAY_BUFFER, surfaceVertexPositionBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tverts), gl.STATIC_DRAW);
+		surfaceVertexPositionBuffer.itemSize = 2;
+		surfaceVertexPositionBuffer.numItems = tverts.length/2;
+		
+		
+		
+		
+		
+	}
+	
+	
 	function createSurface(f){
 		var surface = {};
-		surface.vertexPositionBuffer = gl.createBuffer();
+		surface.heightBuffer = gl.createBuffer();
 		surface.vertexNormalBuffer = gl.createBuffer();
 		
 		var verts = [];
 		var xi,yi;
-		var N=50;
 		var r=5.0;
-		var rN=r/N;
+		var rN=2.0*r/N;
+		var xf0 = -r;
+		var yf0 = -r;
 		f=f||function (x,y){
+			//return 0.1;
 			return Math.sin(x+y);
 		};
 		for(xi=0;xi<N;xi++){
 			for(yi=0;yi<N;yi++){
-				var xf=xi*rN;
-				var yf=yi*rN;
-				verts.push(xf,yf,f(xf,yf));
+				var xf=xi*rN+xf0;
+				var yf=yi*rN+yf0;
+				verts.push(f(xf,yf));
 			}
 		}
 		var norms = [];
@@ -179,23 +247,27 @@ renderers.push(function() {
 			];
 		}
 		function normal(x0,y0,dx1,dy1,dx2,dy2,swap){
-			var vm = 3*(x0*N+y0);
-			var va = 3*((x0+dx1)*N+y0+dy1);
-			var vb = 3*((x0+dx2)*N+y0+dy2);
-			var M=[verts[vm],verts[vm+1],verts[vm+2]];
-			var MA=[verts[va]-M[0],verts[va+1]-M[1],verts[va+2]-M[2]];
-			var MB=[verts[vb]-M[0],verts[vb+1]-M[1],verts[vb+2]-M[2]];
+			
+			var hm = (x0*N+y0);
+			var vm = 3*hm;
+			var ha = ((x0+dx1)*N+y0+dy1);
+			var hb = ((x0+dx2)*N+y0+dy2);
+			var va = 3*ha;
+			var vb = 3*hb;
+			var M=[x0*rN,y0*rN,verts[hm]];
+			var MA=[dx1*rN,dy1*rN,verts[ha]-verts[hm]];
+			var MB=[dx2*rN,dy2*rN,verts[hb]-verts[hm]];
 			var c=cross(MA, MB);
 			if(swap){
-				norms.push(-c[0],-c[1],-c[2]);
-			}else{
 				norms.push(c[0],c[1],c[2]);
+			}else{
+				norms.push(-c[0],-c[1],-c[2]);
 			}
 		}
 		
 		
 		for(xi=0,yi=0;yi<N-1;yi++){
-			var c = normal(xi,yi, 1,0, 0,1,true);
+			normal(xi,yi, 1,0, 0,1,true);
 		}
 		normal(xi,yi, 1,0, 0,-1);
 		for(xi=1;xi<N-1;xi++){
@@ -213,34 +285,38 @@ renderers.push(function() {
 		normal(xi,yi, -1,0, 0,-1,true);
 		
 		
-		var tverts=[verts[0],verts[1],verts[2]];
+		var tverts=[verts[0]];
 		var tnorms=[norms[0],norms[1],norms[2]];
 		for(xi=0;xi<N;xi++){
 			
-			
-				var vb = 3*((xi+1)*N);
-				tverts.push(verts[vb],verts[vb+1],verts[vb+2]);
+				var hb = ((xi+1)*N);
+				var vb = 3*hb;
+				tverts.push(verts[hb]);
 				tnorms.push(norms[vb],norms[vb+1],norms[vb+2]);
 				
 			for(yi=1;yi<N;yi++){
-				var va = 3*(xi*N+yi);
-				var vb = 3*((xi+1)*N+yi);
-				tverts.push(verts[va],verts[va+1],verts[va+2]);
-				tverts.push(verts[vb],verts[vb+1],verts[vb+2]);
+				var ha = (xi*N+yi);
+				var hb = ((xi+1)*N+yi);
+				var va = 3*ha;
+				var vb = 3*hb;
+				tverts.push(verts[ha]);
+				tverts.push(verts[hb]);
 				tnorms.push(norms[va],norms[va+1],norms[va+2]);
 				tnorms.push(norms[vb],norms[vb+1],norms[vb+2]);
 			}
 				xi++;
-			
-				var vb = 3*((xi+1)*N+N-1);
-				tverts.push(verts[vb],verts[vb+1],verts[vb+2]);
+				var hb = ((xi+1)*N+N-1);
+				var vb = 3*hb;
+				tverts.push(verts[hb]);
 				tnorms.push(norms[vb],norms[vb+1],norms[vb+2]);
 				
 			for(yi=N-2;yi>=0;yi--){
-				var va = 3*(xi*N+yi);
-				var vb = 3*((xi+1)*N+yi);
-				tverts.push(verts[va],verts[va+1],verts[va+2]);
-				tverts.push(verts[vb],verts[vb+1],verts[vb+2]);
+				var ha=(xi*N+yi);
+				var hb=((xi+1)*N+yi);
+				var va = 3*ha;
+				var vb = 3*hb;
+				tverts.push(verts[ha]);
+				tverts.push(verts[hb]);
 				tnorms.push(norms[va],norms[va+1],norms[va+2]);
 				tnorms.push(norms[vb],norms[vb+1],norms[vb+2]);
 			}
@@ -248,10 +324,10 @@ renderers.push(function() {
 		}
 		
 		
-		gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexPositionBuffer);
+		gl.bindBuffer(gl.ARRAY_BUFFER, surface.heightBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tverts), gl.STATIC_DRAW);
-		surface.vertexPositionBuffer.itemSize = 3;
-		surface.vertexPositionBuffer.numItems = tverts.length/3;
+		surface.heightBuffer.itemSize = 1;
+		surface.heightBuffer.numItems = tverts.length;
 		
 		
 		
@@ -263,13 +339,13 @@ renderers.push(function() {
 		if(false){
 			var dnorms = [];
 			var i;
-			var l = verts.length;
+			var l = verts.length*3;
 			for(i=0;i<l;i+=3){
-				dnorms.push(verts[i],verts[i+1],verts[i+2]);
+				dnorms.push(verts[i]/*fix this!*/,verts[i+1],verts[i+2]);
 				var nx=norms[i],
 					ny=norms[i+1],
 					nz=norms[i+2];
-				var m = -4.0*Math.sqrt(nx*nx+ny*ny+nz*nz);
+				var m = 4.0*Math.sqrt(nx*nx+ny*ny+nz*nz);
 				dnorms.push(verts[i]+nx/m,verts[i+1]+ny/m,verts[i+2]+nz/m);
 			}
 		
@@ -279,7 +355,9 @@ renderers.push(function() {
 			surface.vertexNormalDisplayBuffer.itemSize = 3;
 			surface.vertexNormalDisplayBuffer.numItems = dnorms.length/3;
 		}
-		surface.color=new Float32Array([1.0,0.0,Math.random(),1.0]);
+		
+		//surface.color=new Float32Array([214/256,148/256,32/256,1.0]);
+		surface.color=new Float32Array([Math.random(),Math.random(),Math.random(),1.0]);
 		return surface;
 		
 	}
@@ -353,7 +431,10 @@ renderers.push(function() {
 		minorGridVertexPositionBuffer.itemSize = 3;
 		minorGridVertexPositionBuffer.numItems = minorGrid.length/3;
 		check("init buffers");
+		createSurfaceVertexPositionBuffer();
+		check("init shared surface buffer");
 		surfaces.test = createSurface();
+		check("init surface buffer");
 	}
 	function go(f){
 		gl.getError();
@@ -369,6 +450,9 @@ renderers.push(function() {
 			console.log(n+": "+x+": "+str);
 		}
 	}
+	window.x=0;
+	window.y=0;
+	window.z=10.0;
 	function drawScene() {
 		
 		var p;
@@ -394,18 +478,18 @@ renderers.push(function() {
         gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
 
 		
-		gl.uniform4f(shaderProgram.colorUniform, 0.0,0.0,0.0, 1.0);
+		gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 1.0);
 
 		gl.bindBuffer(gl.ARRAY_BUFFER, axesVertexPositionBuffer);
 		gl.vertexAttribPointer(p.vertexPositionAttribute, axesVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.drawArrays(gl.TRIANGLE_STRIP,0,axesVertexPositionBuffer.numItems);
-		
+	
 		gl.uniform4f(p.colorUniform, 0.7,0.7,0.7, 1.0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, minorGridVertexPositionBuffer);
 		gl.vertexAttribPointer(p.vertexPositionAttribute, minorGridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 		gl.drawArrays(gl.LINES,0,minorGridVertexPositionBuffer.numItems);
-	
+
 		gl.uniform4f(p.colorUniform, 0.5,0.5,0.5, 1.0);
 		
         gl.bindBuffer(gl.ARRAY_BUFFER, majorGridVertexPositionBuffer);
@@ -430,6 +514,7 @@ renderers.push(function() {
 		gl.useProgram(p=surfaceProgram);
 		gl.enableVertexAttribArray(surfaceProgram.vertexPositionAttribute);
 		gl.enableVertexAttribArray(surfaceProgram.vertexNormalAttribute);
+		gl.enableVertexAttribArray(surfaceProgram.heightAttribute);
 		
 		
         gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
@@ -443,32 +528,39 @@ renderers.push(function() {
 		check("before a");
         gl.uniformMatrix3fv(p.nMatrixUniform, false, normalMatrix);
 		
+		
+		gl.uniform3f(p.pointLightingLocationUniform, window.x, window.y,window.z);
+		
 		surfaces.forEach(function(name, surface) {
 			
 			gl.uniform4fv(p.colorUniform, surface.color);
 
-	        gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexPositionBuffer);
-			gl.vertexAttribPointer(p.vertexPositionAttribute, surface.vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+	        gl.bindBuffer(gl.ARRAY_BUFFER, surfaceVertexPositionBuffer);
+			gl.vertexAttribPointer(p.vertexPositionAttribute, surfaceVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 			
+			
+	        gl.bindBuffer(gl.ARRAY_BUFFER, surface.heightBuffer);
+			gl.vertexAttribPointer(p.heightAttribute, surface.heightBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
 	        gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalBuffer);
 			gl.vertexAttribPointer(p.vertexNormalAttribute, surface.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 			
-			gl.drawArrays(gl.TRIANGLE_STRIP,0,surface.vertexPositionBuffer.numItems);
+			gl.drawArrays(gl.TRIANGLE_STRIP,0,surfaceVertexPositionBuffer.numItems);
 
 		});
 		gl.disableVertexAttribArray(surfaceProgram.vertexPositionAttribute);
 		gl.disableVertexAttribArray(surfaceProgram.vertexNormalAttribute);
-		
+		gl.disableVertexAttribArray(surfaceProgram.heightAttribute);
 		stats.update();
 	}
 	expose(check);
 	expose(drawScene);
 	
-	/*function tick(){
+	function tick(){
 		requestAnimFrame(tick);
 		drawScene();
 	}
-	*/
+	
 
 	renderer.start = function (canvas) {
 		if(!initGL(canvas)){
@@ -483,7 +575,7 @@ renderers.push(function() {
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
 		gl.enable(gl.DEPTH_TEST);
 		
-			check("start");
+			check("start x");
 		drawScene();
 		return true;
 	}

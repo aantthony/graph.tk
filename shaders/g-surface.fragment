@@ -9,17 +9,28 @@ void main(void) {
 */
 
 varying vec2  MCposition;
-
+varying float diffuse;
+varying float specular;
 uniform vec4 uColor;
-varying vec3 vLightWeighting;
+const float ambient = 0.0;
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
 
 void main(void) {
-	vec2 pos = mod(1.0*MCposition,vec2(1,1));
+	if(MCposition.x*MCposition.x+MCposition.y*MCposition.y<1.0){
+		discard;
+	}
+	vec2 pos = fract(MCposition);
 	if ((pos.x > 0.50)&&(pos.y > 0.5) || (pos.x < 0.5)&&(pos.y < 0.5)){
-		gl_FragColor = vec4(uColor.rgb * vLightWeighting, uColor.a);
+		float lightWeighting = (0.2*diffuse+0.8*specular+ambient);
+		gl_FragColor = vec4(lightWeighting*uColor.rgb, uColor.a);
 	}else{
 		vec3 othercolor = vec3(1,1,1)-uColor.rgb;
-		othercolor=othercolor*0.2+uColor.rgb*0.8;
-		gl_FragColor = vec4(othercolor.rgb * vLightWeighting, uColor.a);
+		othercolor=othercolor*0.1+uColor.rgb*0.9;
+		
+		float lightWeighting = (1.0-0.1*rand(MCposition))*(0.7*diffuse+0.3*specular+ambient);
+		gl_FragColor = vec4(lightWeighting*othercolor.rgb, uColor.a);
+		
 	}
 }

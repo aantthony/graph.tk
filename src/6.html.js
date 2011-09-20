@@ -60,6 +60,11 @@ $(function() {
 			if(drag_start_x!==undefined){
 				renderer.cam_long = drag_start_cam_long+radians_per_pixel_x*(e.x-drag_start_x);
 				renderer.cam_lat = drag_start_cam_lat+radians_per_pixel_y*(e.y-drag_start_y);
+				if(renderer.cam_lat<0.0){
+					renderer.cam_lat=0.0;
+				} else if(renderer.cam_lat>Math.PI){
+					renderer.cam_lat=Math.PI;
+				}
 				renderer.update();
 			}
 		});
