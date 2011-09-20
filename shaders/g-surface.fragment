@@ -8,10 +8,18 @@ void main(void) {
 }
 */
 
+varying vec2  MCposition;
 
 uniform vec4 uColor;
 varying vec3 vLightWeighting;
 
 void main(void) {
-       gl_FragColor = vec4(uColor.rgb * vLightWeighting, uColor.a);
+	vec2 pos = mod(1.0*MCposition,vec2(1,1));
+	if ((pos.x > 0.50)&&(pos.y > 0.5) || (pos.x < 0.5)&&(pos.y < 0.5)){
+		gl_FragColor = vec4(uColor.rgb * vLightWeighting, uColor.a);
+	}else{
+		vec3 othercolor = vec3(1,1,1)-uColor.rgb;
+		othercolor=othercolor*0.2+uColor.rgb*0.8;
+		gl_FragColor = vec4(othercolor.rgb * vLightWeighting, uColor.a);
+	}
 }

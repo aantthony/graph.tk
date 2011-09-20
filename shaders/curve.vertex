@@ -1,0 +1,12 @@
+
+varying vec2  MCposition;
+
+void main()
+{
+
+	vec3 ecPosition = vec3(gl_ModelViewMatrix * gl_Vertex);
+	vec3 tnorm      = normalize(gl_NormalMatrix * gl_Normal);
+
+	MCposition  = gl_Vertex.xy;
+	gl_Position = gl_ProjectionMatrix*gl_ModelViewMatrix * gl_Vertex;
+}

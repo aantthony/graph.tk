@@ -1,0 +1,30 @@
+varying vec2  MCposition;
+
+float f(float x){
+	return sqrt(1.0-x*x);
+}
+uniform float thickness;
+
+float normalised(float x){
+	return (x);
+}
+float unnorm(float x){
+	return f(x)/normalised(x);
+}
+
+void main() {
+	gl_FragColor=vec4(0,0,0,0.4);
+	float x = MCposition.x;
+	float lower = normalised(x)* unnorm(x);
+	if(MCposition.y > lower){
+		gl_FragColor=vec4(1,0,0,0.2);
+		float dy=0.1;
+		float upper = unnorm(x)*(normalised(x)+ thickness*(x)*((x)));
+		if(MCposition.y<upper){
+			gl_FragColor=vec4(1,0,0,1.0);
+		}
+
+		
+	}
+
+}
