@@ -129,8 +129,8 @@ renderers.push(function() {
 		surfaceProgram.colorUniform = gl.getUniformLocation(surfaceProgram, "uColor");
 		
 		surfaceProgram.pointLightingLocationUniform = gl.getUniformLocation(surfaceProgram, "uPointLightingLocation");
-		
-		shaders=null;
+		//TODO: clear this:
+		//shaders=null;
 		
 		
 		check("Init Shaders");
@@ -283,11 +283,12 @@ renderers.push(function() {
 			normal(xi,yi, -1,0, 0,1);
 		}
 		normal(xi,yi, -1,0, 0,-1,true);
-		
+		console.log("verts: ", verts);
+		console.log("norms: ", norms);
 		
 		var tverts=[verts[0]];
 		var tnorms=[norms[0],norms[1],norms[2]];
-		for(xi=0;xi<N;xi++){
+		for(xi=0;xi<N-1;xi++){
 			
 				var hb = ((xi+1)*N);
 				var vb = 3*hb;
@@ -305,6 +306,9 @@ renderers.push(function() {
 				tnorms.push(norms[vb],norms[vb+1],norms[vb+2]);
 			}
 				xi++;
+				if(xi+1>=N){
+					break;
+				}
 				var hb = ((xi+1)*N+N-1);
 				var vb = 3*hb;
 				tverts.push(verts[hb]);
@@ -329,13 +333,10 @@ renderers.push(function() {
 		surface.heightBuffer.itemSize = 1;
 		surface.heightBuffer.numItems = tverts.length;
 		
-		
-		
 		gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tnorms), gl.STATIC_DRAW);
 		surface.vertexNormalBuffer.itemSize = 3;
 		surface.vertexNormalBuffer.numItems = tnorms.length/3;
-		
 		if(false){
 			var dnorms = [];
 			var i;
@@ -450,9 +451,7 @@ renderers.push(function() {
 			console.log(n+": "+x+": "+str);
 		}
 	}
-	window.x=0;
-	window.y=0;
-	window.z=10.0;
+	
 	function drawScene() {
 		
 		var p;
@@ -529,7 +528,7 @@ renderers.push(function() {
         gl.uniformMatrix3fv(p.nMatrixUniform, false, normalMatrix);
 		
 		
-		gl.uniform3f(p.pointLightingLocationUniform, window.x, window.y,window.z);
+		gl.uniform3f(p.pointLightingLocationUniform, 0,0,10.0);
 		
 		surfaces.forEach(function(name, surface) {
 			

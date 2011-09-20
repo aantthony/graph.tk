@@ -37,6 +37,7 @@ void main(void){
 	vec3 lightDirection = normalize(lightLocation - mvPosition.xyz); // Note: the ray is traced backwards
 	
 	vec3 transformedNormal = normalize(uNMatrix * normalize(aVertexNormal));
+	
 	diffuse = max((dot(transformedNormal, lightDirection)), 0.0);
 	float spec = 0.0;
 	vec3 reflectVec = reflect(-lightDirection, transformedNormal);

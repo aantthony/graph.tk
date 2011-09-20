@@ -27,7 +27,7 @@ cp tmp/graph.js tmp/graph_packed.js
 #uglifyjs tmp/graph.js > tmp/graph_packed.js
 #combine the two into min.js
 #Note: order is important (I think)
-
+# | uglifyjs --no-copyright \
 cat \
 	lib/jquery.js \
 	lib/math.js \
