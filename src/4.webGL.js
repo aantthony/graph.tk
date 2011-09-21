@@ -7,6 +7,7 @@ renderers.push(function() {
 	var renderer={
 		cam_lat: 0.0,
 		cam_long:0.0,
+		cam_dist: 10.0,
 		update: function(){
 			drawScene();
 		},
@@ -54,7 +55,7 @@ renderers.push(function() {
 	}
 
 
-	function getShader(gl, id) {
+	function getShader(gl, id, data) {
 		
 		var str=shaders[id];
 			
@@ -64,9 +65,11 @@ renderers.push(function() {
 		}else if (/\.vertex$/.test(id)) {
 			shader = gl.createShader(gl.VERTEX_SHADER);
 		}else {
-		
-			console.log(id);
+			throw("Unkown filetype");
 			return null;
+		}
+		if(data!==undefined){
+			str=str.replace("#import javascript\n",data);
 		}
 		gl.shaderSource(shader, str);
 		gl.compileShader(shader);
@@ -145,10 +148,12 @@ renderers.push(function() {
 
 	var cam_lat_now=0.0;
 	var cam_long_now=0.0;
+	var cam_dist_now=10.0;
 	
 	var animating=false;
 	
 	var surfaces = {};
+	var regionsXY = {};
 	
 	
 	var majorGridVertexPositionBuffer;
@@ -157,7 +162,7 @@ renderers.push(function() {
 	var surfaceVertexPositionBuffer;
 	
 	var N=256;
-	
+	var triangle_strip_plane;
 	function createSurfaceVertexPositionBuffer(){
 		surfaceVertexPositionBuffer = gl.createBuffer();
 		var verts = [];
@@ -205,16 +210,48 @@ renderers.push(function() {
 			
 		}
 		gl.bindBuffer(gl.ARRAY_BUFFER, surfaceVertexPositionBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tverts), gl.STATIC_DRAW);
+		gl.bufferData(gl.ARRAY_BUFFER, triangle_strip_plane = new Float32Array(tverts), gl.STATIC_DRAW);
 		surfaceVertexPositionBuffer.itemSize = 2;
-		surfaceVertexPositionBuffer.numItems = tverts.length/2;
-		
-		
-		
-		
-		
+		surfaceVertexPositionBuffer.numItems = triangle_strip_plane.numItems = tverts.length/2;
 	}
 	
+	function createRegionXY(str){
+		//f=f||function(x,y){return x*x*+y*y<4.0;};
+		str=str||"x*x+y*y<4.0";
+		var region = {};
+		var p;
+		region.program = p = gl.createProgram();
+		gl.attachShader(p, getShader(gl, "g-region-xy.vertex"));
+		gl.attachShader(p, getShader(gl, "g-region-xy.fragment", "bool f(float x,float y){return "+str+";}"));
+		gl.linkProgram(p);
+		
+		if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+			alert("Could not initialise shaders");
+		}
+		gl.useProgram(p);
+
+		p.vertexPositionAttribute = gl.getAttribLocation(p, "aVertexPosition");
+
+		p.pMatrixUniform = gl.getUniformLocation(p, "uPMatrix");
+		p.mvMatrixUniform = gl.getUniformLocation(p, "uMVMatrix");
+		p.colorUniform = gl.getUniformLocation(p, "uColor");
+
+		
+		
+		region.color = new Float32Array([126/256,179/256,217/256,0.2]);
+		
+		region.surfaceVertexPositionBuffer=gl.createBuffer();
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, region.surfaceVertexPositionBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, triangle_strip_plane, gl.STATIC_DRAW);
+		region.surfaceVertexPositionBuffer.itemSize = 2;
+		region.surfaceVertexPositionBuffer.numItems = triangle_strip_plane.numItems;
+		window.region=region;
+		check("create region");
+		
+		return region;
+		
+	}
 	
 	function createSurface(f){
 		var surface = {};
@@ -283,8 +320,6 @@ renderers.push(function() {
 			normal(xi,yi, -1,0, 0,1);
 		}
 		normal(xi,yi, -1,0, 0,-1,true);
-		console.log("verts: ", verts);
-		console.log("norms: ", norms);
 		
 		var tverts=[verts[0]];
 		var tnorms=[norms[0],norms[1],norms[2]];
@@ -435,11 +470,13 @@ renderers.push(function() {
 		createSurfaceVertexPositionBuffer();
 		check("init shared surface buffer");
 		surfaces.test = createSurface();
+		//regionsXY.test = createRegionXY();
 		check("init surface buffer");
 	}
 	function go(f){
 		gl.getError();
-		surfaces[Math.random()] = createSurface(f);
+		//surfaces[Math.random()] = createSurface(f);
+		regionsXY[Math.random()] = createRegionXY(f);
 		drawScene();
 	}
 	expose(go);
@@ -451,7 +488,6 @@ renderers.push(function() {
 			console.log(n+": "+x+": "+str);
 		}
 	}
-	
 	function drawScene() {
 		
 		var p;
@@ -461,54 +497,25 @@ renderers.push(function() {
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+			
+		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+		gl.disable(gl.BLEND);
+		gl.enable(gl.DEPTH_TEST);
+		gl.depthMask(true)
+
+		//gl.disable(gl.BLEND);
+		//gl.enable(gl.DEPTH_TEST);
+
+		
+		
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.01, 100.0, pMatrix);
 		mat4.identity(mvMatrix);
-		mat4.translate(mvMatrix, [0, 0, -10]);
 		cam_lat_now = renderer.cam_lat;
 		cam_long_now = renderer.cam_long;
+		cam_dist_now = renderer.cam_dist;
+		mat4.translate(mvMatrix, [0, 0, -cam_dist_now]);
 		mat4.rotate(mvMatrix, cam_lat_now, [-1, 0, 0]);
 		mat4.rotate(mvMatrix, cam_long_now, [0, 0, 1]);
-		
-		gl.useProgram(p=shaderProgram);
-		gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
-		
-		
-        gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
-        gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
-
-		
-		gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 1.0);
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, axesVertexPositionBuffer);
-		gl.vertexAttribPointer(p.vertexPositionAttribute, axesVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.drawArrays(gl.TRIANGLE_STRIP,0,axesVertexPositionBuffer.numItems);
-	
-		gl.uniform4f(p.colorUniform, 0.7,0.7,0.7, 1.0);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, minorGridVertexPositionBuffer);
-		gl.vertexAttribPointer(p.vertexPositionAttribute, minorGridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.drawArrays(gl.LINES,0,minorGridVertexPositionBuffer.numItems);
-
-		gl.uniform4f(p.colorUniform, 0.5,0.5,0.5, 1.0);
-		
-        gl.bindBuffer(gl.ARRAY_BUFFER, majorGridVertexPositionBuffer);
-		gl.vertexAttribPointer(p.vertexPositionAttribute, majorGridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-		gl.drawArrays(gl.LINES,0,majorGridVertexPositionBuffer.numItems);
-		
-		
-	
-		surfaces.forEach(function(name, surface) {
-			//normal
-				if(surface.vertexNormalDisplayBuffer){
-					gl.uniform4f(p.colorUniform, 1-surface.color[0],1-surface.color[1],1-surface.color[2],1.0);
-			   		gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalDisplayBuffer);
-					gl.vertexAttribPointer(p.vertexPositionAttribute, surface.vertexNormalDisplayBuffer.itemSize, gl.FLOAT, false, 0, 0);
-					gl.drawArrays(gl.LINES,0,surface.vertexNormalDisplayBuffer.numItems);
-				}
-		});
-
-		
-		gl.disableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 		
 		gl.useProgram(p=surfaceProgram);
 		gl.enableVertexAttribArray(surfaceProgram.vertexPositionAttribute);
@@ -550,6 +557,73 @@ renderers.push(function() {
 		gl.disableVertexAttribArray(surfaceProgram.vertexPositionAttribute);
 		gl.disableVertexAttribArray(surfaceProgram.vertexNormalAttribute);
 		gl.disableVertexAttribArray(surfaceProgram.heightAttribute);
+		gl.enable(gl.BLEND);
+		
+		gl.depthMask(false)
+		regionsXY.forEach(function(name, region) {
+			
+			gl.useProgram(p=region.program);
+			gl.uniform4fv(p.colorUniform, region.color);
+			
+			gl.enableVertexAttribArray(p.vertexPositionAttribute);
+			
+	        gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
+	        gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
+
+			
+	        gl.bindBuffer(gl.ARRAY_BUFFER, region.surfaceVertexPositionBuffer);
+			gl.vertexAttribPointer(p.vertexPositionAttribute, region.surfaceVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+			gl.drawArrays(gl.TRIANGLE_STRIP,0,region.surfaceVertexPositionBuffer.numItems);
+			
+			gl.disableVertexAttribArray(p.vertexPositionAttribute);
+			
+		});
+		
+	
+	
+			gl.useProgram(p=shaderProgram);
+			gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+	        gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
+	        gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
+
+			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 1.0);
+
+			gl.bindBuffer(gl.ARRAY_BUFFER, axesVertexPositionBuffer);
+			gl.vertexAttribPointer(p.vertexPositionAttribute, axesVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.drawArrays(gl.TRIANGLE_STRIP,0,axesVertexPositionBuffer.numItems);
+
+			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 0.7);
+
+	        gl.bindBuffer(gl.ARRAY_BUFFER, minorGridVertexPositionBuffer);
+			gl.vertexAttribPointer(p.vertexPositionAttribute, minorGridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.drawArrays(gl.LINES,0,minorGridVertexPositionBuffer.numItems);
+
+			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 0.5);
+
+	        gl.bindBuffer(gl.ARRAY_BUFFER, majorGridVertexPositionBuffer);
+			gl.vertexAttribPointer(p.vertexPositionAttribute, majorGridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+			gl.drawArrays(gl.LINES,0,majorGridVertexPositionBuffer.numItems);
+
+
+
+			surfaces.forEach(function(name, surface) {
+				//normal
+					if(surface.vertexNormalDisplayBuffer){
+						gl.uniform4f(p.colorUniform, 1-surface.color[0],1-surface.color[1],1-surface.color[2],1.0);
+				   		gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalDisplayBuffer);
+						gl.vertexAttribPointer(p.vertexPositionAttribute, surface.vertexNormalDisplayBuffer.itemSize, gl.FLOAT, false, 0, 0);
+						gl.drawArrays(gl.LINES,0,surface.vertexNormalDisplayBuffer.numItems);
+					}
+			});
+
+
+			gl.disableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+		
+			gl.disable(gl.BLEND);
+
+
 		stats.update();
 	}
 	expose(check);
@@ -573,7 +647,8 @@ renderers.push(function() {
 
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
 		gl.enable(gl.DEPTH_TEST);
-		
+		gl.depthFunc(gl.LEQUAL);
+	
 			check("start x");
 		drawScene();
 		return true;

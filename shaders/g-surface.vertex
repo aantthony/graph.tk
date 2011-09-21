@@ -29,6 +29,7 @@ varying vec2 MCposition;
 varying float diffuse;
 varying float specular;
 
+
 void main(void){
 	vec3 uPointLightingColor = vec3(1.0,1.0,1.0);
 	vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, aHeight, 1.0);

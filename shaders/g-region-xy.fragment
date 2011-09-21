@@ -1,0 +1,18 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+
+#import javascript
+
+varying vec2  MCposition;
+uniform vec4 uColor;
+
+void main() {
+	if(f(MCposition.x,MCposition.y)){
+		gl_FragColor=vec4(uColor.rgb,0.3);
+		gl_FragColor=vec4(1.0,0.0,0.0,0.3);
+	}else{
+		discard;
+	}
+
+}

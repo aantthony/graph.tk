@@ -18,9 +18,6 @@ float rand(vec2 co){
 }
 
 void main(void) {
-	if(MCposition.x*MCposition.x+MCposition.y*MCposition.y<1.0){
-		discard;
-	}
 	vec2 pos = fract(MCposition);
 	if ((pos.x > 0.50)&&(pos.y > 0.5) || (pos.x < 0.5)&&(pos.y < 0.5)){
 		float lightWeighting = (0.2*diffuse+0.8*specular+ambient);
