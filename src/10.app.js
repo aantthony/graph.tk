@@ -19,12 +19,18 @@ var app=(function(){
 		createGraph: function(eq){
 			var g,id;
 			graphs[id=guid()] = g = new app.Graph(eq);
-			app.ui.createGraph(id, g);
-			renderer.createGraph(id, g);
+			
+			track.time(function ui_create_graph(){
+				app.ui.createGraph(id, g);
+			});
+			track.time(function renderer_create_graph(){
+				renderer.createGraph(id, g)
+			});
 		},
 		updateGraphWithID: function(id){
-			console.log("App was notified that graph with id=",id, " was changed and is now ",graphs[id]);
-			renderer.updateGraph(id, graphs[id]);
+			track.time(function renderer_updateGraph(){
+				renderer.updateGraph(id, graphs[id]);
+			})
 		}
 	};
 	

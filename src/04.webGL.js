@@ -170,7 +170,7 @@ renderers.push(function(canvas) {
 	var minorGridVertexPositionBuffer;
 	var surfaceVertexPositionBuffer;
 	
-	var N=256;
+	var N=250;
 	var triangle_strip_plane;
 	function createSurfaceVertexPositionBuffer(){
 		surfaceVertexPositionBuffer = gl.createBuffer();
@@ -545,7 +545,7 @@ renderers.push(function(canvas) {
 		
 		gl.uniform3f(p.pointLightingLocationUniform, 0,0,10.0);
 		
-		surfaces.forEach(function(name, surface) {
+		foreach(surfaces,function(name, surface) {
 			
 			gl.uniform4fv(p.colorUniform, surface.color);
 
@@ -568,7 +568,7 @@ renderers.push(function(canvas) {
 		gl.enable(gl.BLEND);
 		
 		gl.depthMask(false)
-		regionsXY.forEach(function(name, region) {
+		foreach(regionsXY,function(name, region) {
 			
 			gl.useProgram(p=region.program);
 			gl.uniform4fv(p.colorUniform, region.color);
@@ -616,7 +616,7 @@ renderers.push(function(canvas) {
 
 
 
-			surfaces.forEach(function(name, surface) {
+			foreach(surfaces,function(name, surface) {
 				//normal
 					if(surface.vertexNormalDisplayBuffer){
 						gl.uniform4f(p.colorUniform, 1-surface.color[0],1-surface.color[1],1-surface.color[2],1.0);

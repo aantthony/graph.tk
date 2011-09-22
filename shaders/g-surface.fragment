@@ -12,7 +12,7 @@ varying vec2  MCposition;
 varying float diffuse;
 varying float specular;
 uniform vec4 uColor;
-const float ambient = 0.0;
+const float ambient = 0.03;
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }

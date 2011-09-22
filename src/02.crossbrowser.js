@@ -9,13 +9,11 @@ window.requestAnimFrame = window.requestAnimFrame || (function() {
 	};
 })();
 
-
-Object.prototype.forEach=function(f){
-	var self=this;
-	return Object.keys(this).forEach(function(x) {
-		return f(x,self[x]);
+function foreach(t,f){
+	return Object.keys(t).forEach(function(x) {
+		return f(x,t[x]);
 	});
-};
+}
 
 
 function expose(f){
@@ -24,4 +22,9 @@ function expose(f){
 };
 var startupTime = new Date();
 
+
+//hack for now
+window.__proto__.__proto__=Math;
+Math.e=Math.E;
+Math.pi=Math.PI;
 window.Float32Array = Float32Array || window.Array;

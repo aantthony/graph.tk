@@ -60,11 +60,13 @@ function ui_init(window) {
 
 		
 		html.graphs.appendChild(li);
-		$(inputbox).mathquill("editable").bind("keyup", function(){
-			var latex=$(inputbox).mathquill("latex");
-			var math = M(latex);
-			g.math=math;
-			app.updateGraphWithID(id);
+		$(inputbox).mathquill("editable").bind("keyup", function(e){
+			if(e.keyCode==13 || true){
+				var latex=$(inputbox).mathquill("latex");
+				var math = M(M.latex.parse(latex));
+				g.math=math;
+				app.updateGraphWithID(id);
+			}
 		});
 		
 		return li;
