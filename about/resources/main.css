@@ -72,7 +72,7 @@ footer{
     background:rgba(255,255,255,0.9);
 }
 .plus{
-    background:url(../../buttons.png);
+    background:url(/css/buttons.png);
     width:30px;
     height:21px;
     display:inline-block;

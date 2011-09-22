@@ -16,3 +16,7 @@
 		return obj;
 	});
 }());
+
+var localized = {
+	showhide: "Show/Hide equation"
+};

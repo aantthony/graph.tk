@@ -1,17 +1,79 @@
-$(function() {
-	var renderer;
-	document.body.removeChild(document.getElementById("loading"));
+var renderer;
+function ui_init(window) {
+	
 	var html = {
 		canvas: document.createElement("canvas"),
 		graphs: document.createElement("ul"),
 	};
-	
+	var graphs={};
+	var ui = {
+		createGraph: function(id, g){
+			graphs[id]={
+				node: createGraphNode(id, g)
+			};
+		},
+		destroyGraph:function(id){
+			html.graphs.removeChild(graphs[id].node);
+			delete graphs[id];
+		}
+	};
+	var proto_li = (function(){
+		var _proto=document.createElement("li");
+	    var _proto_div=document.createElement("div");
+	        var _proto_warn=document.createElement("aside");
+	        _proto_warn.appendChild(document.createTextNode("fail"));
+
+	    _proto_div.className="b";
+	    _proto_div.style.backgroundColor="#07c";
+	    var _proto_input=document.createElement("input");
+	    _proto_input.type="checkbox";
+	    _proto_input.checked="checked";
+	        _proto_input.title=localized.showhide;
+	    _proto_div.appendChild(_proto_input);
+
+
+	    var _proto_math=document.createElement("span");
+	    _proto_math.className="matheditor";
+	    var _proto_del=document.createElement("span");
+	    _proto_del.className="delete";
+	        _proto.appendChild(_proto_div);
+	    _proto.appendChild(_proto_math);
+	    _proto.appendChild(_proto_del);
+	    _proto.appendChild(_proto_warn);
+		return _proto.cloneNode(true);
+	}());
+	function createGraphNode(id, g){
+		var li=proto_li.cloneNode(true);
+		li.id="eq-"+id;
+		var b_=li.firstChild;
+		var check_=li.firstChild.firstChild;
+		var delete_=li.getElementsByClassName("delete")[0];
+		var inputbox = li.getElementsByClassName("matheditor")[0];
+		inputbox.appendChild(document.createTextNode(g.latex||""));
+		check_.addEventListener("change",function(e){
+            
+        },false);
+		
+        b_.style.backgroundColor=g.color;
+		
+        delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
+
+		
+		html.graphs.appendChild(li);
+		$(inputbox).mathquill("editable").bind("keyup", function(){
+			var latex=$(inputbox).mathquill("latex");
+			var math = M(latex);
+			g.math=math;
+			app.updateGraphWithID(id);
+		});
+		
+		return li;
+	}
 	html.canvas.width=window.innerWidth;
 	html.canvas.height=window.innerHeight;
 	function resize(){
 		html.canvas.width=window.innerWidth  || document.body.clientWidth;
 		html.canvas.height=window.innerHeight|| document.body.clientHeight || 120;//120 for iframe default
-		drawScene();
 	}
 	
 	document.body.appendChild(html.canvas);
@@ -19,7 +81,7 @@ $(function() {
 	var equations = document.createElement("div");
 	var buttons = document.createElement("div");
 	equations.className="overlay";
-	equations.id="funcs";
+	equations.id="funcs";//change this to a class for portability
 	
 	buttons.className="buttons";
 	function button(value, title, callback){
@@ -32,7 +94,7 @@ $(function() {
 		return button;
 	}
 	button("+", "Add a function", function() {
-		
+		app.createGraph();
 	});
 	button(">_", "Math Console", function() {
 		
@@ -106,7 +168,7 @@ $(function() {
 			delta*=dist_units_per_pixel;
 			var ex=Math.exp(delta);
 			renderer.cam_dist*=ex;
-			drawScene();
+			renderer.update();
 		      //scaley*=ex;
 		    /*
 
@@ -141,9 +203,7 @@ $(function() {
 		
 		html.canvas.addEventListener("mousewheel",mousewheel, false);
 		html.canvas.addEventListener("DOMMouseScroll",mousewheel, false);
-		
-		
-		
+	
 		
 		html.canvas.addEventListener("mouseup", function(e){
 			drag_start_x=drag_start_y=undefined;
@@ -151,9 +211,10 @@ $(function() {
 		});
 		
 	}());
+	
 	while(renderers.length){
-		if(renderers[0].start(html.canvas)){
-			renderer=renderers[0];
+		if(renderer = renderers[0](html.canvas)){
+			window.renderer=renderer;//debug
 			renderers=true;
 			break;
 		}else{
@@ -164,4 +225,5 @@ $(function() {
 	if(renderers!==true){
 		throw("Could not initialise any renderer!");
 	}
-})
+	return ui;
+}

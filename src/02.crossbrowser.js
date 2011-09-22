@@ -22,3 +22,6 @@ function expose(f){
 	window[f.name]=f;
 	return f;
 };
+var startupTime = new Date();
+
+window.Float32Array = Float32Array || window.Array;

@@ -3,7 +3,7 @@ var renderers=[]; //Adds webgl renderer to array.
 
 
 
-renderers.push(function() {
+renderers.push(function(canvas) {
 	var renderer={
 		cam_lat: 0.0,
 		cam_long:0.0,
@@ -11,8 +11,20 @@ renderers.push(function() {
 		update: function(){
 			drawScene();
 		},
-		add: function(name, eqn){
-			createSurface(name, eqn);
+		
+		//Updates from app.js
+		createGraph:function(id, g, f){
+			surfaces[id]=new Surface(f||function(x,y){return x+y});
+			drawScene();
+		},
+		updateGraph:function(id, g){
+			//surfaces[id].animateTo();
+			surfaces[id].destroy();
+			surfaces[id]=new Surface(new Function("x,y","return "+g.math.toExpression("text/javascript")));
+			drawScene();
+		},
+		destroyGraph:function(id){
+			
 		}
 	};
 	var stats;
@@ -83,8 +95,8 @@ renderers.push(function() {
 	}
 
 
-	shaderProgram={};
-	surfaceProgram={};
+	var shaderProgram={};
+	var surfaceProgram={};
 	function initShaders() {
 		check("start");
 		shaderProgram = gl.createProgram();
@@ -142,10 +154,7 @@ renderers.push(function() {
 
 	var mvMatrix = mat4.create();
 	var pMatrix = mat4.create();
-	window.mvMatrix=mvMatrix;
-	window.pMatrix=pMatrix;
-
-
+	
 	var cam_lat_now=0.0;
 	var cam_long_now=0.0;
 	var cam_dist_now=10.0;
@@ -246,17 +255,16 @@ renderers.push(function() {
 		gl.bufferData(gl.ARRAY_BUFFER, triangle_strip_plane, gl.STATIC_DRAW);
 		region.surfaceVertexPositionBuffer.itemSize = 2;
 		region.surfaceVertexPositionBuffer.numItems = triangle_strip_plane.numItems;
-		window.region=region;
 		check("create region");
 		
 		return region;
 		
 	}
 	
-	function createSurface(f){
-		var surface = {};
-		surface.heightBuffer = gl.createBuffer();
-		surface.vertexNormalBuffer = gl.createBuffer();
+	function Surface(f){
+		
+		this.heightBuffer = gl.createBuffer();
+		this.vertexNormalBuffer = gl.createBuffer();
 		
 		var verts = [];
 		var xi,yi;
@@ -363,15 +371,15 @@ renderers.push(function() {
 		}
 		
 		
-		gl.bindBuffer(gl.ARRAY_BUFFER, surface.heightBuffer);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.heightBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tverts), gl.STATIC_DRAW);
-		surface.heightBuffer.itemSize = 1;
-		surface.heightBuffer.numItems = tverts.length;
+		this.heightBuffer.itemSize = 1;
+		this.heightBuffer.numItems = tverts.length;
 		
-		gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalBuffer);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexNormalBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(tnorms), gl.STATIC_DRAW);
-		surface.vertexNormalBuffer.itemSize = 3;
-		surface.vertexNormalBuffer.numItems = tnorms.length/3;
+		this.vertexNormalBuffer.itemSize = 3;
+		this.vertexNormalBuffer.numItems = tnorms.length/3;
 		if(false){
 			var dnorms = [];
 			var i;
@@ -385,18 +393,19 @@ renderers.push(function() {
 				dnorms.push(verts[i]+nx/m,verts[i+1]+ny/m,verts[i+2]+nz/m);
 			}
 		
-			surface.vertexNormalDisplayBuffer = gl.createBuffer();
-			gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalDisplayBuffer);
+			this.vertexNormalDisplayBuffer = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexNormalDisplayBuffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(dnorms), gl.STATIC_DRAW);
-			surface.vertexNormalDisplayBuffer.itemSize = 3;
-			surface.vertexNormalDisplayBuffer.numItems = dnorms.length/3;
+			this.vertexNormalDisplayBuffer.itemSize = 3;
+			this.vertexNormalDisplayBuffer.numItems = dnorms.length/3;
 		}
 		
 		//surface.color=new Float32Array([214/256,148/256,32/256,1.0]);
-		surface.color=new Float32Array([Math.random(),Math.random(),Math.random(),1.0]);
-		return surface;
-		
+		this.color=new Float32Array([Math.random(),Math.random(),Math.random(),1.0]);
 	}
+	Surface.prototype.destroy=function(){
+		//clean up memory?
+	};
 	function initBuffers() {
 		axesVertexPositionBuffer = gl.createBuffer();
 		majorGridVertexPositionBuffer = gl.createBuffer();
@@ -469,13 +478,12 @@ renderers.push(function() {
 		check("init buffers");
 		createSurfaceVertexPositionBuffer();
 		check("init shared surface buffer");
-		surfaces.test = createSurface();
 		//regionsXY.test = createRegionXY();
 		check("init surface buffer");
 	}
 	function go(f){
 		gl.getError();
-		//surfaces[Math.random()] = createSurface(f);
+		//surfaces[Math.random()] = ne Surface(f);
 		regionsXY[Math.random()] = createRegionXY(f);
 		drawScene();
 	}
@@ -634,7 +642,6 @@ renderers.push(function() {
 		drawScene();
 	}
 	
-
 	renderer.start = function (canvas) {
 		if(!initGL(canvas)){
 			return false;
@@ -651,7 +658,7 @@ renderers.push(function() {
 	
 			check("start x");
 		drawScene();
-		return true;
+		return renderer;
 	}
-	return renderer;
-}());
+	return renderer.start(canvas);
+});
