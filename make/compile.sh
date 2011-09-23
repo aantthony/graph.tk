@@ -43,6 +43,7 @@ cat \
 	css/*.css \
 	| sed s/buttons\.png/\\/css\\/buttons\.png/ \
 	| sed s/sw\.png/\\/css\\/sw\.png/ \
+	| sed s/\(font\\//\(\\/css\\/font\\// \
 	> ./min/${TIME_CODE}.css
 echo "created: min/${TIME_CODE}.css"
 rm -rf ./tmp
