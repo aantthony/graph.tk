@@ -29,9 +29,12 @@
 		}
 	};
 	
+	window.Color=Color;
 	var colorpool=["#0077cc","#ff0000","#00ff00"].reverse().map(function(x){return new Color(x);});
 	app.Graph = function(eq){
-		this.color = colorpool.pop() || Math.rando
+		this.color = colorpool.pop() || new Color([Math.random(),Math.random(),Math.random()]);
+		this.latex=eq;
+		this.math=M(this.latex);
 	};
 	
 }());

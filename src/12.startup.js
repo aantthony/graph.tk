@@ -14,7 +14,7 @@ function init(){
 		state = {}
 	}
 	app.ui = ui_init(window);
-	app.createGraph("z=x+sin(y)");
+	app.createGraph("x+\\sin(y)");
 }
 
 document.body.removeChild(document.getElementById("loading"));

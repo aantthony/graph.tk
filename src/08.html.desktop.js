@@ -56,7 +56,7 @@ function ui_init(window) {
 		
         b_.style.backgroundColor=g.color;
 		
-        delete_.addEventListener("mouseup",function(e){app.remove(li);e.stopPropagation();},false);
+        delete_.addEventListener("mouseup",function(e){app.destroyGraph(id);e.stopPropagation();},false);
 
 		
 		html.graphs.appendChild(li);
@@ -188,6 +188,7 @@ function ui_init(window) {
 		      mx =  - cx
 
 		    */
+		/*
 		    var dx=mx+cx;
 		    var dy=my-cy;
 		    if((dx*dx+dy*dy)>1000){
@@ -197,7 +198,7 @@ function ui_init(window) {
 		      cy+=my+ex*(cy-my)-cy;
 		    }
 		    updatePTD(mx,my);
-
+*/
 		        //Prevent browser from scrolling page
 		        e.preventDefault();
 		        return false;

@@ -14,17 +14,29 @@ renderers.push(function(canvas) {
 		
 		//Updates from app.js
 		createGraph:function(id, g, f){
-			surfaces[id]=new Surface(f||function(x,y){return x+y});
+			var expr = g.math.toTypedExpression("text/javascript");
+			if(expr.t!==1 && expr.t!=4){
+				window.x=g.math;
+				alert(expr.t+", "+expr.s);
+				expr.s="0";
+			}
+			surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
 			drawScene();
 		},
 		updateGraph:function(id, g){
 			//surfaces[id].animateTo();
 			surfaces[id].destroy();
-			surfaces[id]=new Surface(new Function("x,y","return "+g.math.toExpression("text/javascript")));
+			var expr = g.math.toTypedExpression("text/javascript");
+			if(expr.t!==1 && expr.t!=4){
+				expr.s="0";
+			}
+			surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
 			drawScene();
 		},
 		destroyGraph:function(id){
-			
+			surfaces[id].destroy();
+			delete surfaces[id];
+			drawScene();
 		}
 	};
 	var stats;
@@ -224,7 +236,7 @@ renderers.push(function(canvas) {
 		surfaceVertexPositionBuffer.numItems = triangle_strip_plane.numItems = tverts.length/2;
 	}
 	
-	function createRegionXY(str){
+	function RegionXY(str){
 		//f=f||function(x,y){return x*x*+y*y<4.0;};
 		str=str||"x*x+y*y<4.0";
 		var region = {};
@@ -261,7 +273,7 @@ renderers.push(function(canvas) {
 		
 	}
 	
-	function Surface(f){
+	function Surface(f, rgba){
 		
 		this.heightBuffer = gl.createBuffer();
 		this.vertexNormalBuffer = gl.createBuffer();
@@ -401,7 +413,7 @@ renderers.push(function(canvas) {
 		}
 		
 		//surface.color=new Float32Array([214/256,148/256,32/256,1.0]);
-		this.color=new Float32Array([Math.random(),Math.random(),Math.random(),1.0]);
+		this.color=new Float32Array(rgba);
 	}
 	Surface.prototype.destroy=function(){
 		//clean up memory?
@@ -478,13 +490,13 @@ renderers.push(function(canvas) {
 		check("init buffers");
 		createSurfaceVertexPositionBuffer();
 		check("init shared surface buffer");
-		//regionsXY.test = createRegionXY();
+		//regionsXY.test = new RegionXY();
 		check("init surface buffer");
 	}
 	function go(f){
 		gl.getError();
 		//surfaces[Math.random()] = ne Surface(f);
-		regionsXY[Math.random()] = createRegionXY(f);
+		regionsXY[Math.random()] = new createRegionXY(f);
 		drawScene();
 	}
 	expose(go);

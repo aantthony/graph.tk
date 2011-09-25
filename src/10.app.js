@@ -18,7 +18,7 @@ var app=(function(){
 	var app = {
 		createGraph: function(eq){
 			var g,id;
-			graphs[id=guid()] = g = new app.Graph(eq);
+			graphs[id=guid()] = g = new app.Graph(eq||"x");
 			
 			track.time(function ui_create_graph(){
 				app.ui.createGraph(id, g);
@@ -26,6 +26,10 @@ var app=(function(){
 			track.time(function renderer_create_graph(){
 				renderer.createGraph(id, g)
 			});
+		},
+		destroyGraph: function(id){
+			renderer.destroyGraph(id);
+			app.ui.destroyGraph(id);
 		},
 		updateGraphWithID: function(id){
 			track.time(function renderer_updateGraph(){
