@@ -14,27 +14,44 @@ renderers.push(function(canvas) {
 		
 		//Updates from app.js
 		createGraph:function(id, g, f){
-			var expr = g.math.toTypedExpression("text/javascript");
-			if(expr.t!==1 && expr.t!=4){
-				window.x=g.math;
-				alert(expr.t+", "+expr.s);
-				expr.s="0";
+			
+			delete regionsXY[id];
+			delete surfaces[id];
+			switch(g.math.type){
+				case ">":
+				case "<":
+				case "<=":
+				case ">=":
+				var expr = g.math.toTypedExpression("x-shader/x-fragment");
+				regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([0.5]));
+				case "=":
+				default:
+				var expr = g.math.toTypedExpression("text/javascript");
+				surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
 			}
-			surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
 			drawScene();
 		},
 		updateGraph:function(id, g){
-			//surfaces[id].animateTo();
-			surfaces[id].destroy();
-			var expr = g.math.toTypedExpression("text/javascript");
-			if(expr.t!==1 && expr.t!=4){
-				expr.s="0";
+			delete regionsXY[id];
+			delete surfaces[id];
+			switch(g.math.type){
+				case ">":
+				case "<":
+				case "<=":
+				case ">=":
+					var expr = g.math.toTypedExpression("x-shader/x-fragment");
+					regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([0.5]));
+					break;
+				case "=":
+				default:
+					var expr = g.math.toTypedExpression("text/javascript");
+					surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
 			}
-			surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
+			
 			drawScene();
 		},
 		destroyGraph:function(id){
-			surfaces[id].destroy();
+			delete regionsXY[id];
 			delete surfaces[id];
 			drawScene();
 		}
@@ -236,7 +253,7 @@ renderers.push(function(canvas) {
 		surfaceVertexPositionBuffer.numItems = triangle_strip_plane.numItems = tverts.length/2;
 	}
 	
-	function RegionXY(str){
+	function RegionXY(str, rgba){
 		//f=f||function(x,y){return x*x*+y*y<4.0;};
 		str=str||"x*x+y*y<4.0";
 		var region = {};
@@ -259,7 +276,7 @@ renderers.push(function(canvas) {
 
 		
 		
-		region.color = new Float32Array([126/256,179/256,217/256,0.2]);
+		region.color = new Float32Array(rgba);
 		
 		region.surfaceVertexPositionBuffer=gl.createBuffer();
 		
@@ -393,16 +410,34 @@ renderers.push(function(canvas) {
 		this.vertexNormalBuffer.itemSize = 3;
 		this.vertexNormalBuffer.numItems = tnorms.length/3;
 		if(false){
+			var xyverts = [];
+			var xi,yi;
+			var r=5.0;
+			var rN=2.0*r/N;
+			var xf0 = -r;
+			var yf0 = -r;
+
+			for(xi=0;xi<N;xi++){
+				for(yi=0;yi<N;yi++){
+					var xf=xi*rN+xf0;
+					var yf=yi*rN+yf0;
+					xyverts.push(xf,yf);
+				}
+			}
+			
+			
+			
 			var dnorms = [];
 			var i;
-			var l = verts.length*3;
-			for(i=0;i<l;i+=3){
-				dnorms.push(verts[i]/*fix this!*/,verts[i+1],verts[i+2]);
-				var nx=norms[i],
-					ny=norms[i+1],
-					nz=norms[i+2];
+			var l = verts.length;
+			for(i=0;i<l;i+=1){
+				dnorms.push(xyverts[i*2],xyverts[i*2+1],verts[i]);
+				var nx=norms[3*i],
+					ny=norms[3*i+1],
+					nz=norms[3*i+2];
 				var m = 4.0*Math.sqrt(nx*nx+ny*ny+nz*nz);
-				dnorms.push(verts[i]+nx/m,verts[i+1]+ny/m,verts[i+2]+nz/m);
+				dnorms.push(xyverts[i*2]+nx/m,xyverts[i*2+1]+ny/m,verts[i]+nz/m);
+				//dnorms.push(xyverts[i*2],xyverts[i*2+1],verts[i]+0.1);
 			}
 		
 			this.vertexNormalDisplayBuffer = gl.createBuffer();
@@ -496,7 +531,7 @@ renderers.push(function(canvas) {
 	function go(f){
 		gl.getError();
 		//surfaces[Math.random()] = ne Surface(f);
-		regionsXY[Math.random()] = new createRegionXY(f);
+		regionsXY[Math.random()] = new RegionXY(f);
 		drawScene();
 	}
 	expose(go);
