@@ -51,14 +51,18 @@ function ui_init(window) {
 		var inputbox = li.getElementsByClassName("matheditor")[0];
 		inputbox.appendChild(document.createTextNode(g.latex||""));
 		check_.addEventListener("change",function(e){
-            
+            app.showHideGraph(id, check_.checked);
         },false);
 		
         b_.style.backgroundColor=g.color;
 		
         delete_.addEventListener("mouseup",function(e){app.destroyGraph(id);e.stopPropagation();},false);
 
-		
+		window.re = function(str){
+			var math = M(str);
+			g.math=math;
+			app.updateGraphWithID(id);
+		};
 		html.graphs.appendChild(li);
 		$(inputbox).mathquill("editable").bind("keyup", function(e){
 			if(e.keyCode==13 || true){
@@ -76,8 +80,9 @@ function ui_init(window) {
 	function resize(){
 		html.canvas.width=window.innerWidth  || document.body.clientWidth;
 		html.canvas.height=window.innerHeight|| document.body.clientHeight || 120;//120 for iframe default
+		renderer.resize(html.canvas.width, html.canvas.height);
 	}
-	
+	window.addEventListener("resize", resize);
 	document.body.appendChild(html.canvas);
 	
 	var equations = document.createElement("div");

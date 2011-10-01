@@ -35,6 +35,9 @@ var app=(function(){
 			track.time(function renderer_updateGraph(){
 				renderer.updateGraph(id, graphs[id]);
 			})
+		},
+		showHideGraph: function(id, show){
+			renderer.showHideGraph(id, show);
 		}
 	};
 	

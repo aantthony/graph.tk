@@ -4,12 +4,26 @@ var renderers=[]; //Adds webgl renderer to array.
 
 
 renderers.push(function(canvas) {
+	
+	var mvMatrix = mat4.create();
+	var pMatrix = mat4.create();
+	
+	var animating=false;
+	
+	var region2D_opacity = 0.8;
 	var renderer={
 		cam_lat: 0.0,
 		cam_long:0.0,
 		cam_dist: 10.0,
+		d:2,
 		update: function(){
-			drawScene();
+			if(!animating){
+				drawScene();
+			}else{
+				if(renderer.d>3){
+					renderer.d-=2;
+				}
+			}
 		},
 		
 		//Updates from app.js
@@ -23,13 +37,14 @@ renderers.push(function(canvas) {
 				case "<=":
 				case ">=":
 				var expr = g.math.toTypedExpression("x-shader/x-fragment");
-				regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([0.5]));
+				regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([region2D_opacity]));
 				case "=":
 				default:
 				var expr = g.math.toTypedExpression("text/javascript");
 				surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
 			}
-			drawScene();
+			renderer.d = 2+(Object.keys(surfaces).length ? 3 : 2);
+			startAnimation();
 		},
 		updateGraph:function(id, g){
 			delete regionsXY[id];
@@ -40,7 +55,7 @@ renderers.push(function(canvas) {
 				case "<=":
 				case ">=":
 					var expr = g.math.toTypedExpression("x-shader/x-fragment");
-					regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([0.5]));
+					regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([region2D_opacity]));
 					break;
 				case "=":
 				default:
@@ -48,12 +63,32 @@ renderers.push(function(canvas) {
 					surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
 			}
 			
-			drawScene();
+			renderer.d = 2+(Object.keys(surfaces).length ? 3 : 2);
+			startAnimation();
 		},
 		destroyGraph:function(id){
 			delete regionsXY[id];
 			delete surfaces[id];
+			renderer.d = Object.keys(surfaces).length ? 3 : 2;
 			drawScene();
+		},
+		showHideGraph:function(id, show){
+			if(regionsXY[id]){
+				regionsXY[id].hide = !show;
+			}else if(surfaces[id]){
+				surfaces[id].hide = !show;
+			}
+			drawScene();
+		},
+		resize:function(width,height,prevent_redraw){
+			
+			gl.viewportWidth = width;
+			gl.viewportHeight = height;
+			
+		    mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.01, 100.0, pMatrix);
+			if(!prevent_redraw){
+				drawScene();
+			}
 		}
 	};
 	var stats;
@@ -86,8 +121,7 @@ renderers.push(function(canvas) {
 			if (gl === null) {
 				throw("Fail");
 			}
-			gl.viewportWidth = canvas.width;
-			gl.viewportHeight = canvas.height;
+			renderer.resize(canvas.width,canvas.height,true);
 		} catch (e) {
 			alert(e);
 		}
@@ -116,7 +150,7 @@ renderers.push(function(canvas) {
 		gl.compileShader(shader);
 
 		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-			alert(gl.getShaderInfoLog(shader));
+			throw(gl.getShaderInfoLog(shader));
 			return null;
 		}
 		
@@ -181,14 +215,10 @@ renderers.push(function(canvas) {
 	}
 
 
-	var mvMatrix = mat4.create();
-	var pMatrix = mat4.create();
-	
 	var cam_lat_now=0.0;
 	var cam_long_now=0.0;
 	var cam_dist_now=10.0;
 	
-	var animating=false;
 	
 	var surfaces = {};
 	var regionsXY = {};
@@ -543,8 +573,19 @@ renderers.push(function(canvas) {
 			console.log(n+": "+x+": "+str);
 		}
 	}
+	var animating = false;
+	
+	function stopAnimation(){
+		animating=false;
+	}
+	function startAnimation(){
+		if(animating){
+			return;
+		}
+		animating=true;
+		tick();
+	}
 	function drawScene() {
-		
 		var p;
 		
 		gl.getError();
@@ -552,25 +593,63 @@ renderers.push(function(canvas) {
 		gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		
-			
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		gl.disable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthMask(true)
-
 		//gl.disable(gl.BLEND);
 		//gl.enable(gl.DEPTH_TEST);
 
+		if(renderer.d===3){
+			cam_lat_now = renderer.cam_lat;
+			cam_long_now = renderer.cam_long;
+			cam_dist_now = renderer.cam_dist;
+			
+			mat4.identity(mvMatrix);
+			mat4.translate(mvMatrix, [0, 0, -cam_dist_now]);
+			mat4.rotate(mvMatrix, cam_lat_now, [-1, 0, 0]);
+			mat4.rotate(mvMatrix, cam_long_now, [0, 0, 1]);
+		}else if(renderer.d == 2){
+			mat4.identity(mvMatrix);
+			mat4.translate(mvMatrix, [0, 0, -10.0]);
+		}else if (renderer.d === 5){
+			// x -> 3
+			
+			cam_lat_now += 0.03*(renderer.cam_lat-cam_lat_now);
+			cam_long_now += 0.03*(renderer.cam_long-cam_long_now);
+			cam_dist_now += 0.01*(renderer.cam_dist-cam_dist_now);
+
+			mat4.identity(mvMatrix);
+			mat4.translate(mvMatrix, [0, 0, -cam_dist_now]);
+			mat4.rotate(mvMatrix, cam_lat_now, [-1, 0, 0]);
+			mat4.rotate(mvMatrix, cam_long_now, [0, 0, 1]);
+			if(
+				Math.abs(cam_lat_now-renderer.cam_lat) + 
+				Math.abs(cam_long_now-renderer.cam_long) +
+				Math.abs(cam_dist_now-renderer.cam_dist)
+				<= 0.1) {
+				renderer.d = 3;
+				stopAnimation();
+			}
+		}else if(renderer.d == 4){
+			// x -> 2
+			
+			cam_lat_now += 0.1*(0-cam_lat_now);
+			cam_long_now += 0.1*(0-cam_long_now);
+			cam_dist_now += 0.1*(10.0-cam_dist_now);
+
+			mat4.identity(mvMatrix);
+			mat4.translate(mvMatrix, [0, 0, -cam_dist_now]);
+			mat4.rotate(mvMatrix, cam_lat_now, [-1, 0, 0]);
+			mat4.rotate(mvMatrix, cam_long_now, [0, 0, 1]);
+			if(Math.abs(cam_lat_now) + Math.abs(cam_long_now) + Math.abs(cam_dist_now-10.0) <= 0.01){
+				renderer.d = 2;
+				stopAnimation();
+			}
+		}else{
+			console.error("d= "+renderer.d);
+		}
 		
-		
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.01, 100.0, pMatrix);
-		mat4.identity(mvMatrix);
-		cam_lat_now = renderer.cam_lat;
-		cam_long_now = renderer.cam_long;
-		cam_dist_now = renderer.cam_dist;
-		mat4.translate(mvMatrix, [0, 0, -cam_dist_now]);
-		mat4.rotate(mvMatrix, cam_lat_now, [-1, 0, 0]);
-		mat4.rotate(mvMatrix, cam_long_now, [0, 0, 1]);
 		
 		gl.useProgram(p=surfaceProgram);
 		gl.enableVertexAttribArray(surfaceProgram.vertexPositionAttribute);
@@ -593,21 +672,22 @@ renderers.push(function(canvas) {
 		gl.uniform3f(p.pointLightingLocationUniform, 0,0,10.0);
 		
 		foreach(surfaces,function(name, surface) {
-			
-			gl.uniform4fv(p.colorUniform, surface.color);
+			if(!surface.hide){
+				gl.uniform4fv(p.colorUniform, surface.color);
 
-	        gl.bindBuffer(gl.ARRAY_BUFFER, surfaceVertexPositionBuffer);
-			gl.vertexAttribPointer(p.vertexPositionAttribute, surfaceVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-			
-			
-	        gl.bindBuffer(gl.ARRAY_BUFFER, surface.heightBuffer);
-			gl.vertexAttribPointer(p.heightAttribute, surface.heightBuffer.itemSize, gl.FLOAT, false, 0, 0);
+		        gl.bindBuffer(gl.ARRAY_BUFFER, surfaceVertexPositionBuffer);
+				gl.vertexAttribPointer(p.vertexPositionAttribute, surfaceVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-	        gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalBuffer);
-			gl.vertexAttribPointer(p.vertexNormalAttribute, surface.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-			
-			gl.drawArrays(gl.TRIANGLE_STRIP,0,surfaceVertexPositionBuffer.numItems);
 
+		        gl.bindBuffer(gl.ARRAY_BUFFER, surface.heightBuffer);
+				gl.vertexAttribPointer(p.heightAttribute, surface.heightBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+		        gl.bindBuffer(gl.ARRAY_BUFFER, surface.vertexNormalBuffer);
+				gl.vertexAttribPointer(p.vertexNormalAttribute, surface.vertexNormalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+				gl.drawArrays(gl.TRIANGLE_STRIP,0,surfaceVertexPositionBuffer.numItems);
+
+			}
 		});
 		gl.disableVertexAttribArray(surfaceProgram.vertexPositionAttribute);
 		gl.disableVertexAttribArray(surfaceProgram.vertexNormalAttribute);
@@ -616,23 +696,24 @@ renderers.push(function(canvas) {
 		
 		gl.depthMask(false)
 		foreach(regionsXY,function(name, region) {
-			
-			gl.useProgram(p=region.program);
-			gl.uniform4fv(p.colorUniform, region.color);
-			
-			gl.enableVertexAttribArray(p.vertexPositionAttribute);
-			
-	        gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
-	        gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
+			if(!region.hide){
+				gl.useProgram(p=region.program);
+				gl.uniform4fv(p.colorUniform, region.color);
 
-			
-	        gl.bindBuffer(gl.ARRAY_BUFFER, region.surfaceVertexPositionBuffer);
-			gl.vertexAttribPointer(p.vertexPositionAttribute, region.surfaceVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.enableVertexAttribArray(p.vertexPositionAttribute);
 
-			gl.drawArrays(gl.TRIANGLE_STRIP,0,region.surfaceVertexPositionBuffer.numItems);
-			
-			gl.disableVertexAttribArray(p.vertexPositionAttribute);
-			
+		        gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
+		        gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
+
+
+		        gl.bindBuffer(gl.ARRAY_BUFFER, region.surfaceVertexPositionBuffer);
+				gl.vertexAttribPointer(p.vertexPositionAttribute, region.surfaceVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+				gl.drawArrays(gl.TRIANGLE_STRIP,0,region.surfaceVertexPositionBuffer.numItems);
+
+				gl.disableVertexAttribArray(p.vertexPositionAttribute);
+
+			}
 		});
 		
 	
@@ -643,12 +724,15 @@ renderers.push(function(canvas) {
 	        gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
 	        gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
 
-			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 1.0);
+			if(renderer.d == 3 || renderer.d == 5 || 1){
+				gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 1.0);
+				gl.bindBuffer(gl.ARRAY_BUFFER, axesVertexPositionBuffer);
+				gl.vertexAttribPointer(p.vertexPositionAttribute, axesVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.drawArrays(gl.TRIANGLE_STRIP,0,axesVertexPositionBuffer.numItems);
 
-			gl.bindBuffer(gl.ARRAY_BUFFER, axesVertexPositionBuffer);
-			gl.vertexAttribPointer(p.vertexPositionAttribute, axesVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-			gl.drawArrays(gl.TRIANGLE_STRIP,0,axesVertexPositionBuffer.numItems);
-
+			}else{
+				
+			}
 			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 0.7);
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, minorGridVertexPositionBuffer);
@@ -678,15 +762,18 @@ renderers.push(function(canvas) {
 		
 			gl.disable(gl.BLEND);
 
-
 		stats.update();
 	}
 	expose(check);
 	expose(drawScene);
 	
 	function tick(){
-		requestAnimFrame(tick);
-		drawScene();
+		var res;
+		if(animating){
+			res = requestAnimFrame(tick);
+			drawScene();
+		}
+		return res;
 	}
 	
 	renderer.start = function (canvas) {
@@ -698,7 +785,7 @@ renderers.push(function(canvas) {
 		initShaders();
 				check("initshaders");
 		initBuffers();
-
+		
 		gl.clearColor(1.0, 1.0, 1.0, 1.0);
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthFunc(gl.LEQUAL);
