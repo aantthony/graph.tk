@@ -133,12 +133,11 @@ function ui_init(window) {
 			}
 			drag_start_x=e.x;
 			drag_start_y=e.y;
-			drag_start_cam_long=renderer.cam_long;
-			drag_start_cam_lat=renderer.cam_lat;
-			if(!window.D3){
+			if(renderer.d == 2 || renderer.d == 4){
 				html.canvas.style.cursor = "url(css/grabbing.gif), grabbing";
 			}
-
+			drag_start_cam_long=renderer.cam_long;
+			drag_start_cam_lat=renderer.cam_lat;
 		});
 		html.canvas.addEventListener("mousemove", function(e) {
 			if(drag_start_x!==undefined){
@@ -146,12 +145,15 @@ function ui_init(window) {
 					e.x = e.pageX;
 					e.y = e.pageY;
 				}
-				renderer.cam_long = drag_start_cam_long+radians_per_pixel_x*(e.x-drag_start_x);
-				renderer.cam_lat = drag_start_cam_lat+radians_per_pixel_y*(e.y-drag_start_y);
-				if(renderer.cam_lat<0.0){
-					renderer.cam_lat=0.0;
-				} else if(renderer.cam_lat>Math.PI){
-					renderer.cam_lat=Math.PI;
+				if(renderer.d == 2 || renderer.d == 4){
+				}else{
+					renderer.cam_long = drag_start_cam_long+radians_per_pixel_x*(e.x-drag_start_x);
+					renderer.cam_lat = drag_start_cam_lat+radians_per_pixel_y*(e.y-drag_start_y);
+					if(renderer.cam_lat<0.0){
+						renderer.cam_lat=0.0;
+					} else if(renderer.cam_lat>Math.PI){
+						renderer.cam_lat=Math.PI;
+					}
 				}
 				renderer.update();
 			}
@@ -174,7 +176,11 @@ function ui_init(window) {
 		    }
 			delta*=dist_units_per_pixel;
 			var ex=Math.exp(delta);
-			renderer.cam_dist*=ex;
+			if(renderer.d == 2 || renderer.d == 4){
+			}else{
+				
+				renderer.cam_dist*=ex;
+			}
 			renderer.update();
 		      //scaley*=ex;
 		    /*

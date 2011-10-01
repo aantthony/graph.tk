@@ -27,26 +27,8 @@ renderers.push(function(canvas) {
 		},
 		
 		//Updates from app.js
-		createGraph:function(id, g, f){
+		createGraph:function(id, g){
 			
-			delete regionsXY[id];
-			delete surfaces[id];
-			switch(g.math.type){
-				case ">":
-				case "<":
-				case "<=":
-				case ">=":
-				var expr = g.math.toTypedExpression("x-shader/x-fragment");
-				regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([region2D_opacity]));
-				case "=":
-				default:
-				var expr = g.math.toTypedExpression("text/javascript");
-				surfaces[id]=new Surface(new Function("x,y","return "+expr.s), g.color.rgba);
-			}
-			renderer.d = 2+(Object.keys(surfaces).length ? 3 : 2);
-			startAnimation();
-		},
-		updateGraph:function(id, g){
 			delete regionsXY[id];
 			delete surfaces[id];
 			switch(g.math.type){
@@ -66,11 +48,15 @@ renderers.push(function(canvas) {
 			renderer.d = 2+(Object.keys(surfaces).length ? 3 : 2);
 			startAnimation();
 		},
+		updateGraph:function(id, g){
+			return renderer.createGraph(id, g);
+		},
 		destroyGraph:function(id){
 			delete regionsXY[id];
 			delete surfaces[id];
-			renderer.d = Object.keys(surfaces).length ? 3 : 2;
-			drawScene();
+			
+			renderer.d = 2+(Object.keys(surfaces).length ? 3 : 2);
+			startAnimation();
 		},
 		showHideGraph:function(id, show){
 			if(regionsXY[id]){
@@ -577,6 +563,7 @@ renderers.push(function(canvas) {
 	
 	function stopAnimation(){
 		animating=false;
+		drawScene();
 	}
 	function startAnimation(){
 		if(animating){

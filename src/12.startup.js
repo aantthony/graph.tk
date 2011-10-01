@@ -14,7 +14,8 @@ function init(){
 		state = {}
 	}
 	app.ui = ui_init(window);
-	app.createGraph("x+\\sin(y)");
+	app.public.cam(Math.PI/4,Math.PI/4, 10.5)
+	app.createGraph("y^2<-x");
 }
 
 document.body.removeChild(document.getElementById("loading"));

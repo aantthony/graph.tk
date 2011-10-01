@@ -38,6 +38,13 @@ var app=(function(){
 		},
 		showHideGraph: function(id, show){
 			renderer.showHideGraph(id, show);
+		},
+		"public": {
+			cam: function (lat_, long_, dist_){
+				renderer.cam_lat = lat_;
+				renderer.cam_long = long_;
+				renderer.cam_dist = dist_;
+			}
 		}
 	};
 	
