@@ -49,7 +49,7 @@ app.config={
   var webkitVersion;
   if(webkitVersion=/AppleWebKit\/([\d]+\.[\d]+)/.exec(navigator.userAgent)){
     webkitVersion=Number(webkitVersion[1]);
-    if(webkitVersion>=534.46){
+    if(webkitVersion>=534.46 && !/Chrome/.test(navigator.userAgent)){
       app.config.minorGridStyle="#eee";
       app.config.majorGridStyle="#aaa";
     }
