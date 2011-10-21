@@ -765,7 +765,8 @@ app.init=function (){
     var fullscreen=!window.parent.length;
     
     if(window && window.parent != window) {
-      window.parent.postMessage('locale check');
+	//this causes an error when in an iframe: SYNTAX_ERR: DOM Exception 12: An invalid or illegal string was specified.
+      //window.parent.postMessage('locale check');
     }
     app.locale = $.map(['language', 'browserLanguage', 'systemLanguage', 'userLanguage'], function(key) { return window.navigator && window.navigator[key] })[0];
     
