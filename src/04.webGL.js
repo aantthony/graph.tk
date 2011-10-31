@@ -10,7 +10,7 @@ renderers.push(function(canvas) {
 	
 	var animating=false;
 	
-	var region2D_opacity = 0.8;
+	var region2D_opacity = 0.2;
 	var renderer={
 		cam_lat: 0.0,
 		cam_long:0.0,
@@ -37,6 +37,11 @@ renderers.push(function(canvas) {
 				case "<=":
 				case ">=":
 					var expr = g.math.toTypedExpression("x-shader/x-fragment");
+					//hack: 
+					console.log(expr.s);
+					expr.s=expr.s.replace(/r/g, "(x*x+y*y)");
+					//really bad hack. there should never be a θ exported, but instead "theta":
+					expr.s=expr.s.replace(/θ/g, "atan(y,x)");
 					regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([region2D_opacity]));
 					break;
 				case "=":
@@ -584,8 +589,8 @@ renderers.push(function(canvas) {
 		gl.disable(gl.BLEND);
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthMask(true)
-		//gl.disable(gl.BLEND);
-		//gl.enable(gl.DEPTH_TEST);
+		gl.disable(gl.BLEND);
+		gl.enable(gl.DEPTH_TEST);
 
 		if(renderer.d===3){
 			cam_lat_now = renderer.cam_lat;
@@ -720,7 +725,7 @@ renderers.push(function(canvas) {
 			}else{
 				
 			}
-			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 0.7);
+			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 0.3);
 
 	        gl.bindBuffer(gl.ARRAY_BUFFER, minorGridVertexPositionBuffer);
 			gl.vertexAttribPointer(p.vertexPositionAttribute, minorGridVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
