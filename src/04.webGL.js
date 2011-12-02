@@ -36,12 +36,15 @@ renderers.push(function(canvas) {
 				case "<":
 				case "<=":
 				case ">=":
+					g.math = g.math.sub("r", M("\\sqrt (x^2+y^2)"));
+					g.math = g.math.sub("θ", M("\\atan(y,x)"));
+					g.math = g.math.sub("∞", M("-\\log(0)"));
+					g.math = g.math.sub("e", Math.E);
+					g.math = g.math.sub("π", Math.PI);
 					var expr = g.math.toTypedExpression("x-shader/x-fragment");
 					//hack: 
-					console.log(expr.s);
-					expr.s=expr.s.replace(/r/g, "(x*x+y*y)");
 					//really bad hack. there should never be a θ exported, but instead "theta":
-					expr.s=expr.s.replace(/θ/g, "atan(y,x)");
+					console.log(expr.s);
 					regionsXY[id]=new RegionXY(expr.s, g.color.rgb.concat([region2D_opacity]));
 					break;
 				case "=":
@@ -216,7 +219,7 @@ renderers.push(function(canvas) {
 	
 	
 	var majorGridVertexPositionBuffer;
-	var axesVertexPositionBuffer;
+	var squareVertexPositionBuffer;
 	var minorGridVertexPositionBuffer;
 	var surfaceVertexPositionBuffer;
 	
@@ -475,38 +478,21 @@ renderers.push(function(canvas) {
 		//clean up memory?
 	};
 	function initBuffers() {
-		axesVertexPositionBuffer = gl.createBuffer();
+		squareVertexPositionBuffer = gl.createBuffer();
 		majorGridVertexPositionBuffer = gl.createBuffer();
 		minorGridVertexPositionBuffer = gl.createBuffer();
 		var lt =0.01;
 		var vertices = [
-			-5.0, -lt,  0.0,
-			-5.0,  lt,  0.0,
-			+5.0, -lt,  0.0,
-			+5.0,  lt,  0.0,
-			
-			+5.0, +lt*15.0,  0.0,
-			+5.3, +0.0,  0.0,
-			+5.0, -lt*15.0,  0.0,
-			
-			
-			+5.0, -lt*15.0,  0.0,
-			-lt,  -5.0,  0.0,
-			
-			-lt,  -5.0,  0.0,
-			+lt, -5.0,  0.0,
-			-lt,  5.0,  0.0,
-			+lt, 5.0,  0.0,
-		      
-			+lt*15.0, 5.0,  0.0,
-			+0.0, 5.3,  0.0,
-			-lt*15.0, 5.0,  0.0,
+			-1.0, -1.0,  0.0,
+			-1.0,  1.0,  0.0,
+			+1.0, -1.0,  0.0,
+			+1.0,  1.0,  0.0
 		];
 		
-		gl.bindBuffer(gl.ARRAY_BUFFER, axesVertexPositionBuffer);
+		gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-		axesVertexPositionBuffer.itemSize = 3;
-		axesVertexPositionBuffer.numItems = vertices.length/3;
+		squareVertexPositionBuffer.itemSize = 3;
+		squareVertexPositionBuffer.numItems = vertices.length/3;
 
 		vertices = [];
 		var minorGrid = [];
@@ -560,7 +546,7 @@ renderers.push(function(canvas) {
 		var x;
 		while(x=gl.getError()){
 			var str="";
-			for(i in gl){if(gl[i]==1281){str=i;}}
+			for(i in gl){if(gl[i]==x){str=i;break;}}
 			console.log(n+": "+x+": "+str);
 		}
 	}
@@ -603,7 +589,9 @@ renderers.push(function(canvas) {
 			mat4.rotate(mvMatrix, cam_long_now, [0, 0, 1]);
 		}else if(renderer.d == 2){
 			mat4.identity(mvMatrix);
-			mat4.translate(mvMatrix, [0, 0, -10.0]);
+			
+			cam_dist_now = renderer.cam_dist;
+			mat4.translate(mvMatrix, [0, 0, -cam_dist_now]);
 		}else if (renderer.d === 5){
 			// x -> 3
 			
@@ -628,7 +616,7 @@ renderers.push(function(canvas) {
 			
 			cam_lat_now += 0.1*(0-cam_lat_now);
 			cam_long_now += 0.1*(0-cam_long_now);
-			cam_dist_now += 0.1*(10.0-cam_dist_now);
+			//cam_dist_now += 0.1*(10.0-cam_dist_now);
 
 			mat4.identity(mvMatrix);
 			mat4.translate(mvMatrix, [0, 0, -cam_dist_now]);
@@ -651,7 +639,6 @@ renderers.push(function(canvas) {
 		
         gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
         gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
-
 
         var normalMatrix = mat3.create();
         mat4.toInverseMat3(mvMatrix, normalMatrix);
@@ -716,14 +703,13 @@ renderers.push(function(canvas) {
 	        gl.uniformMatrix4fv(p.pMatrixUniform, false, pMatrix);
 	        gl.uniformMatrix4fv(p.mvMatrixUniform, false, mvMatrix);
 
-			if(renderer.d == 3 || renderer.d == 5 || 1){
-				gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 1.0);
-				gl.bindBuffer(gl.ARRAY_BUFFER, axesVertexPositionBuffer);
-				gl.vertexAttribPointer(p.vertexPositionAttribute, axesVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-				gl.drawArrays(gl.TRIANGLE_STRIP,0,axesVertexPositionBuffer.numItems);
+			if(renderer.d == 3 || renderer.d == 5){
 
 			}else{
-				
+				gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 1.0);
+				gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
+				gl.vertexAttribPointer(p.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+				gl.drawArrays(gl.TRIANGLE_STRIP,0,squareVertexPositionBuffer.numItems);
 			}
 			gl.uniform4f(p.colorUniform, 0.0,0.0,0.0, 0.3);
 
