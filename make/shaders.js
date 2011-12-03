@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 var fs = require("fs");
 
-var subdir="./shaders/";
-var fileNames = fs.readdirSync(subdir).filter(function(x) {return /\.(vertex|fragment|glsl)$/.test(x)});;
+var subdir="./tmp/shaders/";
+var fileNames = fs.readdirSync(subdir).filter(function(x) {return /\.(vertex|fragment|glsl)$/.test(x)});
 var response = {};
 fileNames.forEach(function(filename) {
 	try{

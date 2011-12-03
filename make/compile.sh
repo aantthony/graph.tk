@@ -46,7 +46,7 @@ cat \
 	| sed s/\(font\\//\(\\/css\\/font\\// \
 	> ./min/${TIME_CODE}.css
 echo "created: min/${TIME_CODE}.css"
-rm -rf ./tmp
+#rm -rf ./tmp
 
 sed s/CSS_FILE/min\\/${TIME_CODE}.css/ \
 	index.template.html \

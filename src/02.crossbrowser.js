@@ -9,21 +9,14 @@ window.requestAnimFrame = window.requestAnimFrame || (function() {
 	};
 })();
 
-function foreach(t,f){
-	return Object.keys(t).forEach(function(x) {
-		return f(x,t[x]);
-	});
-}
-
-
-function expose(f){
-	window[f.name]=f;
-	return f;
-};
-var startupTime = new Date();
-
-
 //hack for now
 Math.e=Math.E;
 Math.pi=Math.PI;
 window.Float32Array = Float32Array || window.Array;
+
+var startupTime = new Date();
+
+var d=document;
+
+//debug:
+window.debug = {};

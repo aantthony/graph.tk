@@ -1,4 +1,4 @@
-function init(){
+function main(flags){
 	var state;
 	if(window.localStorage && localStorage.getItem){
 		try{
@@ -10,14 +10,10 @@ function init(){
 			state = undefined;
 		}
 	}
-	if(state == undefined){
-		state = {}
-	}
-	app.ui = ui_init(window);
-	app.public.cam(Math.PI/4,Math.PI/4, 10.5)
-	app.createGraph("y^2<-x");
+	app.init(state);
+	app.createGraph("x>\\sin(y)");
+	window.boot = "ok";
 }
 
-document.body.removeChild(document.getElementById("loading"));
-
-track.time(init)("full load", new Date()-startupTime);
+d.body.removeChild(d.getElementById("loading"));
+window.boot = main;

@@ -1,3 +1,4 @@
+//Defines new app.Graph()
 (function(){
 	window.Color=Color;
 	function Color(x){
@@ -29,12 +30,42 @@
 		}
 	};
 	
-	window.Color=Color;
 	var colorpool=["#0077cc","#ff0000","#00ff00"].reverse().map(function(x){return new Color(x);});
 	app.Graph = function(eq){
 		this.color = colorpool.pop() || new Color([Math.random(),Math.random(),Math.random()]);
-		this.latex=eq;
+		this.latex=eq||"";
 		this.math=M(this.latex);
+		this.delegates = [];
+		this.visible = true;
+	};
+	app.Graph.prototype = {
+		"addDelegate": function(delegate){
+			this.delegates.push(delegate);
+		},
+		"trigger": function(event){
+			var graph = this;
+			this.delegates.forEach(function(delegate){
+				delegate[event](graph);
+			});
+		},
+		"update": function(){
+			this.trigger("update");
+		},
+		"delete": function(){
+			colorpool.push(this.color);
+			this.trigger("delete");
+		},
+		"hide": function(show){
+			if(show){
+				this.visible = true;
+				return this.trigger("show");
+			}else if(show === false){
+				this.visible=false;
+				this.trigger("hide");
+			}
+			this.visible=false;
+			this.trigger("hide");
+		}
 	};
 	
 }());

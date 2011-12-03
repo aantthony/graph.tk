@@ -1,102 +1,87 @@
-var renderer;
-function ui_init(window) {
-	
-	var html = {
-		canvas: document.createElement("canvas"),
-		graphs: document.createElement("ul"),
-	};
-	var graphs={};
-	var ui = {
-		createGraph: function(id, g){
-			graphs[id]={
-				node: createGraphNode(id, g)
-			};
+var html = (function(){
+	var renderer,
+		dom = {
+		"canvas": d.createElement("canvas"),
+		"graphs": d.createElement("ul")
 		},
-		destroyGraph:function(id){
-			html.graphs.removeChild(graphs[id].node);
-			delete graphs[id];
-		}
-	};
-	var proto_li = (function(){
-		var _proto=document.createElement("li");
-	    var _proto_div=document.createElement("div");
-	        var _proto_warn=document.createElement("aside");
-	        _proto_warn.appendChild(document.createTextNode("fail"));
+		proto_li = (function(){
+		var p=d.createElement("li"),
+			div=d.createElement("div"),
+			warn=d.createElement("aside"),
+			input=d.createElement("input"),
+			math=d.createElement("span"),
+	    	del=d.createElement("span");
+		warn.appendChild(d.createTextNode("fail"));
+		
+		div.className="b";
+		div.style.backgroundColor="#07c";
+	    input.type="checkbox";
+		input.checked="checked";
+		input.title=strings.showhide;
+		div.appendChild(input);
 
-	    _proto_div.className="b";
-	    _proto_div.style.backgroundColor="#07c";
-	    var _proto_input=document.createElement("input");
-	    _proto_input.type="checkbox";
-	    _proto_input.checked="checked";
-	        _proto_input.title=localized.showhide;
-	    _proto_div.appendChild(_proto_input);
-
-
-	    var _proto_math=document.createElement("span");
-	    _proto_math.className="matheditor";
-	    var _proto_del=document.createElement("span");
-	    _proto_del.className="delete";
-	        _proto.appendChild(_proto_div);
-	    _proto.appendChild(_proto_math);
-	    _proto.appendChild(_proto_del);
-	    _proto.appendChild(_proto_warn);
-		return _proto.cloneNode(true);
+	    math.className="matheditor";
+	    del.className="delete";
+		p.appendChild(div);
+	    p.appendChild(math);
+	    p.appendChild(del);
+	    p.appendChild(warn);
+		return p.cloneNode(true);
 	}());
 	function createGraphNode(id, g){
 		var li=proto_li.cloneNode(true);
 		li.id="eq-"+id;
-		var b_=li.firstChild;
-		var check_=li.firstChild.firstChild;
-		var delete_=li.getElementsByClassName("delete")[0];
-		var inputbox = li.getElementsByClassName("matheditor")[0];
-		inputbox.appendChild(document.createTextNode(g.latex||""));
+		var b_=li.firstChild,
+			check_=li.firstChild.firstChild,
+			delete_=li.getElementsByClassName("delete")[0],
+			inputbox = li.getElementsByClassName("matheditor")[0];
+		inputbox.appendChild(d.createTextNode(g.latex||""));
 		check_.addEventListener("change",function(e){
             app.showHideGraph(id, check_.checked);
-        },false);
+        }, false);
 		
         b_.style.backgroundColor=g.color;
 		
         delete_.addEventListener("mouseup",function(e){app.destroyGraph(id);e.stopPropagation();},false);
 
-		window.re = function(str){
-			var math = M(str);
-			g.math=math;
-			app.updateGraphWithID(id);
-		};
-		html.graphs.appendChild(li);
+		dom.graphs.appendChild(li);
 		$(inputbox).mathquill("editable").bind("keyup", function(e){
 			if(e.keyCode==13 || true){
 				var latex=$(inputbox).mathquill("latex");
 				var math = M(M.latex.parse(latex));
 				g.math=math;
-				app.updateGraphWithID(id);
+				g.update();
 			}
 		});
 		
 		return li;
 	}
-	html.canvas.width=window.innerWidth;
-	html.canvas.height=window.innerHeight;
-	function resize(){
-		html.canvas.width=window.innerWidth  || document.body.clientWidth;
-		html.canvas.height=window.innerHeight|| document.body.clientHeight || 120;//120 for iframe default
-		renderer.resize(html.canvas.width, html.canvas.height);
-	}
-	window.addEventListener("resize", resize);
-	document.body.appendChild(html.canvas);
+	//Initialise the canvas
+	dom.canvas.width = window.innerWidth   || d.body.clientWidth;
+	dom.canvas.height = window.innerHeight || d.body.clientHeight || 120;
 	
-	var equations = document.createElement("div");
-	var buttons = document.createElement("div");
+	function resize(){
+		dom.canvas.width = window.innerWidth   || d.body.clientWidth;
+		dom.canvas.height = window.innerHeight || d.body.clientHeight || 120; //120 for iframe default
+		renderer.resize(dom.canvas.width, dom.canvas.height);
+	}
+	
+	addEventListener("resize", resize);
+	d.body.appendChild(dom.canvas);
+	
+	
+	var equations = d.createElement("div");
+	var buttons = d.createElement("div");
 	equations.className="overlay";
 	equations.id="funcs";//change this to a class for portability
 	
 	buttons.className="buttons";
 	function button(value, title, callback){
-		var b = document.createElement("input");
-		b.type="button";
-		b.value=value;
-		b.title=title;
-		b.onclick=callback;
+		var b = d.createElement("input");
+		b.type = "button";
+		b.value = value;
+		b.title = title;
+		b.onclick = callback;
 		buttons.appendChild(b);
 		return button;
 	}
@@ -109,15 +94,15 @@ function ui_init(window) {
 	button(".png", "Make screenshot", function() {
 		
 	});
-	var help_button = document.createElement("a");
-	help_button.target="_blank";
-	help_button.className="help_button";
-	help_button.title="Help Page";
-	help_button.href="about/";
+	var help_button = d.createElement("a");
+	help_button.target = "_blank";
+	help_button.className = "help_button";
+	help_button.title = "Help Page";
+	help_button.href = "about/";
 	buttons.appendChild(help_button);
-	equations.appendChild(html.graphs);
+	equations.appendChild(dom.graphs);
 	equations.appendChild(buttons);
-	document.body.appendChild(equations);
+	d.body.appendChild(equations);
 	(function() {
 		var drag_start_x, drag_start_y;
 		var radians_per_pixel_x = 0.01,
@@ -126,26 +111,26 @@ function ui_init(window) {
 		var drag_start_cam_long,
 			drag_start_cam_lat,
 			drag_start_cam_dist;
-		html.canvas.addEventListener("mousedown", function(e) {
+		dom.canvas.addEventListener("mousedown", function(e) {
 			if (e.x === undefined) {
 				e.x = e.pageX;
 				e.y = e.pageY;
 			}
 			drag_start_x=e.x;
 			drag_start_y=e.y;
-			if(false && (renderer.d == 2 || renderer.d == 4)){
-				html.canvas.style.cursor = "url(css/grabbing.gif), grabbing";
+			if(false && (renderer.d == 2)){
+				dom.canvas.style.cursor = "url(css/grabbing.gif), grabbing";
 			}
 			drag_start_cam_long=renderer.cam_long;
 			drag_start_cam_lat=renderer.cam_lat;
 		});
-		html.canvas.addEventListener("mousemove", function(e) {
+		dom.canvas.addEventListener("mousemove", function(e) {
 			if(drag_start_x!==undefined){
 				if (e.x === undefined) {
 					e.x = e.pageX;
 					e.y = e.pageY;
 				}
-				if(false && (renderer.d == 2 || renderer.d == 4)){
+				if(false && (renderer.d == 2)){
 				}else{
 					renderer.cam_long = drag_start_cam_long+radians_per_pixel_x*(e.x-drag_start_x);
 					renderer.cam_lat = drag_start_cam_lat+radians_per_pixel_y*(e.y-drag_start_y);
@@ -176,7 +161,8 @@ function ui_init(window) {
 		    }
 			delta*=dist_units_per_pixel;
 			var ex=Math.exp(delta);
-			if(false && (renderer.d == 2 || renderer.d == 4)){
+			if(renderer.d == 2){
+				renderer.cam_dist*=ex;
 			}else{
 				renderer.cam_dist*=ex;
 			}
@@ -214,20 +200,19 @@ function ui_init(window) {
 		        return false;
 		  }
 		
-		html.canvas.addEventListener("mousewheel",mousewheel, false);
-		html.canvas.addEventListener("DOMMouseScroll",mousewheel, false);
+		dom.canvas.addEventListener("mousewheel",mousewheel, false);
+		dom.canvas.addEventListener("DOMMouseScroll",mousewheel, false);
 	
 		
-		html.canvas.addEventListener("mouseup", function(e){
+		dom.canvas.addEventListener("mouseup", function(e){
 			drag_start_x=drag_start_y=undefined;
-			html.canvas.style.cursor="";
+			dom.canvas.style.cursor="";
 		});
 		
 	}());
 	
 	while(renderers.length){
-		if(renderer = renderers[0](html.canvas)){
-			window.renderer=renderer;//debug
+		if(renderer = renderers[0](dom.canvas)){
 			renderers=true;
 			break;
 		}else{
@@ -235,8 +220,14 @@ function ui_init(window) {
 		}
 	}
 	
-	if(renderers!==true){
-		throw("Could not initialise any renderer!");
+var html = {
+	renderer: renderer,
+	"didAddGraph": function(g){
+		dom.graphs.appendChild(createGraphNode(g.id, g));
+	},
+	"didDeleteGraph": function(id){
+		dom.graphs.removeChild(d.getElementById("eq-"+id));
 	}
-	return ui;
-}
+};
+return html;
+});//NOT EXECUTED
