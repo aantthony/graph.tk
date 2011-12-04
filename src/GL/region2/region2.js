@@ -2,11 +2,6 @@ GL.region2 = function(g){
 	var region2D_opacity = 0.2;
 	var gl = GL.region2.gl;
 	var m = g.math;
-	m = m.sub("r", M("\\sqrt (x^2+y^2)"));
-	m = m.sub("θ", M("\\atan(y,x)"));
-	m = m.sub("∞", M("-\\log(0)"));
-	m = m.sub("e", Math.E);
-	m = m.sub("π", Math.PI);
 	var expr = g.math.toTypedExpression("x-shader/x-fragment");
 	var frag = gl.createShader(gl.FRAGMENT_SHADER);
 	var str = shaders["region2.fragment"];
@@ -35,7 +30,7 @@ GL.region2 = function(g){
 	this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 	this.shader.sMatrixUniform = gl.getUniformLocation(this.shader, "uSMatrix");
 	this.shader.colorUniform = gl.getUniformLocation(this.shader, "uColor");
-
+	this.shader.sizeUniform = gl.getUniformLocation(this.shader, "uSize");
 		
 	
 	
@@ -55,7 +50,6 @@ GL.region2.init = function(gl){
 };
 GL.region2.prototype = {
 	"draw": function(gl){
-		window.gl=gl;
 		gl.useProgram(this.shader);
 		
 		gl.enableVertexAttribArray(this.shader.vertexPositionAttribute);
@@ -65,6 +59,7 @@ GL.region2.prototype = {
 		gl.uniformMatrix4fv(this.shader.sMatrixUniform, false, gl.sMatrix);
 
 		gl.uniform4fv(this.shader.colorUniform, this.color);
+		gl.uniform2f(this.shader.sizeUniform, gl.worldLineWidth, gl.worldLineWidth);
 		
 		gl.bindBuffer(gl.ARRAY_BUFFER, gl.squareVertexPositionBuffer);
 		gl.vertexAttribPointer(this.shader.vertexPositionAttribute, gl.squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);

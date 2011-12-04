@@ -11,7 +11,7 @@ function main(flags){
 		}
 	}
 	app.init(state);
-	app.createGraph("x>\\sin(y)");
+	app.createGraph("x/y");
 	window.boot = "ok";
 }
 

@@ -34,7 +34,8 @@ var html = (function(){
 		var b_=li.firstChild,
 			check_=li.firstChild.firstChild,
 			delete_=li.getElementsByClassName("delete")[0],
-			inputbox = li.getElementsByClassName("matheditor")[0];
+			inputbox = li.getElementsByClassName("matheditor")[0],
+			warn = li.getElementsByTagName("aside")[0];
 		inputbox.appendChild(d.createTextNode(g.latex||""));
 		check_.addEventListener("change",function(e){
             app.showHideGraph(id, check_.checked);
@@ -43,14 +44,28 @@ var html = (function(){
         b_.style.backgroundColor=g.color;
 		
         delete_.addEventListener("mouseup",function(e){app.destroyGraph(id);e.stopPropagation();},false);
-
+		warn.addEventListener("mouseup", function(e){
+			alert(warn.message);
+		})
+		
+		
+		warn.style.display = "none";
+			
 		dom.graphs.appendChild(li);
 		$(inputbox).mathquill("editable").bind("keyup", function(e){
 			if(e.keyCode==13 || true){
-				var latex=$(inputbox).mathquill("latex");
-				var math = M(M.latex.parse(latex));
-				g.math=math;
-				g.update();
+				try{
+					var latex=$(inputbox).mathquill("latex");
+					var math = M(M.latex.parse(latex));
+					math = math.simplify();
+					g.math=math;
+					g.update();
+					warn.style.display = "none";
+				}catch(ex){
+					warn.style.display = "";
+					warn.message = ex.message;
+					warn.firstChild.nodeValue = "Error";
+				}
 			}
 		});
 		
@@ -107,10 +122,12 @@ var html = (function(){
 		var drag_start_x, drag_start_y;
 		var radians_per_pixel_x = 0.01,
 			radians_per_pixel_y = -0.01,
-			dist_units_per_pixel = 0.01;
+			dist_units_per_pixel = 0.04;
 		var drag_start_cam_long,
 			drag_start_cam_lat,
-			drag_start_cam_dist;
+			drag_start_cam_dist,
+			drag_start_cam_x,
+			drag_start_cam_y;
 		dom.canvas.addEventListener("mousedown", function(e) {
 			if (e.x === undefined) {
 				e.x = e.pageX;
@@ -118,11 +135,14 @@ var html = (function(){
 			}
 			drag_start_x=e.x;
 			drag_start_y=e.y;
-			if(false && (renderer.d == 2)){
+			if(renderer.d == 2){
 				dom.canvas.style.cursor = "url(css/grabbing.gif), grabbing";
+				drag_start_cam_x = renderer.cam_x;
+				drag_start_cam_y = renderer.cam_y;
+			}else{
+				drag_start_cam_long=renderer.cam_long;
+				drag_start_cam_lat=renderer.cam_lat;
 			}
-			drag_start_cam_long=renderer.cam_long;
-			drag_start_cam_lat=renderer.cam_lat;
 		});
 		dom.canvas.addEventListener("mousemove", function(e) {
 			if(drag_start_x!==undefined){
@@ -130,7 +150,11 @@ var html = (function(){
 					e.x = e.pageX;
 					e.y = e.pageY;
 				}
-				if(false && (renderer.d == 2)){
+				if(renderer.d == 2){
+					var d_c = 0.83/dom.canvas.height;
+					var d_s = d_c*renderer.cam_dist;//I don't know what this should be!
+					renderer.cam_x = drag_start_cam_x-d_s*(e.x-drag_start_x);
+					renderer.cam_y = drag_start_cam_y+d_s*(e.y-drag_start_y);
 				}else{
 					renderer.cam_long = drag_start_cam_long+radians_per_pixel_x*(e.x-drag_start_x);
 					renderer.cam_lat = drag_start_cam_lat+radians_per_pixel_y*(e.y-drag_start_y);
@@ -140,7 +164,7 @@ var html = (function(){
 						renderer.cam_lat=Math.PI;
 					}
 				}
-				renderer.update();
+				renderer.update(undefined, {stopdchangeanimation: true});
 			}
 		});
 		function mousewheel(e){
@@ -199,11 +223,77 @@ var html = (function(){
 		        e.preventDefault();
 		        return false;
 		  }
-		
+		var keys = {
+			"up": 87,
+			"down": 83,
+			"left": 65,
+			"right": 68
+		};
+		var down_keys={};
+		var ks={
+			updown: 0,
+			leftright: 0
+		}
+		function update_ks(){
+			if(renderer.d==3){
+				if(down_keys[keys.up]){
+					ks.updown = +1;
+				}else if(down_keys[keys.down]){
+					ks.updown = -1;
+				}else{
+					ks.updown = 0;
+				}
+				if(down_keys[keys.left]){
+					ks.leftright = -1;
+				}else if(down_keys[keys.right]){
+					ks.leftright = +1;
+				}else{
+					ks.leftright = 0;
+				}
+				if(ks.updown === 0 && ks.leftright === 0){
+					renderer.setVelocity(false);
+				}else{
+					var speed = 0.8;
+					speed *= renderer.cam_dist;
+					var s = Math.sin(renderer.cam_long);
+					var c = Math.cos(renderer.cam_long);
+					renderer.setVelocity({x: speed * (ks.leftright*c + ks.updown*s), y:speed * (ks.updown*c - ks.leftright*s)});
+				}
+			}else{
+				renderer.setVelocity(false);
+			}
+			
+		}
+		function keydown(e){
+			switch(e.keyCode){
+				case keys.up:
+				case keys.down:
+				case keys.left:
+				case keys.right:
+					down_keys[e.keyCode]=1;
+					update_ks();
+					break;
+				default:
+			}
+		}
+		function keyup(e){
+			switch(e.keyCode){
+				case keys.up:
+				case keys.down:
+				case keys.left:
+				case keys.right:
+					down_keys[e.keyCode]=0;
+					update_ks();
+					break;
+				default:
+			}
+		}
 		dom.canvas.addEventListener("mousewheel",mousewheel, false);
 		dom.canvas.addEventListener("DOMMouseScroll",mousewheel, false);
+		document.body.addEventListener("keydown",keydown, false);
+		document.body.addEventListener("keyup",keyup, false);
 	
-		
+	
 		dom.canvas.addEventListener("mouseup", function(e){
 			drag_start_x=drag_start_y=undefined;
 			dom.canvas.style.cursor="";

@@ -1,0 +1,17 @@
+attribute vec3 aVertexPosition;
+
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uSMatrix;
+
+varying vec2  MCposition;
+
+void main()
+{
+	vec4 sPosition = uSMatrix * vec4(aVertexPosition, 1.0);
+	MCposition  = sPosition.xy;
+	vec4 mvPosition = uMVMatrix * sPosition;
+	gl_Position = uPMatrix * mvPosition;
+
+	
+}

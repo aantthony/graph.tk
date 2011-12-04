@@ -6,10 +6,11 @@ precision highp float;
 
 varying vec2  MCposition;
 uniform vec4 uColor;
-
+uniform vec2 uSize;
 void main() {
-    float dx=0.02;
-    float dy=0.02;
+    
+    float dx=uSize.x;
+    float dy=uSize.y;
 	if(f(MCposition.x,MCposition.y)){
         vec3 white = vec3(1.0,1.0,1.0);
         gl_FragColor=vec4(uColor.rgb*uColor.a + white*(1.0-uColor.a),0.97);

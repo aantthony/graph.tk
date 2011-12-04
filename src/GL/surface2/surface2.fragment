@@ -1,0 +1,41 @@
+#ifdef GL_ES
+precision highp float;
+#endif
+/*
+uniform vec4 uColor;
+void main(void) {
+	gl_FragColor = uColor;
+}
+*/
+#import javascript
+
+varying vec2  MCposition;
+varying float diffuse;
+varying float specular;
+uniform vec4 uColor;
+const float ambient = 0.1;
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+void main(void) {
+	vec2 pos = fract(MCposition);
+	if ((pos.x > 0.50)&&(pos.y > 0.5) || (pos.x < 0.5)&&(pos.y < 0.5)){
+		//float lightWeighting = (0.2*diffuse+0.8*specular+ambient);
+        vec3 diffuseColor = 0.2*uColor.rgb;
+        vec3 specularColor = 0.8*uColor.rgb;
+		gl_FragColor = vec4(diffuse*diffuseColor.rgb + specular*specularColor+ambient*uColor.rgb, uColor.a);
+	}else{
+		vec3 othercolor = vec3(1,1,1)-uColor.rgb;
+		othercolor=othercolor*0.1+uColor.rgb*0.9;
+        float r = (1.0-0.1*rand(MCposition));
+		float lightWeighting = r*(0.7*diffuse+0.3*specular+ambient);
+		
+        vec3 diffuseColor = r*0.7*othercolor.rgb;
+        vec3 specularColor = r*0.3*othercolor.rgb;
+        vec3 ambientColor = r*othercolor.rgb;
+        
+		gl_FragColor = vec4(diffuse * diffuseColor+specular*specularColor+r*ambient*othercolor.rgb, uColor.a);
+		
+	}
+}

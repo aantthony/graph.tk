@@ -1,0 +1,50 @@
+
+#ifdef GL_ES
+precision highp float;
+#endif
+
+attribute vec2 aVertexPosition;
+
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform mat4 uSMatrix;
+uniform mat3 uNMatrix;
+
+uniform vec3 uPointLightingLocation;
+
+varying vec2 MCposition;
+varying float diffuse;
+varying float specular;
+
+#import javascript
+
+void main(void){
+	vec3 uPointLightingColor = vec3(1.0,1.0,1.0);
+	vec4 saVertexPosition = uSMatrix * vec4(aVertexPosition,0.0,1.0);
+	vec4 aVertexPosition3 = vec4(saVertexPosition.xy, f(saVertexPosition.x,saVertexPosition.y), 1.0);
+	
+	vec4 mvPosition = uMVMatrix * aVertexPosition3;
+	gl_Position = uPMatrix * mvPosition;
+	vec3 lightLocation = vec3(uMVMatrix * vec4(uPointLightingLocation,1.0));
+	vec3 lightDirection = normalize(lightLocation - mvPosition.xyz); // Note: the ray is traced backwards
+	
+	vec3 aVertexNormal = n(aVertexPosition.x,aVertexPosition.y);
+	
+	vec3 transformedNormal = normalize(uNMatrix * normalize(aVertexNormal));
+	//vec3 transformedNormal = normalize(aVertexNormal);
+	
+	diffuse = max((dot(transformedNormal, lightDirection)), 0.0);
+	specular = 0.3;
+	float spec = 0.0;
+	
+	vec3 reflectVec = reflect(-lightDirection, transformedNormal);
+	vec3 viewVec = normalize(-vec3(mvPosition));
+	
+	if (diffuse > 0.0) {
+		spec = max(dot(reflectVec, viewVec), 0.0);
+		spec = pow(spec, 16.0);
+	}
+	specular = spec;
+	
+	MCposition  = aVertexPosition3.xy;
+}
