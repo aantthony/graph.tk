@@ -31,7 +31,7 @@ GL.region2 = function(g){
 	this.shader.sMatrixUniform = gl.getUniformLocation(this.shader, "uSMatrix");
 	this.shader.colorUniform = gl.getUniformLocation(this.shader, "uColor");
 	this.shader.sizeUniform = gl.getUniformLocation(this.shader, "uSize");
-		
+	this.shader.tUniform = gl.getUniformLocation(this.shader, "t");
 	
 	
 };
@@ -49,7 +49,7 @@ GL.region2.init = function(gl){
 	}
 };
 GL.region2.prototype = {
-	"draw": function(gl){
+	"draw": function(gl, t){
 		gl.useProgram(this.shader);
 		
 		gl.enableVertexAttribArray(this.shader.vertexPositionAttribute);
@@ -59,6 +59,7 @@ GL.region2.prototype = {
 		gl.uniformMatrix4fv(this.shader.sMatrixUniform, false, gl.sMatrix);
 
 		gl.uniform4fv(this.shader.colorUniform, this.color);
+		gl.uniform1f(this.shader.tUniform, t);
 		gl.uniform2f(this.shader.sizeUniform, gl.worldLineWidth, gl.worldLineWidth);
 		
 		gl.bindBuffer(gl.ARRAY_BUFFER, gl.squareVertexPositionBuffer);

@@ -64,6 +64,7 @@ var html = (function(){
 				}catch(ex){
 					warn.style.display = "";
 					warn.message = ex.message;
+					console.error(ex);
 					warn.firstChild.nodeValue = "Error";
 				}
 			}

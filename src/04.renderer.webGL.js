@@ -56,6 +56,7 @@ function graph_object(g){
 	throw("Graph.tk doesn't know how to render such a graph.");
 }
 var graphs = {};
+var components = [];
 var ks = {};
 var renderer = {
 	"name":"webGL",
@@ -68,7 +69,7 @@ var renderer = {
 			graphs[g.id]=graph_object(g);
 			d_mode_update();
 		}else if(flags){
-			if(flags.stopdchangeanimation){
+			if(flags.stopdchangeanimation && renderer.dchange){
 				renderer.dchange = false;
 				if(!renderer.velocity){
 					stopAnimation();
@@ -188,6 +189,9 @@ for(i in GL){
 		check("init "+ i);
 	}
 }
+function setComponents(){
+	components.push(new GL());
+}
 
 
 //InitBuffers:
@@ -219,6 +223,7 @@ var cam_y_now = renderer.cam_y;
 var animating = false;
 
 var last_time;
+var t = 0.0;
 function dt(){
 	var n = new Date()-0;
 	var old = last_time;
@@ -232,10 +237,15 @@ function startAnimation(){
 	if(animating){
 		return;
 	}
+	console.log("start");
 	animating=true;
 	tick();
 }
+window.startAnimation=function(){
+	startAnimation();
+};
 function stopAnimation(){
+	console.log("stop");
 	animating=false;
 	//drawScene();
 }
@@ -243,6 +253,7 @@ function tick(){
 	var res;
 	if(animating){
 		var deltat = dt();
+		t+=deltat;
 		res = requestAnimFrame(tick);
 		if(renderer.velocity){
 			renderer.cam_x += renderer.velocity.x*deltat;
@@ -365,7 +376,7 @@ function drawScene(deltat){
 		if(graphs.hasOwnProperty(id)){
 			if(graphs[id].visible){
 				if(graphs[id].depthMask !== false){
-					graphs[id].draw(gl);
+					graphs[id].draw(gl, t);
 				}else{
 					todo.push(graphs[id]);
 				}
@@ -373,7 +384,10 @@ function drawScene(deltat){
 		}
 	}
 	todo.forEach(function(graph){
-		graph.draw(gl);
+		graph.draw(gl,t);
+	});
+	components.forEach(function(c){
+		c.draw(gl);
 	});
 	
 	stats.update();

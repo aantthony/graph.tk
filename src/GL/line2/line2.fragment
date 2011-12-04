@@ -2,6 +2,8 @@
 precision highp float;
 #endif
 
+uniform float t;
+
 #import javascript
 
 varying vec2  MCposition;

@@ -30,7 +30,7 @@ GL.scalar2 = function(g){
 	this.shader.mvMatrixUniform = gl.getUniformLocation(this.shader, "uMVMatrix");
 	this.shader.sMatrixUniform = gl.getUniformLocation(this.shader, "uSMatrix");
 	this.shader.colorUniform = gl.getUniformLocation(this.shader, "uColor");
-
+	this.shader.tUniform = gl.getUniformLocation(this.shader, "t");
 		
 	
 	
@@ -49,7 +49,7 @@ GL.scalar2.init = function(gl){
 	}
 };
 GL.scalar2.prototype = {
-	"draw": function(gl){
+	"draw": function(gl, t){
 		gl.useProgram(this.shader);
 		
 		gl.enableVertexAttribArray(this.shader.vertexPositionAttribute);
@@ -59,6 +59,7 @@ GL.scalar2.prototype = {
 		gl.uniformMatrix4fv(this.shader.sMatrixUniform, false, gl.sMatrix);
 
 		gl.uniform4fv(this.shader.colorUniform, this.color);
+		gl.uniform1f(this.shader.tUniform, t);
 		
 		gl.bindBuffer(gl.ARRAY_BUFFER, gl.squareVertexPositionBuffer);
 		gl.vertexAttribPointer(this.shader.vertexPositionAttribute, gl.squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);

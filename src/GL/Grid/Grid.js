@@ -1,5 +1,5 @@
-GL.line2 = function(g){
-	var line2D_opacity = 0.2;
+GL.Grid = function(g){
+	var line2D_opacity = 0.6;
 	var gl = GL.line2.gl;
 	var m = g.math;
 	m=[m[1], m[0]].setType("-");
@@ -33,16 +33,15 @@ GL.line2 = function(g){
 	this.shader.sMatrixUniform = gl.getUniformLocation(this.shader, "uSMatrix");
 	this.shader.colorUniform = gl.getUniformLocation(this.shader, "uColor");
 	this.shader.sizeUniform = gl.getUniformLocation(this.shader, "uSize");
-	this.shader.tUniform = gl.getUniformLocation(this.shader, "t");
 
 		
 	
 	
 };
-GL.line2.match = function(g){
-	return ["="].indexOf(g.math.type) != -1;
+GL.Grid.match = function(g){
+	return false;
 };
-GL.line2.init = function(gl){
+GL.Grid.init = function(gl){
 	GL.line2.gl = gl;
 	var vert = GL.line2.prototype.vert = gl.createShader(gl.VERTEX_SHADER);
 	
@@ -52,8 +51,8 @@ GL.line2.init = function(gl){
 		throw(gl.getShaderInfoLog(vert));
 	}
 };
-GL.line2.prototype = {
-	"draw": function(gl, t){
+GL.Grid.prototype = {
+	"draw": function(gl){
 		gl.useProgram(this.shader);
 		
 		gl.enableVertexAttribArray(this.shader.vertexPositionAttribute);
@@ -63,7 +62,6 @@ GL.line2.prototype = {
 		gl.uniformMatrix4fv(this.shader.sMatrixUniform, false, gl.sMatrix);
 
 		gl.uniform4fv(this.shader.colorUniform, this.color);
-		gl.uniform1f(this.shader.tUniform, t);
 		
 		gl.uniform2f(this.shader.sizeUniform, gl.worldLineWidth, gl.worldLineWidth);
 		
