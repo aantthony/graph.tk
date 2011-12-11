@@ -54,19 +54,19 @@ var html = (function(){
 		dom.graphs.appendChild(li);
 		$(inputbox).mathquill("editable").bind("keyup", function(e){
 			if(e.keyCode==13 || true){
-				try{
+				//try{
 					var latex=$(inputbox).mathquill("latex");
 					var math = M(M.latex.parse(latex));
 					math = math.simplify();
 					g.math=math;
 					g.update();
 					warn.style.display = "none";
-				}catch(ex){
+				/*}catch(ex){
 					warn.style.display = "";
 					warn.message = ex.message;
 					console.error(ex);
 					warn.firstChild.nodeValue = "Error";
-				}
+				}*/
 			}
 		});
 		
@@ -123,7 +123,7 @@ var html = (function(){
 		var drag_start_x, drag_start_y;
 		var radians_per_pixel_x = 0.01,
 			radians_per_pixel_y = -0.01,
-			dist_units_per_pixel = 0.04;
+			dist_units_per_pixel = 0.04*5;
 		var drag_start_cam_long,
 			drag_start_cam_lat,
 			drag_start_cam_dist,
@@ -228,14 +228,25 @@ var html = (function(){
 			"up": 87,
 			"down": 83,
 			"left": 65,
-			"right": 68
+			"right": 68,
+			"minus":189,
+			"equals":187
 		};
 		var down_keys={};
 		var ks={
 			updown: 0,
-			leftright: 0
+			leftright: 0,
+			inout: 0
 		}
 		function update_ks(){
+			if(down_keys[keys.minus]){
+				ks.inout = -1;
+			}else if(down_keys[keys.equals]){
+				ks.inout = +1;
+			}else{
+				ks.inout = 0;
+			}
+			
 			if(renderer.d==3){
 				if(down_keys[keys.up]){
 					ks.updown = +1;
@@ -251,17 +262,24 @@ var html = (function(){
 				}else{
 					ks.leftright = 0;
 				}
-				if(ks.updown === 0 && ks.leftright === 0){
+				
+				if(ks.updown === 0 && ks.leftright === 0 && ks.inout === 0){
 					renderer.setVelocity(false);
 				}else{
 					var speed = 0.8;
 					speed *= renderer.cam_dist;
 					var s = Math.sin(renderer.cam_long);
 					var c = Math.cos(renderer.cam_long);
-					renderer.setVelocity({x: speed * (ks.leftright*c + ks.updown*s), y:speed * (ks.updown*c - ks.leftright*s)});
+					renderer.setVelocity({x: speed * (ks.leftright*c + ks.updown*s), y:speed * (ks.updown*c - ks.leftright*s), z: ks.inout});
 				}
 			}else{
-				renderer.setVelocity(false);
+				if(ks.inout===0){
+					renderer.setVelocity(false);
+				}else{
+					var speed = 0.8;
+					speed *= renderer.cam_dist;
+					renderer.setVelocity({x:0,y:0,z:-speed*ks.inout});
+				}
 			}
 			
 		}
@@ -271,6 +289,8 @@ var html = (function(){
 				case keys.down:
 				case keys.left:
 				case keys.right:
+				case keys.minus:
+				case keys.equals:
 					down_keys[e.keyCode]=1;
 					update_ks();
 					break;
@@ -283,6 +303,8 @@ var html = (function(){
 				case keys.down:
 				case keys.left:
 				case keys.right:
+				case keys.minus:
+				case keys.equals:
 					down_keys[e.keyCode]=0;
 					update_ks();
 					break;
@@ -293,7 +315,12 @@ var html = (function(){
 		dom.canvas.addEventListener("DOMMouseScroll",mousewheel, false);
 		document.body.addEventListener("keydown",keydown, false);
 		document.body.addEventListener("keyup",keyup, false);
-	
+		function catchevent(e){
+			e.stopImmediatePropagation();
+			return false;
+		}
+		dom.graphs.addEventListener("keydown", catchevent);
+		dom.graphs.addEventListener("keyup", catchevent);
 	
 		dom.canvas.addEventListener("mouseup", function(e){
 			drag_start_x=drag_start_y=undefined;

@@ -12,7 +12,7 @@ window.requestAnimFrame = window.requestAnimFrame || (function() {
 //hack for now
 Math.e=Math.E;
 Math.pi=Math.PI;
-window.Float32Array = Float32Array || window.Array;
+window.Float32Array = window.Float32Array || window.Array;
 
 var startupTime = new Date();
 

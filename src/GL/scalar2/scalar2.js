@@ -20,6 +20,7 @@ GL.scalar2 = function(g){
 	this.shader = gl.createProgram();
 	gl.attachShader(this.shader, this.vert);
 	gl.attachShader(this.shader, frag);
+	gl.deleteShader(frag);
 	gl.linkProgram(this.shader);
 	
 	gl.useProgram(this.shader);

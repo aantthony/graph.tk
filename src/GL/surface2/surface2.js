@@ -38,8 +38,8 @@ GL.surface2 = function(g){
 	str_f = gl.import(str_f, "");
 	str_v = gl.import(str_v, float_f_s+vec3_n_s);
 
-	console.log(str_v);
-	console.log(str_f);
+	//console.log(str_v);
+	//console.log(str_f);
 	
 	gl.shaderSource(vert, str_v);
 	gl.shaderSource(frag, str_f);
@@ -63,6 +63,8 @@ GL.surface2 = function(g){
 	
 	gl.attachShader(this.shader, vert);
 	gl.attachShader(this.shader, frag);
+	gl.deleteShader(vert);
+	gl.deleteShader(frag);
 	gl.linkProgram(this.shader);
 	
 	gl.useProgram(this.shader);
@@ -149,7 +151,6 @@ GL.surface2.prototype = {
 		gl.uniformMatrix4fv(this.shader.sMatrixUniform, false, gl.sMatrix);
 		gl.uniformMatrix3fv(this.shader.nMatrixUniform, false, gl.nMatrix);
 		
-		window.x=this;
 		gl.uniform4fv(this.shader.colorUniform, this.color);
 		gl.uniform3f(this.shader.pointLightingLocationUniform, 0,0,10.0);
 		

@@ -8,7 +8,7 @@ GL.line2 = function(g){
 	var frag = gl.createShader(gl.FRAGMENT_SHADER);
 	var str = shaders["line2.fragment"];
 	str = gl.import(str, "float f(float x, float y){return "+expr.s+";}");
-	//console.log(str);
+	console.log(str);
 	gl.shaderSource(frag, str);
 	gl.compileShader(frag);
 	
@@ -22,6 +22,7 @@ GL.line2 = function(g){
 	this.shader = gl.createProgram();
 	gl.attachShader(this.shader, this.vert);
 	gl.attachShader(this.shader, frag);
+	gl.deleteShader(frag);
 	gl.linkProgram(this.shader);
 	
 	gl.useProgram(this.shader);
