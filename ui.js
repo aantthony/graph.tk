@@ -842,6 +842,8 @@ app.ui=(function(){
         cy+=y||0;
         cz+=z||0;
         draw();
+		},"redraw": function(){
+			draw();
     },"get_camera":function() {
         return [cx,cy,cz];
     },"set_camera":function(x,y,z){

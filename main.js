@@ -683,6 +683,10 @@ function message(m){
         case "translate":
             app.ui.translate(s[1],s[2],s[3]);
             break;
+				case "set":
+						app.variables[s[1]]=Number(s[2]);
+						app.ui.redraw();
+						break;
         case "locale":
             app.locale = s[1];
             app.locale_updated();
