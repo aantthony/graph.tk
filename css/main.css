@@ -1,30 +1,32 @@
-*{margin:0;padding:0}
+*{
+  margin:0;padding:0;
+}
 body{
-    font-family:sans-serif;position:relative;
-    overflow:hidden;
-    background:white;
-    -webkit-user-select:none;
-    -moz-user-select:none;
-    -o-user-select:none;
-    user-select:none;
+  font-family:sans-serif;position:relative;
+  overflow:hidden;
+  background:white;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -o-user-select:none;
+  user-select:none;
 }
 .overlay{
-    position:fixed;
-    -webkit-box-shadow:0px 0px 5px black;
-    -moz-box-shadow:0px 0px 5px black;
-    -o-box-shadow:0px 0px 5px black;
-    box-shadow:0px 0px 5px black;
-    box-shadow:0px 0px 5px black;
-    
-    z-Index:80000;
-    color:black;
-    opacity:0.8;
-    padding:4px;
-    background:#eee;
+  position:fixed;
+  -webkit-box-shadow:0px 0px 5px black;
+  -moz-box-shadow:0px 0px 5px black;
+  -o-box-shadow:0px 0px 5px black;
+  box-shadow:0px 0px 5px black;
+  box-shadow:0px 0px 5px black;
+  
+  z-Index:80000;
+  color:black;
+  opacity:0.8;
+  padding:4px;
+  background:#eee;
 }
 li:hover .delete{visibility:visible}
 .delete{
-    background:url(buttons.png) no-repeat;
+  background:url(buttons.png) no-repeat;
 	width:20px;
 	visibility:hidden;
 	height:21px;
@@ -35,20 +37,20 @@ li:hover .delete{visibility:visible}
 	top:0;
 	opacity:0.5;
 	margin:8px;
-    cursor:pointer;
+  cursor:pointer;
 }
 .delete:hover{
-    opacity:1.0;
+  opacity:1.0;
 }
 
 #con{
-    top:0;
-    left:0;
-    background:white;
-    font-size:small;
-    padding:8px;
-    border:8px solid #eee;
-    opacity:0.97;
+  top:0;
+  left:0;
+  background:white;
+  font-size:small;
+  padding:8px;
+  border:8px solid #eee;
+  opacity:0.97;
 }
 input[type=button]:hover,a.help_button:hover{
 	opacity:1.0;
@@ -64,32 +66,34 @@ input[type=button]{
 	margin-top:3px;
 	margin-bottom:4px;
 }
-h3{text-align:center;padding-top:1em}
+h3{
+  text-align:center;padding-top:1em
+}
 .buttons{
-    position:relative;
+  position:relative;
 	border-top:1px solid #ececec;
 	background-image: -webkit-gradient(
-	    linear,
-	    left bottom,
-	    left top,
-	    color-stop(0, rgba(194,194,194,0.8)),
-	    color-stop(1, rgba(239,239,239,0.8))
+    linear,
+    left bottom,
+    left top,
+    color-stop(0, rgba(194,194,194,0.8)),
+    color-stop(1, rgba(239,239,239,0.8))
 	);
 	background-image: -moz-linear-gradient(
-	    center bottom,
-	    rgba(194,194,194,0.8) 0%,
-	    rgba(239,239,239,0.8) 100%
+    center bottom,
+    rgba(194,194,194,0.8) 0%,
+    rgba(239,239,239,0.8) 100%
 	);
 	background-color: #e8e8e8;
 	
 }
 .buttons a{
-    text-decoration:none;
-    display:block;
-    width:50px;
-    position:absolute;
-    top:0;
-    right:0;
+  text-decoration:none;
+  display:block;
+  width:50px;
+  position:absolute;
+  top:0;
+  right:0;
 }
 a.help_button{
 	background:url(buttons.png);
@@ -117,43 +121,43 @@ input[value="config"]{
 	background-position:-30px 21px;
 }
 #funcs{
-    right:0;
-	opacity:1.0;
-    background:rgba(255,255,255,0.8);
-    padding:0;
-    top:0
+  right:0;
+  opacity:1.0;
+  background:rgba(255,255,255,0.8);
+  padding:0;
+  top:0
 }
 #funcs ul{
-    list-style: none;
-    width:300px;
+  list-style: none;
+  width:300px;
 }
 #funcs ul li:last-child .b{
 	border-bottom:none;
 }
 #funcs ul li:only-child .delete{
-    display:none;
+  display:none;
 }
 
 #funcs ul aside{
-    position:absolute;
-    bottom:0;
-    right:0;
-    font-size:small;
-    padding-bottom:1px;
-    color:#888;
-    padding-right:4px;
+  position:absolute;
+  bottom:0;
+  right:0;
+  font-size:small;
+  padding-bottom:1px;
+  color:#888;
+  padding-right:4px;
 	border-bottom:1px solid transparent;
 	opacity:0.7;
 	padding-left:4px;
 	padding-top:3px;
 }
 #funcs ul aside:before{
-    background:url(buttons.png) -62px -21px no-repeat;
-    display:block;
-    width:20px;
-    float:left;
-    color:rgba(0,0,0,0.0);
-    content:"!";
+  background:url(buttons.png) -62px -21px no-repeat;
+  display:block;
+  width:20px;
+  float:left;
+  color:rgba(0,0,0,0.0);
+  content:"!";
 }
 #funcs ul aside:hover{
 	opacity:1.0;
@@ -178,7 +182,7 @@ input[value="config"]{
 }
 
 #funcs ul li{
-    border-bottom:1px solid #444;
+  border-bottom:1px solid #444;
 	vertical-align:center;
 	min-height:35px;
 	position:relative;
@@ -190,95 +194,94 @@ input[value="config"]{
 }
 
 #ptd{
-    position:fixed;
-    z-Index:80000;
-    color:black;
-    opacity:0.6;
-    left:8px;
-    bottom:8px;
-    background:white;
-    -webkit-transition:opacity 0.5s ease-in-out;
-    -moz-transition:opacity 0.5s ease-in-out;
-    -o-transition:opacity 0.5s ease-in-out;
-    transition: opacity 0.5s ease-in-out;
-    font-size:10pt;
-
+  position:fixed;
+  z-Index:80000;
+  color:black;
+  opacity:0.6;
+  left:8px;
+  bottom:8px;
+  background:white;
+  -webkit-transition:opacity 0.5s ease-in-out;
+  -moz-transition:opacity 0.5s ease-in-out;
+  -o-transition:opacity 0.5s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
+  font-size:10pt;
 }
 
 #conin{
-    background:url(buttons.png) -83px -21px no-repeat;
-    border:none;
-    padding:0;
-    outline:none;
-    width:100%;
-    padding-left:10px
+  background:url(buttons.png) -83px -21px no-repeat;
+  border:none;
+  padding:0;
+  outline:none;
+  width:100%;
+  padding-left:10px
 }
 .monospace{
-    font-family:'Menlo','Andale Mono', Consolas, 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Monaco, monofur, monospace;
+  font-family:'Menlo','Andale Mono', Consolas, 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Monaco, monofur, monospace;
 }
 
 
 #logt{
-    background:white;
-    width:300px;
-    padding:2px;
-    -webkit-user-select:text;
-    -moz-user-select:text;
-    -o-user-select:text;
-    user-select:text;
-    font-size:90%;
-    max-height:500px;
-    overflow:auto;
+  background:white;
+  width:300px;
+  padding:2px;
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  -o-user-select:text;
+  user-select:text;
+  font-size:90%;
+  max-height:500px;
+  overflow:auto;
 }
 #logt .warn{
-    background:url(buttons.png) -62px -21px no-repeat;
-    width:20px;
-    height:20px;
-    float:left;
+  background:url(buttons.png) -62px -21px no-repeat;
+  width:20px;
+  height:20px;
+  float:left;
 }
 
 
 ul.json li.end b:before{
-    color:transparent;
+  color:transparent;
 }
 ul.json li b:before{
-    content:'▶';
-    font-size:x-small;
-    padding-right:2px;
-    color:#555;
+  content:'▶';
+  font-size:x-small;
+  padding-right:2px;
+  color:#555;
 }
 ul.json li.show b:before{
-    content:'▼';
+  content:'▼';
 }
 ul.json li.hide b:before{
-    content:'▶';
+  content:'▶';
 }
 ul.json span{
-    color: #1C00CF;
+  color: #1C00CF;
 }
 ul.json b{
-    color:#881391;
-    font-weight:normal;
+  color:#881391;
+  font-weight:normal;
 }
 
 ul.json strong{
-    font-weight:normal;
-    color:#C41A16;
+  font-weight:normal;
+  color:#C41A16;
 }
 ul.json i{
-    color:#aaa;
-    font-style: normal;
+  color:#aaa;
+  font-style: normal;
 }
 ul.json .child{
-    padding-left:16px;
+  padding-left:16px;
 }
 ul.json li.hide .child{
-    display:none;
+  display:none;
 }
 ul.json{
-    list-style:none;
-    font-family:Menlo, Monaco, monospace;
-    font-size:11px;
+  list-style:none;
+  font-family:Menlo, Monaco, monospace;
+  font-size:11px;
 }
 
 
