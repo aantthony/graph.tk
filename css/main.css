@@ -26,7 +26,7 @@ body{
 }
 li:hover .delete{visibility:visible}
 .delete{
-  background:url(buttons.png) no-repeat;
+  background:url(/images/buttons.png) no-repeat;
 	width:20px;
 	visibility:hidden;
 	height:21px;
@@ -56,7 +56,7 @@ input[type=button]:hover,a.help_button:hover{
 	opacity:1.0;
 }
 input[type=button]{
-	background:url(buttons.png);
+	background:url(/images/buttons.png);
 	border:none;
 	opacity:0.7;
 	width:30px;
@@ -96,7 +96,7 @@ h3{
   right:0;
 }
 a.help_button{
-	background:url(buttons.png);
+	background:url(/images/buttons.png);
 	border:none;
 	opacity:0.7;
 	width:30px;
@@ -152,7 +152,7 @@ input[value="config"]{
 	padding-top:3px;
 }
 #funcs ul aside:before{
-  background:url(buttons.png) -62px -21px no-repeat;
+  background:url(/images/buttons.png) -62px -21px no-repeat;
   display:block;
   width:20px;
   float:left;
@@ -176,7 +176,7 @@ input[value="config"]{
 	border-left:1px solid rgba(255,255,255,0.4);
 	border-right:1px solid rgba(0,0,0,0.7);
 	border-bottom:1px solid rgba(0,0,0,0.85);
-	background:url(sw.png) repeat-x;
+	background:url(/images/sw.png) repeat-x;
 	margin-right:3px;
 	
 }
@@ -209,7 +209,7 @@ input[value="config"]{
 }
 
 #conin{
-  background:url(buttons.png) -83px -21px no-repeat;
+  background:url(/images/buttons.png) -83px -21px no-repeat;
   border:none;
   padding:0;
   outline:none;
@@ -234,7 +234,7 @@ input[value="config"]{
   overflow:auto;
 }
 #logt .warn{
-  background:url(buttons.png) -62px -21px no-repeat;
+  background:url(/images/buttons.png) -62px -21px no-repeat;
   width:20px;
   height:20px;
   float:left;
