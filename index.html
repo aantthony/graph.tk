@@ -46,6 +46,7 @@ body {
 #text-shadow-box #tsb-text {
     font-size: 100px;
     color: transparent;
+    text-shadow: black 0px -45.2px 19px; 
 }
 
 #text-shadow-box #tsb-link a {
@@ -60,6 +61,11 @@ body {
     left: 0;
     width: 100%;
     height: 60%;
+}
+
+#text-shadow-box #tsb-box {
+    -webkit-box-shadow: black 0px -45.2px 39px;
+    -moz-box-shadow: black 0px -45.2px 39px;
 }
 
 #text-shadow-box #tsb-wall {
@@ -87,8 +93,8 @@ body {
 
 #tsb-spot {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: -50%;
+    left: -50%;
     width: 200%;
     height: 200%;
     pointer-events: none;
@@ -141,8 +147,6 @@ function init() {
         document.getElementById('text-shadow-box').onmousemove = onMouseMove;
         document.getElementById('text-shadow-box').ontouchmove = function (e) {e.preventDefault(); e.stopPropagation(); onMouseMove({clientX: e.touches[0].clientX, clientY: e.touches[0].clientY});};
     }
-    
-    onMouseMove({clientX: Math.floor(window.innerWidth / 2), clientY: Math.floor(window.innerHeight / 2.75)});
 }
 
 function onMouseMove(e) {
@@ -155,8 +159,8 @@ function onMouseMove(e) {
         box.style[boxProperty] = '0 ' + -ym + 'px ' + (d + 30) + 'px black';
     }
     
-    xm = e.clientX - window.innerWidth;
-    ym = e.clientY - window.innerHeight;
+    xm = e.clientX - Math.floor(window.innerWidth / 2);
+    ym = e.clientY - Math.floor(window.innerHeight / 2);
     spot.style.backgroundPosition = xm + 'px ' + ym + 'px';
 }
 </script>
