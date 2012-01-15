@@ -2,7 +2,9 @@
 
 This repository is my take on "going dark" for the [January 18 blackout to protest SOPA](http://sopastrike.com/).
 
-You can use the provided **`index.html`** as your site's homepage on January 18 as one possible way to participate.  [**It looks like this.**](http://www.zachstronaut.com/lab/text-shadow-box/stop-sopa.html)
+You can use the provided **`index.html`** as your site's homepage on January 18 as one possible way to participate.
+
+[**It looks like this.**](http://www.zachstronaut.com/lab/text-shadow-box/stop-sopa.html)
 
 ---
 
