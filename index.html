@@ -24,6 +24,7 @@ body {
     height: 100%;
     overflow: hidden;
     background: #444;
+    font-family: Helvetica, Arial, sans-serif;
     -webkit-tap-highlight-color: rgba(0,0,0,0);
 	-webkit-user-select: none;
 }
@@ -36,7 +37,6 @@ body {
     width: 100%;
     height: 1em;
     margin: -0.77em 0 0 0;
-    font-family: Helvetica, Arial, sans-serif;
     font-size: 90px;
     line-height: 1em;
     font-weight: bold;
@@ -66,6 +66,25 @@ body {
     background: #999;
 }
 
+#text-shadow-box #tsb-wall p {
+    font-size: 18px;
+    line-height: 1.5em;
+    text-align: justify;
+    color: #222;
+    width: 550px;
+    margin: 1.5em auto;
+}
+
+#text-shadow-box #tsb-wall p a {
+    color: #fff;
+}
+
+#text-shadow-box #tsb-wall p a:hover {
+    text-decoration: none;
+    color: #000;
+    background: #fff;
+}
+
 #tsb-spot {
     position: absolute;
     top: 0;
@@ -73,8 +92,8 @@ body {
     width: 200%;
     height: 200%;
     pointer-events: none;
-    background: -webkit-gradient(radial, center center, 0, center center, 300, from(rgba(0,0,0,0)), to(rgba(0,0,0,1)));
-    background: -moz-radial-gradient(center 45deg, circle closest-side, transparent 0, black 300px);
+    background: -webkit-gradient(radial, center center, 0, center center, 350, from(rgba(0,0,0,0)), to(rgba(0,0,0,1)));
+    background: -moz-radial-gradient(center 45deg, circle closest-side, transparent 0, black 350px);
 }
 </style>
 
@@ -84,8 +103,10 @@ body {
 <div id="text-shadow-box">
     <div id="tsb-box"></div>
     <p id="tsb-text">STOP SOPA!</p>
-    <p id="tsb-link"><a href="http://americancensorship.org/modal/sopastrikeoverlay.html">STOP SOPA!</a></p>
-    <div id="tsb-wall"></div>
+    <p id="tsb-link"><a href="http://americancensorship.org/">STOP SOPA!</a></p>
+    <div id="tsb-wall">
+        <p>This site has gone dark today in protest of the U.S. Stop Online Piracy Act (SOPA) and PROTECT-IP Act (PIPA).  The U.S. Congress is about censor the internet, even though the vast majority of Americans are opposed. We need to kill these bills to protect our rights to free speech, privacy, and prosperity.  Learn more at <a href="http://americancensorship.org/">AmericanCensorship.org</a></p>
+    </div>
     <div id="tsb-spot"></div>
 </div>
 
