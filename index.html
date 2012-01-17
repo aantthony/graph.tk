@@ -73,12 +73,14 @@ body {
 }
 
 #text-shadow-box #tsb-wall p {
+    position: relative;
     font-size: 18px;
     line-height: 1.5em;
     text-align: justify;
     color: #222;
     width: 550px;
     margin: 1.5em auto;
+    cursor: default;
 }
 
 #text-shadow-box #tsb-wall p a {
@@ -98,10 +100,27 @@ body {
     width: 200%;
     height: 200%;
     pointer-events: none;
-    background: -webkit-gradient(radial, center center, 0, center center, 350, from(rgba(0,0,0,0)), to(rgba(0,0,0,1)));
-    background: -moz-radial-gradient(center 45deg, circle closest-side, transparent 0, black 350px);
+    background: -webkit-gradient(radial, center center, 0, center center, 450, from(rgba(0,0,0,0)), to(rgba(0,0,0,1)));
+    background: -moz-radial-gradient(center 45deg, circle closest-side, transparent 0, black 450px);
 }
 </style>
+
+<!--[if IE]>
+<style type="text/css">
+/* Sadly no IE9 support for pointer-events: none; nor CSS2 text-shadow */
+#tsb-spot {
+    display: none;
+}
+#tsb-ie {
+    position: absolute;
+    top: -90%;
+    left: -50%;
+    width: 200%;
+    height: 334%;
+    background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPHJhZGlhbEdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY3g9IjUwJSIgY3k9IjUwJSIgcj0iNzUlIj4KICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiMwMDAwMDAiIHN0b3Atb3BhY2l0eT0iMCIvPgogICAgPHN0b3Agb2Zmc2V0PSI3NCUiIHN0b3AtY29sb3I9IiMwMDAwMDAiIHN0b3Atb3BhY2l0eT0iMSIvPgogICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDAwMDAwIiBzdG9wLW9wYWNpdHk9IjEiLz4KICA8L3JhZGlhbEdyYWRpZW50PgogIDxyZWN0IHg9Ii01MCIgeT0iLTUwIiB3aWR0aD0iMTAxIiBoZWlnaHQ9IjEwMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+}
+</style>
+<![endif]-->
 
 </head>
 <body>
@@ -111,6 +130,8 @@ body {
     <p id="tsb-text">STOP SOPA!</p>
     <p id="tsb-link"><a href="http://americancensorship.org/">STOP SOPA!</a></p>
     <div id="tsb-wall">
+        <div id="tsb-ie"></div>
+        
         <p>This site has gone dark today in protest of the U.S. Stop Online Piracy Act (SOPA) and PROTECT-IP Act (PIPA).  The U.S. Congress is about to censor the Internet, even though the vast majority of Americans are opposed. We need to kill these bills to protect our rights to free speech, privacy, and prosperity.  Learn more at <a href="http://americancensorship.org/">AmericanCensorship.org</a></p>
     </div>
     <div id="tsb-spot"></div>
@@ -152,6 +173,10 @@ function init() {
 }
 
 function onMouseMove(e) {
+    if (typeof e === 'undefined' || typeof e.clientX === 'undefined') {
+        return;
+    }
+    
     var xm = (e.clientX - Math.floor(window.innerWidth / 2)) * 0.4;
     var ym = (e.clientY - Math.floor(window.innerHeight / 3)) * 0.4;
     var d = Math.round(Math.sqrt(xm*xm + ym*ym) / 5);
