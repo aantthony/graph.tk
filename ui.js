@@ -243,7 +243,7 @@ app.ui=(function(){
                                       ctx.fillText(utf8_print(text),12+scalex*_nx-cx,cy-scaley*_ny);
                                   }
                               }catch(ex){
-                                  app.ui.console.warn("Could not plot dot: ("+_nx+","+_ny+")");
+                                  //app.ui.console.warn("Could not plot dot: ("+_nx+","+_ny+")");
                               }
                           }
             }
