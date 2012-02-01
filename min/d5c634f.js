@@ -6920,7 +6920,7 @@ var Graph=function(n,disabled){
 app.variables={};
 
 //Updated automatically by shell script.
-app.version="6068225";
+app.version="d5c634f";
 app.add=function(n,disabled){
     var graph = new Graph(n,disabled);
     graph.disabled = disabled;
