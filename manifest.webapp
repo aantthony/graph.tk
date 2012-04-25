@@ -29,14 +29,5 @@
     }
   },
   "launch_path": "/",
-  "default_locale": "en",
-  "screen_size": {
-    "min_width": "600",
-    "min_height": "300"
-  },  
-  "required_features": [
-  	
-  ],
-  "orientation": "landscape",
-  "fullscreen": "false"
+  "default_locale": "en"
 }
