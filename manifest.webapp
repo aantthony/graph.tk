@@ -1,0 +1,42 @@
+{
+  "name": "Graph.tk",
+  "description": "Graph without bounds.",
+  "version": "0.0.0.1",
+  "icons": {
+    "16": "/images/icon_16.png",
+    "48": "/images/icon_48.png",
+    "128": "/images/icon_128.png"
+  },
+  "developer": {
+    "name": "Anthony",  
+    "url": "http://af.id.au/"  
+  },
+  "installs_allowed_from": [
+    "https://marketplace.mozilla.org"  
+  ],
+  "locales": {
+    "es": {
+      "description": "Graficar funciones matemáticas.",  
+      "developer": {
+        "url": "http://af.id.au/"
+      }
+    },
+    "it": {
+      "description": "disegnare le funzioni matematiche.",
+      "developer": {
+        "url": "http://af.id.au/"
+      }
+    }
+  },
+  "launch_path": "/",
+  "default_locale": "en",
+  "screen_size": {
+    "min_width": "600",
+    "min_height": "300"
+  },  
+  "required_features": [
+  	
+  ],
+  "orientation": "landscape",
+  "fullscreen": "false"
+}
