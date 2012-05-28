@@ -694,8 +694,7 @@ function message(m){
             app.empty();
             break;
 	case "screenshot":
-	console.log('take screenshot!');
-		m.source.postMessage(ui.render(false));
+		m.source.postMessage(app.ui.render(false));
 		break;
     case "bounds":
       app.ui.bounds(s[1],s[2],s[3],s[4]);
