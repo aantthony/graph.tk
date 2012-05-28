@@ -694,7 +694,7 @@ function message(m){
             app.empty();
             break;
 	case "screenshot":
-		m.source.postMessage(app.ui.png(false));
+		m.source.postMessage(app.ui.png(false), m.origin);
 		break;
     case "bounds":
       app.ui.bounds(s[1],s[2],s[3],s[4]);
