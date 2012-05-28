@@ -693,6 +693,10 @@ function message(m){
         case "empty":
             app.empty();
             break;
+	case "screenshot":
+	console.log('take screenshot!');
+		m.source.postMessage(ui.render(false));
+		break;
     case "bounds":
       app.ui.bounds(s[1],s[2],s[3],s[4]);
       break;
