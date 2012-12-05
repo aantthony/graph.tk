@@ -12,7 +12,7 @@
     "url": "http://af.id.au/"  
   },
   "installs_allowed_from": [
-    "https://marketplace.mozilla.org"  
+    "https://marketplace.firefox.com"  
   ],
   "locales": {
     "es": {
