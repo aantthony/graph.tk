@@ -6,7 +6,7 @@ Graph.tk is a web application that graphs, solves, simplifies, integrates and di
 It can currently solve already factorized expressions like: 0=(x^2 /12-log(2))*(x-1)(x+3).
 
 ### Try it out
-[graph.tk](http://graph.tk/) is the website which this code is used on.
+[graph.equation.io](https://graph.equation.io) is the website which this code is used on.
 
 ### Requirements:
 * JQuery
